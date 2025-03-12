@@ -17,6 +17,7 @@ class BookDao(private val dbHelper: PagerDatabaseHelper) {
         return db.insert("books", null, values)
     }
 
+
     fun getAllBooks(): Cursor {
         val db = dbHelper.readableDatabase
         return db.rawQuery("SELECT * FROM books ORDER BY id DESC", null)
