@@ -51,7 +51,9 @@ fun PagerTheme(
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = colorScheme.copy(
+            background = DarkBackgroundColor
+        ),
         typography = Typography,
         content = content
     )
