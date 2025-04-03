@@ -1,6 +1,6 @@
 package com.luke.pager.data.dao
 
-import BookEntity
+import com.luke.pager.data.entities.BookEntity
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert

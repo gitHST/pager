@@ -6,6 +6,9 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.luke.pager.data.dao.BookDao
 import com.luke.pager.data.dao.ReviewDao
+import com.luke.pager.data.entities.BookEntity
+import com.luke.pager.data.entities.ReviewEntity
+
 
 @Database(entities = [BookEntity::class, ReviewEntity::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
