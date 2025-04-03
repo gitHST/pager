@@ -1,3 +1,5 @@
+package com.luke.pager.data.entities
+
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey

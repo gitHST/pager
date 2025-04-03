@@ -1,6 +1,6 @@
 package com.luke.pager.data.dao
 
-import ReviewEntity
+import com.luke.pager.data.entities.ReviewEntity
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
