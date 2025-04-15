@@ -4,17 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.repo.BookRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class BookViewModel @Inject constructor(private val bookRepository: BookRepository) : ViewModel() {
+class BookViewModel(private val bookRepository: BookRepository) : ViewModel() {
 
     private val _books = MutableStateFlow<List<BookEntity>>(emptyList())
-
     val books: StateFlow<List<BookEntity>> get() = _books
 
     fun addBook(book: BookEntity) {
@@ -29,9 +25,11 @@ class BookViewModel @Inject constructor(private val bookRepository: BookReposito
         }
     }
 
-    fun getBooks() {
+    fun loadBooks() {
         viewModelScope.launch {
-            bookRepository.getAllBooks()
+            bookRepository.getAllBooks().collect {
+                _books.value = it
+            }
         }
     }
 }
