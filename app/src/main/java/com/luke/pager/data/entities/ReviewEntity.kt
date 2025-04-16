@@ -21,13 +21,16 @@ data class ReviewEntity(
     val id: Int = 0,
 
     @ColumnInfo(name = "book_id")
-    val bookId: Int,
+    val bookId: Long,
 
     @ColumnInfo(name = "date_started_reading")
     val dateStartedReading: String? = null,
 
     @ColumnInfo(name = "date_finished_reading")
     val dateFinishedReading: String? = null,
+
+    @ColumnInfo(name = "date_reviewed")
+    val dateReviewed: String? = null,
 
     @ColumnInfo(name = "rating")
     val rating: Int? = null,

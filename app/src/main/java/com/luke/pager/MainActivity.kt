@@ -15,7 +15,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.room.Room
 import com.luke.pager.data.AppDatabase
 import com.luke.pager.data.repo.BookRepository
+import com.luke.pager.data.repo.ReviewRepository
 import com.luke.pager.data.viewmodel.BookViewModel
+import com.luke.pager.data.viewmodel.ReviewViewModel
 import com.luke.pager.navigation.BottomNavBar
 import com.luke.pager.navigation.PagerNavHost
 import com.luke.pager.ui.theme.PagerTheme
@@ -37,19 +39,22 @@ class MainActivity : ComponentActivity() {
                 }
 
             }
-        val dao = db.bookDao()
-        val repo = BookRepository(dao)
-        val viewModel = BookViewModel(repo)
+        val bookDao = db.bookDao()
+        val reviewDao = db.reviewDao()
+        val bookRepo = BookRepository(bookDao)
+        val reviewRepo = ReviewRepository(reviewDao)
+        val bookViewModel = BookViewModel(bookRepo)
+        val reviewViewModel = ReviewViewModel(reviewRepo)
 
         setContent {
-            PagerAppUI(viewModel)
+            PagerAppUI(bookViewModel, reviewViewModel)
         }
     }
 }
 
 
 @Composable
-fun PagerAppUI(viewModel: BookViewModel) {
+fun PagerAppUI(bookViewModel: BookViewModel, reviewViewModel: ReviewViewModel) {
     PagerTheme {
         val navController = rememberNavController()
 
@@ -62,7 +67,7 @@ fun PagerAppUI(viewModel: BookViewModel) {
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                PagerNavHost(navController, viewModel)
+                PagerNavHost(navController, bookViewModel, reviewViewModel)
             }
         }
     }
