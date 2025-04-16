@@ -10,7 +10,7 @@ import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.entities.ReviewEntity
 
 
-@Database(entities = [BookEntity::class, ReviewEntity::class], version = 1)
+@Database(entities = [BookEntity::class, ReviewEntity::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun bookDao(): BookDao
