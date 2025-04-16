@@ -20,33 +20,75 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.luke.pager.data.viewmodel.BookViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun DiaryScreen(bookViewModel: BookViewModel) {
-    val books by bookViewModel.books.collectAsState()
 
-    LaunchedEffect(Unit) {
-        bookViewModel.loadBooks()
-    }
-
-    if (books.isEmpty()) {
+    Column(modifier = Modifier.fillMaxSize()) {
         Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = "No books yet", fontSize = 20.sp)
-        }
-    } else {
-        LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            contentAlignment = Alignment.TopCenter
         ) {
-            items(books) { book ->
-                BookItem(book.title, book.authors)
+            Text(text = "Diary", fontSize = 24.sp)
+        }
+
+        val books by bookViewModel.books.collectAsState()
+        val sortedBooks = books.sortedByDescending { it.dateAdded }
+
+        // Group books by their date (ignoring the time)
+        val groupedBooks = sortedBooks.groupBy { getDateWithoutTime(it.dateAdded) }
+
+        LaunchedEffect(Unit) {
+            bookViewModel.loadBooks()
+        }
+
+        if (books.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "No books yet", fontSize = 20.sp)
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                groupedBooks.forEach { (date, books) ->
+                    // Group header (date)
+                    item {
+                        Text(
+                            text = date,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    }
+                    // Books under that date
+                    items(books) { book ->
+                        BookItem(book.title, book.authors)
+                    }
+                }
             }
         }
+    }
+}
+
+// Helper function to extract date without time
+fun getDateWithoutTime(dateString: String?): String {
+    return try {
+        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val date = formatter.parse(dateString ?: "") ?: Date()
+        val dateOnlyFormat = SimpleDateFormat("MMMM", Locale.getDefault())  // "13th March"
+        dateOnlyFormat.format(date)
+    } catch (e: Exception) {
+        "Unknown Date"
     }
 }
 

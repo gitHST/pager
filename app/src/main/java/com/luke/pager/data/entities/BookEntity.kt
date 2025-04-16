@@ -52,5 +52,8 @@ data class BookEntity(
     val bookmarked: Boolean = false,
 
     @ColumnInfo(name = "genres")
-    val genres: String? = null
+    val genres: String? = null,
+
+    @ColumnInfo(name = "date_added")
+    val dateAdded: String? = null
 )
