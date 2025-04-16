@@ -1,6 +1,8 @@
 package com.luke.pager.navigation
 
-import androidx.compose.material3.*
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
@@ -9,11 +11,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 @Composable
 fun BottomNavBar(navController: NavHostController) {
     val items = listOf(
+        NavItem("activity", "Activity"),
         NavItem("diary", "Diary"),
-        NavItem("search", "Search"),
         NavItem("plus", "+"),
-        NavItem("quotes", "Quotes"),
-        NavItem("library", "Library")
+        NavItem("search", "Search"),
+        NavItem("quotes", "Quotes")
     )
 
     NavigationBar {
