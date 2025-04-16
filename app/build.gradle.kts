@@ -64,12 +64,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.google.android.material)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.javapoet)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    implementation(libs.javapoet)
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    ksp(libs.room.ksp)
     ksp(libs.androidx.room.compiler)
 
     testImplementation(libs.junit)
