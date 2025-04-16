@@ -19,13 +19,24 @@ import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.navigation.BottomNavBar
 import com.luke.pager.navigation.PagerNavHost
 import com.luke.pager.ui.theme.PagerTheme
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "pager-db").build()
+        val db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "pager-db")
+            .fallbackToDestructiveMigration()
+            .build()
+            .apply {
+                GlobalScope.launch {
+                    // 👇 comment out this line to keep the database
+                    // clearAllTables()
+                }
+
+            }
         val dao = db.bookDao()
         val repo = BookRepository(dao)
         val viewModel = BookViewModel(repo)
