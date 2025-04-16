@@ -13,10 +13,14 @@ class BookViewModel(private val bookRepository: BookRepository) : ViewModel() {
     private val _books = MutableStateFlow<List<BookEntity>>(emptyList())
     val books: StateFlow<List<BookEntity>> get() = _books
 
-    fun addBook(book: BookEntity) {
+    fun insertBook(book: BookEntity) {
         viewModelScope.launch {
             bookRepository.insertBook(book)
         }
+    }
+
+    suspend fun insertAndReturnId(book: BookEntity): Long {
+        return bookRepository.insertAndReturnId(book)
     }
 
     fun deleteBook(book: BookEntity) {

@@ -24,18 +24,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.luke.pager.components.AddBookModal
 import com.luke.pager.data.viewmodel.BookViewModel
+import com.luke.pager.data.viewmodel.ReviewViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddScreen(viewModel: BookViewModel) {
-    val books by viewModel.books.collectAsState()
+fun AddScreen(bookViewModel: BookViewModel, reviewViewModel: ReviewViewModel) {
+    val books by bookViewModel.books.collectAsState()
     val scope = rememberCoroutineScope()
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var showSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        viewModel.loadBooks()
+        bookViewModel.loadBooks()
     }
 
     if (showSheet) {
@@ -44,9 +45,11 @@ fun AddScreen(viewModel: BookViewModel) {
             sheetState = bottomSheetState,
             scope = scope,
             onDismiss = { showSheet = false },
-            onAddBook = { viewModel.addBook(it) }
+            bookViewModel = bookViewModel,
+            reviewViewModel = reviewViewModel
         )
     }
+
 
     Box(
         modifier = Modifier.fillMaxSize(),
