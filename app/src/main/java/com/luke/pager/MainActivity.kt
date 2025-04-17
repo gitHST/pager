@@ -4,13 +4,18 @@ package com.luke.pager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.navigation.compose.rememberNavController
 import androidx.room.Room
 import com.luke.pager.data.AppDatabase
@@ -58,18 +63,34 @@ fun PagerAppUI(bookViewModel: BookViewModel, reviewViewModel: ReviewViewModel) {
     PagerTheme {
         val navController = rememberNavController()
 
-        Scaffold(
-            containerColor = Color.Transparent,
-            bottomBar = { BottomNavBar(navController) }
-        ) { paddingValues ->
-            Box(
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFFF7FEFF)) // Light cyan background
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.clean_gray_paper), // Save this image in res/drawable
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                PagerNavHost(navController, bookViewModel, reviewViewModel)
+                    .alpha(0.9f) // Adjust visibility of texture
+            )
+
+            Scaffold(
+                containerColor = Color.Transparent,
+                bottomBar = { BottomNavBar(navController) }
+            ) { paddingValues ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                ) {
+                    PagerNavHost(navController, bookViewModel, reviewViewModel)
+                }
             }
         }
+
     }
 }
 
