@@ -9,14 +9,12 @@ import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.sp
 import com.luke.pager.R
 
-// 1. Define the Google Font Provider
 private val gentiumProvider = GoogleFont.Provider(
     providerAuthority = "com.google.android.gms.fonts",
     providerPackage = "com.google.android.gms",
     certificates = R.array.com_google_android_gms_fonts_certs
 )
 
-// 2. Create the FontFamily using Inter
 private val GentiumFontFamily = FontFamily(
     Font(googleFont = GoogleFont("Gentium Book Plus"), fontProvider = gentiumProvider, weight = FontWeight.Normal),
     Font(googleFont = GoogleFont("Gentium Book Plus"), fontProvider = gentiumProvider, weight = FontWeight.Medium),

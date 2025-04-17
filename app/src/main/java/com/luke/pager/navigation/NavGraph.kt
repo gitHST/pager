@@ -21,14 +21,12 @@ fun PagerNavHost(
     bookViewModel: BookViewModel,
     reviewViewModel: ReviewViewModel
 ) {
-    NavHost(navController, startDestination = "activity") {
+    NavHost(navController, startDestination = "plus") {
         composable("activity") { ActivityScreen(bookViewModel) }
         composable("diary") { DiaryScreen(navController, bookViewModel) }
         composable("plus") { AddScreen(bookViewModel, reviewViewModel) }
         composable("search") { SearchScreen(bookViewModel) }
         composable("quotes") { QuotesScreen(bookViewModel) }
-
-        // Add composable for Review Screen
         composable("review_screen/{reviewId}") { backStackEntry ->
             val reviewId = backStackEntry.arguments?.getString("reviewId")?.toLongOrNull() ?: 0L
             val reviews by bookViewModel.allReviews.collectAsState()
