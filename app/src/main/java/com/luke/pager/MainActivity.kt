@@ -21,7 +21,6 @@ import androidx.room.Room
 import com.luke.pager.data.AppDatabase
 import com.luke.pager.data.repo.BookRepository
 import com.luke.pager.data.repo.ReviewRepository
-import com.luke.pager.data.sample.seedDatabaseIfEmpty
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.data.viewmodel.ReviewViewModel
 import com.luke.pager.navigation.BottomNavBar
@@ -42,8 +41,8 @@ class MainActivity : ComponentActivity() {
             .apply {
                 GlobalScope.launch {
                     // 👇 comment out this line to keep the database
-                    clearAllTables()
-                    seedDatabaseIfEmpty(this@apply)
+                    // clearAllTables()
+                    // seedDatabaseIfEmpty(this@apply)
                 }
 
             }
