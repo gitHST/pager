@@ -88,7 +88,6 @@ fun AddBookModal(
                     val currentDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
 
                     scope.launch {
-                        // 1. Insert Book
                         val book = BookEntity(
                             title = actualTitle,
                             authors = authors.ifBlank { "Unknown Author" },
@@ -96,7 +95,6 @@ fun AddBookModal(
                         )
                         val bookId = bookViewModel.insertAndReturnId(book)
 
-                        // 2. Insert Review with linked bookId
                         val review = ReviewEntity(
                             bookId = bookId,
                             dateReviewed = currentDate,
@@ -104,7 +102,6 @@ fun AddBookModal(
                         )
                         reviewViewModel.addReview(review)
 
-                        // 3. Clear and close
                         title = ""
                         authors = ""
                         reviewText = ""
