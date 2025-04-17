@@ -21,16 +21,18 @@ import androidx.room.Room
 import com.luke.pager.data.AppDatabase
 import com.luke.pager.data.repo.BookRepository
 import com.luke.pager.data.repo.ReviewRepository
+import com.luke.pager.data.sample.seedDatabaseIfEmpty
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.data.viewmodel.ReviewViewModel
 import com.luke.pager.navigation.BottomNavBar
 import com.luke.pager.navigation.PagerNavHost
 import com.luke.pager.ui.theme.PagerTheme
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-
 class MainActivity : ComponentActivity() {
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -40,7 +42,8 @@ class MainActivity : ComponentActivity() {
             .apply {
                 GlobalScope.launch {
                     // 👇 comment out this line to keep the database
-                    // clearAllTables()
+                    clearAllTables()
+                    seedDatabaseIfEmpty(this@apply)
                 }
 
             }
@@ -48,7 +51,7 @@ class MainActivity : ComponentActivity() {
         val reviewDao = db.reviewDao()
         val bookRepo = BookRepository(bookDao)
         val reviewRepo = ReviewRepository(reviewDao)
-        val bookViewModel = BookViewModel(bookRepo)
+        val bookViewModel = BookViewModel(bookRepo, reviewRepo)
         val reviewViewModel = ReviewViewModel(reviewRepo)
 
         setContent {
@@ -66,15 +69,15 @@ fun PagerAppUI(bookViewModel: BookViewModel, reviewViewModel: ReviewViewModel) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFF7FEFF)) // Light cyan background
+                .background(Color(0xFFF7FEFF))
         ) {
             Image(
-                painter = painterResource(id = R.drawable.clean_gray_paper), // Save this image in res/drawable
+                painter = painterResource(id = R.drawable.clean_gray_paper),
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier
                     .fillMaxSize()
-                    .alpha(0.9f) // Adjust visibility of texture
+                    .alpha(0.9f)
             )
 
             Scaffold(
