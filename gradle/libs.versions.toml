@@ -10,6 +10,7 @@ espressoCore = "3.6.1"  # Espresso Core version
 lifecycleRuntimeKtx = "2.8.7"  # Lifecycle Runtime KTX version
 activityCompose = "1.10.1"  # Activity Compose version
 composeBom = "2025.03.01"  # Compose BOM version
+composeFont = "1.7.8"
 lifecycleViewModelCompose = "2.8.7"  # Lifecycle ViewModel Compose version (updated)
 androidx-navigation-compose = "2.8.9"
 room = "2.6.1"  # Use the latest version if available
@@ -40,6 +41,7 @@ androidx-room-runtime = { group = "androidx.room", name = "room-runtime", versio
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
+compose-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "composeFont" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
