@@ -18,7 +18,7 @@ interface BookDao {
     suspend fun insertAndReturnId(book: BookEntity): Long
 
     @Query("SELECT * FROM books WHERE id = :id")
-    suspend fun getBookById(id: Int): BookEntity?
+    suspend fun getBookById(id: Long): BookEntity?
 
     @Query("SELECT * FROM books")
     fun getAllBooks(): Flow<List<BookEntity>>
