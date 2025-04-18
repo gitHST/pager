@@ -12,7 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,31 +21,34 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.luke.pager.components.AddBookModal
+import com.luke.pager.components.SearchBookModal
 import com.luke.pager.data.viewmodel.BookViewModel
-import com.luke.pager.data.viewmodel.ReviewViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddScreen(bookViewModel: BookViewModel, reviewViewModel: ReviewViewModel) {
-    val books by bookViewModel.books.collectAsState()
+fun AddScreen(bookViewModel: BookViewModel) {
     val scope = rememberCoroutineScope()
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    // Initialize the modal bottom sheet state
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = false,
+        confirmValueChange = { true }
+    )
+
+
 
     var showSheet by remember { mutableStateOf(false) }
 
+    // Load books when the screen is first launched
     LaunchedEffect(Unit) {
         bookViewModel.loadBooks()
     }
 
+    // Conditionally show the SearchBookModal based on showSheet state
     if (showSheet) {
-        AddBookModal(
-            books = books,
-            sheetState = bottomSheetState,
-            scope = scope,
-            onDismiss = { showSheet = false },
-            bookViewModel = bookViewModel,
-            reviewViewModel = reviewViewModel
+        SearchBookModal(
+            sheetState = sheetState,
+            onDismiss = { showSheet = false }
         )
     }
 
