@@ -11,12 +11,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.luke.pager.data.entities.ReviewEntity
 
 @Composable
 fun ReviewScreen(
-    navController: NavController,
     reviewId: Long,
     reviews: Map<Long, ReviewEntity?>
 ) {
