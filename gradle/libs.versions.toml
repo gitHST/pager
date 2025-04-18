@@ -2,7 +2,7 @@
 agp = "8.9.1"  # Android Gradle Plugin version
 material = "1.12.0"
 appcompat = "1.7.0"
-kotlin = "2.1.0"  # Kotlin version
+kotlin = "2.1.20"  # Kotlin version
 coreKtx = "1.16.0"  # Core KTX version
 junit = "4.13.2"  # JUnit version
 junitVersion = "1.2.1"  # JUnit version (for testing)

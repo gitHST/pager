@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     implementation(libs.compose.google.fonts)
     implementation(libs.compose.animation)
+    implementation(libs.androidx.navigation.compose)
     ksp(libs.androidx.room.compiler)
 
     testImplementation(libs.junit)
