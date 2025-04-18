@@ -3,17 +3,18 @@ agp = "8.5.2"  # Android Gradle Plugin version
 material = "1.12.0"
 appcompat = "1.7.0"
 kotlin = "1.9.0"  # Kotlin version
-coreKtx = "1.15.0"  # Core KTX version
+coreKtx = "1.16.0"  # Core KTX version
 junit = "4.13.2"  # JUnit version
 junitVersion = "1.2.1"  # JUnit version (for testing)
 espressoCore = "3.6.1"  # Espresso Core version
 lifecycleRuntimeKtx = "2.8.7"  # Lifecycle Runtime KTX version
 activityCompose = "1.10.1"  # Activity Compose version
-composeBom = "2025.03.01"  # Compose BOM version
+composeBom = "2025.04.00"  # Compose BOM version
 composeFont = "1.7.8"
+composeAnimation = "1.7.8"
 lifecycleViewModelCompose = "2.8.7"  # Lifecycle ViewModel Compose version (updated)
 androidx-navigation-compose = "2.8.9"
-room = "2.6.1"  # Use the latest version if available
+room = "2.7.0"  # Use the latest version if available
 ksp = "1.9.0-1.0.13"
 
 
@@ -42,6 +43,7 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 compose-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "composeFont" }
+compose-animation = { module = "androidx.compose.animation:animation", version.ref = "composeAnimation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

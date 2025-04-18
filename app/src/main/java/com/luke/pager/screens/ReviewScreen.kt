@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -37,11 +36,6 @@ fun ReviewScreen(
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(review.reviewText ?: "You have not reviewed this book", fontSize = 16.sp)
-
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = { navController.popBackStack() }) {
-                Text("Close")
-            }
         }
     } ?: run {
         Text(text = "Review not found", fontSize = 20.sp)
