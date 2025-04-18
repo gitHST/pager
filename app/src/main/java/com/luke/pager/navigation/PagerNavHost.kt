@@ -1,5 +1,6 @@
 package com.luke.pager.navigation
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -16,7 +17,7 @@ import com.luke.pager.screens.QuotesScreen
 import com.luke.pager.screens.ReviewScreen
 import com.luke.pager.screens.SearchScreen
 
-
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun PagerNavHost(
     navController: NavHostController,
@@ -33,7 +34,10 @@ fun PagerNavHost(
 
     val currentRoute by navController.currentBackStackEntryAsState()
 
-    NavHost(navController, startDestination = "plus") {
+    NavHost(
+        navController = navController,
+        startDestination = "plus"
+    ) {
         composable("activity") {
             SwipeToNavigate(navController, currentRoute?.destination?.route.orEmpty(), navItems) {
                 ActivityScreen(bookViewModel)
