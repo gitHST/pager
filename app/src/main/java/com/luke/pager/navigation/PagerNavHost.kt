@@ -62,7 +62,7 @@ fun PagerNavHost(
         composable("review_screen/{reviewId}") { backStackEntry ->
             val reviewId = backStackEntry.arguments?.getString("reviewId")?.toLongOrNull() ?: 0L
             val reviews by bookViewModel.allReviews.collectAsState()
-            ReviewScreen(navController = navController, reviewId = reviewId, reviews = reviews)
+            ReviewScreen(reviewId = reviewId, reviews = reviews)
         }
     }
 }
