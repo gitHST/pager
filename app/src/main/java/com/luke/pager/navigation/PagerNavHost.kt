@@ -50,7 +50,7 @@ fun PagerNavHost(
         }
         composable("plus") {
             SwipeToNavigate(navController, currentRoute?.destination?.route.orEmpty(), navItems) {
-                AddScreen(bookViewModel, reviewViewModel)
+                AddScreen(bookViewModel)
             }
         }
         composable("search") {
