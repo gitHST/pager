@@ -1,4 +1,4 @@
-package com.luke.pager.components
+package com.luke.pager.screens.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
