@@ -1,7 +1,9 @@
 package com.luke.pager.components
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomSheetDefaults
@@ -18,10 +20,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-
+import com.luke.pager.network.apiresponse.OpenLibraryBook
+import com.luke.pager.network.searchBooksSmart
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,6 +38,12 @@ fun SearchBookModal(
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
+    var books by remember { mutableStateOf<List<OpenLibraryBook>>(emptyList()) }
+    val scope = rememberCoroutineScope()
+
+    var searchJob by remember { mutableStateOf<Job?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
+
 
     LaunchedEffect(active) {
         if (active && sheetState.currentValue == SheetValue.PartiallyExpanded) {
@@ -38,13 +51,34 @@ fun SearchBookModal(
         }
     }
 
+    LaunchedEffect(searchQuery) {
+        searchJob?.cancel() // cancel the last search if still running
+
+        if (searchQuery.isBlank()) {
+            books = emptyList()
+            return@LaunchedEffect
+        }
+
+        val currentQuery = searchQuery
+
+        searchJob = scope.launch {
+            delay(150) // debounce duration
+
+            if (currentQuery == searchQuery) {
+                books = searchBooksSmart(currentQuery)
+            }
+        }
+    }
+
+
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         dragHandle = { BottomSheetDefaults.DragHandle() },
         modifier = Modifier
             .fillMaxWidth()
-            .navigationBarsPadding(),
+            .navigationBarsPadding()
     ) {
         Column(
             Modifier
@@ -63,13 +97,29 @@ fun SearchBookModal(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerLow
                 )
             ) {
-                if (searchQuery.isNotBlank()) {
-                    Text(
-                        text = "Search result for \"$searchQuery\"",
-                        modifier = Modifier.padding(8.dp)
-                    )
+                if (books.isNotEmpty()) {
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        books.forEach { book ->
+                            Column(modifier = Modifier.padding(bottom = 8.dp)) {
+                                Text(
+                                    book.title,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                book.author_name?.let {
+                                    Text(
+                                        it.joinToString(),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                            }
+                        }
+                    }
+                } else if (searchQuery.isNotBlank()) {
+                    Text("No results", modifier = Modifier.padding(8.dp))
                 }
             }
+
+            Spacer(modifier = Modifier.height(80.dp))
         }
     }
 }

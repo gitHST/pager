@@ -71,6 +71,8 @@ dependencies {
     implementation(libs.compose.google.fonts)
     implementation(libs.compose.animation)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
     ksp(libs.androidx.room.compiler)
 
     testImplementation(libs.junit)
