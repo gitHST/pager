@@ -1,8 +1,5 @@
 package com.luke.pager.network
 
-import com.luke.pager.network.apiresponse.OpenLibraryBook
-import com.luke.pager.network.apiresponse.OpenLibraryService
-
 suspend fun searchBooksSmart(rawQuery: String): List<OpenLibraryBook> {
     val query = rawQuery.trim()
     val lowerQuery = query.lowercase()
