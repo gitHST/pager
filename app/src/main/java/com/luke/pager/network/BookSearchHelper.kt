@@ -9,18 +9,29 @@ suspend fun searchBooksSmart(rawQuery: String): List<OpenLibraryBook> {
 
     val combined = (titleResponse.docs + authorResponse.docs)
 
-    val seenTitles = mutableSetOf<String>()
+    val seen = mutableMapOf<Pair<String, String>, OpenLibraryBook>() // (normalizedTitleNoArticle, author) -> bestBook
 
-    val scored = combined.mapNotNull { book ->
+    val result = mutableListOf<Pair<Int, OpenLibraryBook>>()
+
+    for (book in combined) {
         val normTitle = book.title.normalizeTitle()
-        if (normTitle in seenTitles) return@mapNotNull null
-        seenTitles += normTitle
+        val strippedTitle = normTitle.stripLeadingArticle()
+        val author = book.author_name?.firstOrNull()?.lowercase() ?: continue
+        val key = strippedTitle to author
 
+        val existing = seen[key]
+        val keepThis = existing == null || normTitle.length > existing.title.normalizeTitle().length
+
+        if (keepThis) {
+            seen[key] = book
+        }
+    }
+
+    for ((_, book) in seen) {
         val titleLower = book.title.lowercase()
         val authorMatch = book.author_name?.any { it.equals(query, ignoreCase = true) } == true
         val titleMatch = titleLower.contains(lowerQuery)
 
-        // Title length penalty: more extra words = lower score
         val lengthPenalty = (book.title.length - query.length).coerceAtLeast(0)
 
         val finalScore = when {
@@ -29,11 +40,10 @@ suspend fun searchBooksSmart(rawQuery: String): List<OpenLibraryBook> {
             else -> 100
         }
 
-
-        finalScore to book
+        result += finalScore to book
     }
 
-    return scored
+    return result
         .sortedWith(compareByDescending<Pair<Int, OpenLibraryBook>> { it.first }
             .thenBy { it.second.title.lowercase() })
         .map { it.second }
@@ -42,7 +52,7 @@ suspend fun searchBooksSmart(rawQuery: String): List<OpenLibraryBook> {
 
 
 
-fun String.normalizeTitle(): String {
+    fun String.normalizeTitle(): String {
     return this.lowercase()
         .replace(Regex("""^["'“”‘’]+|["'“”‘’]+$"""), "") // remove leading/trailing quotes
         .replace(Regex("""\s*\(.*?\)"""), "")              // Remove parentheses and content
@@ -52,3 +62,8 @@ fun String.normalizeTitle(): String {
         .trim()
 }
 
+fun String.stripLeadingArticle(): String {
+    return this.trimStart()
+        .replace(Regex("""^(the|a|an)\s+"""), "")
+        .trim()
+}
