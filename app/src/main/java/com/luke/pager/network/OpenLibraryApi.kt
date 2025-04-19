@@ -1,6 +1,5 @@
-package com.luke.pager.network.apiresponse
+package com.luke.pager.network
 
-import com.luke.pager.network.OpenLibraryApi
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

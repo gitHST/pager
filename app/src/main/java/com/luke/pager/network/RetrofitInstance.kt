@@ -1,6 +1,5 @@
 package com.luke.pager.network
 
-import com.luke.pager.network.apiresponse.OpenLibrarySearchResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 
