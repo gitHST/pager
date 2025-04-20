@@ -11,9 +11,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.screens.ActivityScreen
 import com.luke.pager.screens.DiaryScreen
+import com.luke.pager.screens.ExploreScreen
 import com.luke.pager.screens.QuotesScreen
 import com.luke.pager.screens.ReviewScreen
-import com.luke.pager.screens.SearchScreen
 import com.luke.pager.screens.components.FloatingSearchOverlay
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -51,9 +51,9 @@ fun PagerNavHost(
                 FloatingSearchOverlay(onDismiss = {})
             }
         }
-        composable("search") {
+        composable("explore") {
             SwipeToNavigate(navController, currentRoute?.destination?.route.orEmpty(), navItems) {
-                SearchScreen(bookViewModel)
+                ExploreScreen(bookViewModel)
             }
         }
         composable("quotes") {
