@@ -14,7 +14,7 @@ import com.luke.pager.screens.DiaryScreen
 import com.luke.pager.screens.ExploreScreen
 import com.luke.pager.screens.QuotesScreen
 import com.luke.pager.screens.ReviewScreen
-import com.luke.pager.screens.components.FloatingSearchOverlay
+import com.luke.pager.screens.components.SearchAndResultsModal
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -48,7 +48,7 @@ fun PagerNavHost(
         }
         composable("plus") {
             SwipeToNavigate(navController, currentRoute?.destination?.route.orEmpty(), navItems) {
-                FloatingSearchOverlay(onDismiss = {})
+                SearchAndResultsModal(onDismiss = {})
             }
         }
         composable("explore") {

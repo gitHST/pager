@@ -11,7 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -23,13 +23,13 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 
 @Composable
-fun BookCover(coverId: Int?) {
+fun BookCover(coverId: Int?, modifier: Modifier = Modifier) {
     val coverUrl = coverId?.let { "https://covers.openlibrary.org/b/id/$it-M.jpg" }
 
     val painter = rememberAsyncImagePainter(model = coverUrl)
     val painterState = painter.state
 
-    var aspectRatio by remember { mutableStateOf(2f / 3f) }
+    var aspectRatio by remember { mutableFloatStateOf(2f / 3f) }
 
     if (painterState is AsyncImagePainter.State.Success) {
         val width = painterState.result.drawable.intrinsicWidth
@@ -44,16 +44,15 @@ fun BookCover(coverId: Int?) {
     val actualHeight = maxWidth / aspectRatio
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .width(maxWidth)
             .height(maxHeight),
         contentAlignment = Alignment.Center
     ) {
-        // Always draw the image, even if loading
         Box(
             modifier = Modifier
                 .width(maxWidth)
-                .height(actualHeight.coerceAtMost(maxHeight)) // avoid overspill
+                .height(actualHeight.coerceAtMost(maxHeight))
                 .clip(RoundedCornerShape(8.dp))
         ) {
             Image(
