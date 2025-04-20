@@ -117,7 +117,7 @@ fun FloatingSearchOverlay(onDismiss: () -> Unit) {
                 SearchBar(
                     query = searchQuery,
                     onQueryChange = { searchQuery = it },
-                    onSearch = {}, // optional
+                    onSearch = {},
                     active = active,
                     onActiveChange = { active = it },
                     placeholder = { Text("Search books...") },
