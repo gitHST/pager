@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.luke.pager.data.viewmodel.BookViewModel
-import com.luke.pager.screens.components.FloatingSearchOverlay
+import com.luke.pager.screens.components.SearchAndResultsModal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,7 +49,7 @@ fun AddScreen(bookViewModel: BookViewModel) {
 
         // Overlay floating search on top
         if (showSheet) {
-            FloatingSearchOverlay(onDismiss = { showSheet = false })
+            SearchAndResultsModal(onDismiss = { showSheet = false })
         }
     }
 }
