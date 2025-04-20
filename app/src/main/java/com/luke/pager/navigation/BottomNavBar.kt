@@ -14,7 +14,7 @@ fun BottomNavBar(navController: NavHostController) {
         NavItem("activity", "Activity"),
         NavItem("diary", "Diary"),
         NavItem("plus", "+"),
-        NavItem("search", "Search"),
+        NavItem("explore", "Explore"),
         NavItem("quotes", "Quotes")
     )
 
