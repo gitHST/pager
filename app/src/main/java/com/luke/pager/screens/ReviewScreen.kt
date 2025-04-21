@@ -9,16 +9,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material.icons.outlined.StarHalf
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -40,22 +49,66 @@ fun ReviewScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            var menuExpanded by remember { mutableStateOf(false) }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "Review",
-                    fontSize = 24.sp,
-                    modifier = Modifier.weight(1f)
+                    fontSize = 24.sp
                 )
-                IconButton(onClick = { /* TODO: Handle menu click */ }) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = "More options"
+
+                Box(modifier = Modifier
+                    .align(Alignment.TopEnd)
+                ) {
+                    IconButton(onClick = { menuExpanded = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "More options"
+                        )
+                    }
+
+                    DropdownMenuItem(
+                        text = { Text("Edit") },
+                        onClick = {
+                            menuExpanded = false
+                            // TODO: Handle edit logic
+                        },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Edit"
+                            )
+                        }
                     )
+
+                    DropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false },
+                        modifier = Modifier.padding(top = 0.dp),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Delete") },
+                            onClick = {
+                                menuExpanded = false
+                                // TODO: Handle delete logic
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Delete"
+                                )
+                            }
+                        )
+                    }
                 }
             }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             review.dateReviewed?.let {
