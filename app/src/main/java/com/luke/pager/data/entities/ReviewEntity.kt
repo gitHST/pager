@@ -41,5 +41,8 @@ data class ReviewEntity(
     val reviewText: String? = null,
 
     @ColumnInfo(name = "tags")
-    val tags: String? = null
+    val tags: String? = null,
+
+    @ColumnInfo(name = "private")
+    val private: Boolean = false
 )

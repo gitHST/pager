@@ -49,19 +49,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.unit.dp
+import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.network.OpenLibraryBook
 import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit) {
+fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookViewModel) {
     var reviewText by remember { mutableStateOf("") }
     var rating by remember { mutableFloatStateOf(0f) }
-    var isLocked by remember { mutableStateOf(false) }
+    var isPrivate by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState(
@@ -91,7 +96,21 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit) {
 
                 Text(
                     "Submit review",
-                    modifier = Modifier.clickable { /* handle submit here */ },
+                    modifier = Modifier.clickable
+                    {
+                        val now = LocalDate.now()
+
+                        val finalDateTime = if (selectedDate != now) {
+                            selectedDate.atStartOfDay()
+                        } else {
+                            selectedDate.atTime(LocalTime.now())
+                        }
+
+                        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                        val dateReviewed = formatter.format(Date.from(finalDateTime.atZone(ZoneId.systemDefault()).toInstant()))
+
+                        bookViewModel.submitReview(book, rating, reviewText, dateReviewed, isPrivate)
+                    },
                     color = MaterialTheme.colorScheme.primary
                 )
             }
@@ -106,8 +125,8 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit) {
                 onDismiss = { showDatePicker = false },
                 onDateSelected = { selectedDate = it }
             )
-            DateAndPrivateGrid(selectedDate, isLocked, onDateClick = { showDatePicker = true }) {
-                isLocked = it
+            DateAndPrivateGrid(selectedDate, isPrivate, onDateClick = { showDatePicker = true }) {
+                isPrivate = it
             }
             Spacer(Modifier.height(12.dp))
             ReviewTextField(reviewText) { reviewText = it }
