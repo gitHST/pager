@@ -41,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.network.BookCover
 import com.luke.pager.network.OpenLibraryBook
@@ -53,7 +54,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
-fun SearchAndResultsModal(onDismiss: () -> Unit, bookViewModel: BookViewModel) {
+fun SearchAndResultsModal(onDismiss: () -> Unit, bookViewModel: BookViewModel, navController: NavHostController) {
     var searchQuery by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
     var books by remember { mutableStateOf<List<OpenLibraryBook>>(emptyList()) }
@@ -125,7 +126,7 @@ fun SearchAndResultsModal(onDismiss: () -> Unit, bookViewModel: BookViewModel) {
                     }
                 ) { book ->
                     if (book != null) {
-                        ReviewBook(book = book, onBack = { selectedBook = null }, bookViewModel = bookViewModel)
+                        ReviewBook(book = book, onBack = { selectedBook = null }, bookViewModel = bookViewModel, navController = navController)
                     } else {
                         SearchBar(
                             query = searchQuery,
