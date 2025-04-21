@@ -19,7 +19,7 @@ Pager is an all in one android app for browsing and reviewing books and sharing 
   - The ability to add books to diary by searching for them using an online API.
   - The ability to rate books from 1 - 10
   - The ability to mark reviews for spoilers
-  - The ability to mark reviews as public or private
+  - The ability to mark reviews as public, just friends, or private
   - The ability to mark any date as the date read
 - View books
   - The ability to sort diary by date reviewed, rating, title, name of author, and date published.
