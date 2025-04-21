@@ -14,7 +14,7 @@ import com.luke.pager.screens.DiaryScreen
 import com.luke.pager.screens.ExploreScreen
 import com.luke.pager.screens.QuotesScreen
 import com.luke.pager.screens.ReviewScreen
-import com.luke.pager.screens.components.SearchAndResultsModal
+import com.luke.pager.screens.addscreen.SearchAndResultsModal
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable

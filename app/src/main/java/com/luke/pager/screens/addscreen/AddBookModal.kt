@@ -1,4 +1,4 @@
-package com.luke.pager.screens.components
+package com.luke.pager.screens.addscreen
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -19,13 +19,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.StarHalf
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
-import androidx.compose.material.icons.outlined.StarHalf
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePickerState
@@ -168,7 +168,7 @@ private fun RatingBar(rating: Float, onRatingChange: (Float) -> Unit) {
                 for (i in 1..5) {
                     val icon = when {
                         rating >= i -> Icons.Filled.Star
-                        rating == i - 0.5f -> Icons.Outlined.StarHalf
+                        rating == i - 0.5f -> Icons.AutoMirrored.Outlined.StarHalf
                         else -> Icons.Outlined.StarBorder
                     }
                     Box(
