@@ -31,10 +31,11 @@ Pager is an all in one android app for browsing and reviewing books and sharing 
 - Quotes
     - The ability to add quotes for your books
     - The ability to view a carousel of all your books and their quotes
-    - Maybe...
-        - The ability to import the clippings.txt from a kindle and update your quotes
 - Search
     - The ability to do a general search of books, and view all their information
+- UI
+    - Fully polished User Interface
+    - Full dark mode integration
 ### `Version 2.0.0 "Book Club"`
 - Online 
   - The ability to share your reviews with friends and the world
@@ -43,5 +44,10 @@ Pager is an all in one android app for browsing and reviewing books and sharing 
   - The ability to like other users reviews
 - Explore
     - The explore page will show books your friends like, recommended books, etc
+
+## Possible feature ideas
+#### Book calendar
+#### Statistics page
+#### 
 ## Contact me
 Email: Lukew2048@gmail.com
