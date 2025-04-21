@@ -1,18 +1,26 @@
 package com.luke.pager.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material.icons.outlined.StarHalf
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -108,9 +116,10 @@ fun DiaryScreen(
 @Composable
 fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit) {
     val trimAmount = 40
-    // At some point change this so the text fades to grey instead of being cut off
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onReviewClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -118,25 +127,51 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
             if (!book.authors.isNullOrBlank()) {
                 Text(text = "By ${book.authors}", fontSize = 14.sp)
             }
-            val reviewText = review?.reviewText ?: "No review yet"
-            val truncatedReview = if (reviewText.length > trimAmount) {
-                reviewText.take(trimAmount-3) + "..."
-            } else {
-                reviewText
-            }
 
+            val reviewText = review?.reviewText?.takeIf { it.isNotBlank() }
+            val displayText = reviewText?.let {
+                if (it.length > trimAmount) it.take(trimAmount - 3) + "..." else it
+            } ?: "No review given"
+
+            val isPlaceholder = reviewText == null
             Text(
-                text = truncatedReview,
-                style = MaterialTheme.typography.bodyMedium
+                text = displayText,
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (isPlaceholder) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(onClick = onReviewClick) {
-                Text("See Review")
+
+            review?.rating?.let { ratingInt ->
+                val rating = ratingInt.toFloat()
+                val starSize = 16.dp
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(modifier = Modifier.width(90.dp)) {
+                    for (i in 1..5) {
+                        val icon = when {
+                            rating >= i -> Icons.Filled.Star
+                            rating == i - 0.5f -> Icons.Outlined.StarHalf
+                            else -> Icons.Outlined.StarBorder
+                        }
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                icon,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.height(starSize)
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 }
+
 
 
 

@@ -55,10 +55,12 @@ class BookViewModel(private val bookRepository: BookRepository, private val revi
 
             val bookId = insertAndReturnId(book)
 
+            val sanitizedReviewText = reviewText.takeIf { it.isNotBlank() }
+
             val review = ReviewEntity(
                 bookId = bookId,
                 rating = rating.toInt(),
-                reviewText = reviewText,
+                reviewText = sanitizedReviewText,
                 dateReviewed = dateReviewed,
                 private = isPrivate
             )
@@ -66,6 +68,4 @@ class BookViewModel(private val bookRepository: BookRepository, private val revi
             reviewRepository.insertReview(review)
         }
     }
-
-
 }
