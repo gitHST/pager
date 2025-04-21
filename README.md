@@ -4,6 +4,7 @@
 ![Platform](https://img.shields.io/badge/platform-Android-green.svg)
 ![Made with Kotlin](https://img.shields.io/badge/made%20with-Kotlin-7F52FF.svg)
 ![UI: Jetpack Compose](https://img.shields.io/badge/UI-Jetpack%20Compose-purple.svg)
+
 Pager is an all in one android app for browsing and reviewing books and sharing your thoughts with your friends, or the world!
 ## Goals for major milestones
 ### `Version 0.1.0 "Footnote"`
