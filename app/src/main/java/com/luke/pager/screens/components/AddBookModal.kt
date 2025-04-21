@@ -49,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.network.OpenLibraryBook
 import kotlinx.coroutines.delay
@@ -63,7 +64,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookViewModel) {
+fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookViewModel, navController : NavHostController) {
     var reviewText by remember { mutableStateOf("") }
     var rating by remember { mutableFloatStateOf(0f) }
     var isPrivate by remember { mutableStateOf(false) }
@@ -110,6 +111,11 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
                         val dateReviewed = formatter.format(Date.from(finalDateTime.atZone(ZoneId.systemDefault()).toInstant()))
 
                         bookViewModel.submitReview(book, rating, reviewText, dateReviewed, isPrivate)
+                        navController.navigate("diary") {
+                            popUpTo("review_screen") { inclusive = true }
+                            launchSingleTop = true
+                        }
+
                     },
                     color = MaterialTheme.colorScheme.primary
                 )
