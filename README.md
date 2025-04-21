@@ -9,11 +9,12 @@ Pager is an all in one android app for browsing and reviewing books and sharing 
 ### `Version 0.1.0 "Footnote"`
 - Add books
   - The ability to add books to diary by manually typing the name and author, and giving your optional review.
-  - ![img.png](img/AddPage.png)
-  - ![img.png](img/AddPopup.png)
+    <img src="img/AddPage.png" alt="img.png" width="200"/>
+    <img src="img/AddPopup.png" alt="img.png" width="200"/>
 - View books
   - The ability to view all your books and reviews from the diary page, ordered by date reviewed.
-  - ![img.png](img/Diary.png)
+
+    <img src="img/Diary.png" alt="img.png" width="200"/>
 ### `Version 0.2.0 "Alexandria"`
 - Add books
   - The ability to add books to diary by searching for them using an online API.
