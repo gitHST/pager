@@ -1,129 +1,272 @@
 package com.luke.pager.screens.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material.icons.outlined.StarHalf
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.luke.pager.data.entities.BookEntity
-import com.luke.pager.data.entities.ReviewEntity
-import com.luke.pager.data.viewmodel.BookViewModel
-import com.luke.pager.data.viewmodel.ReviewViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-
+import com.luke.pager.network.OpenLibraryBook
+import kotlinx.coroutines.delay
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddBookModal(
-    books: List<BookEntity>,
-    sheetState: SheetState,
-    scope: CoroutineScope,
-    onDismiss: () -> Unit,
-    bookViewModel: BookViewModel,
-    reviewViewModel: ReviewViewModel
-) {
-    var title by remember { mutableStateOf("") }
-    var authors by remember { mutableStateOf("") }
+fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit) {
     var reviewText by remember { mutableStateOf("") }
+    var rating by remember { mutableFloatStateOf(0f) }
+    var isLocked by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+    )
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState
-    ) {
+    Box(modifier = Modifier.padding(8.dp)) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .fillMaxSize()
+                .animateContentSize()
         ) {
-            Text("Enter Book Details", fontSize = 20.sp)
-
-            OutlinedTextField(
-                value = title,
-                onValueChange = { title = it },
-                label = { Text("Title") },
-                modifier = Modifier.fillMaxWidth()
+            Spacer(Modifier.height(8.dp))
+            BookRowUIClickable(book = book, onClick = {})
+            Spacer(Modifier.height(8.dp))
+            RatingBar(rating) { rating = it }
+            Spacer(Modifier.height(8.dp))
+            ReviewTextField(reviewText) { reviewText = it }
+            Spacer(Modifier.height(16.dp))
+            DatePickerPopup(
+                showDialog = showDatePicker,
+                datePickerState = datePickerState,
+                onDismiss = { showDatePicker = false },
+                onDateSelected = { selectedDate = it }
             )
-
-            OutlinedTextField(
-                value = authors,
-                onValueChange = { authors = it },
-                label = { Text("Author") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            OutlinedTextField(
-                value = reviewText,
-                onValueChange = { reviewText = it },
-                label = { Text("Review (Optional)") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp),
-                maxLines = 6,
-                singleLine = false
-            )
-
-            Button(
-                onClick = {
-                    val actualTitle = generateUniqueTitle(title, books)
-                    val currentDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
-
-                    scope.launch {
-                        val book = BookEntity(
-                            title = actualTitle,
-                            authors = authors.ifBlank { "Unknown Author" },
-                            dateAdded = currentDate
-                        )
-                        val bookId = bookViewModel.insertAndReturnId(book)
-
-                        val review = ReviewEntity(
-                            bookId = bookId,
-                            dateReviewed = currentDate,
-                            reviewText = reviewText.ifBlank { null }
-                        )
-                        reviewViewModel.addReview(review)
-
-                        title = ""
-                        authors = ""
-                        reviewText = ""
-                        sheetState.hide()
-                        onDismiss()
-                    }
-                },
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text("Submit")
+            DateAndPrivateGrid(selectedDate, isLocked, onDateClick = { showDatePicker = true }) {
+                isLocked = it
             }
+            Spacer(Modifier.height(16.dp))
+            Text(
+                "Go back",
+                modifier = Modifier.clickable(onClick = onBack),
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
 
-private fun generateUniqueTitle(title: String, books: List<BookEntity>): String {
-    val existingTitles = books.map { it.title }
-    var actualTitle = title.ifBlank { "Book1" }
-    var index = 2
-    while (actualTitle in existingTitles) {
-        actualTitle = "Book$index"
-        index++
+@Composable
+private fun RatingBar(rating: Float, onRatingChange: (Float) -> Unit) {
+    val starScale = 1.5f
+    val starSize = 24.dp * starScale
+    val starRowWidthFraction = 0.7f
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(starSize)
+    ) {
+        IconButton(onClick = { if (rating > 0.0f) onRatingChange(rating - 0.5f) }) {
+            Icon(Icons.Default.Remove, contentDescription = "Decrease Rating", tint = MaterialTheme.colorScheme.primary)
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(starRowWidthFraction)
+                .height(starSize)
+        ) {
+            Row(modifier = Modifier.matchParentSize()) {
+                for (i in 1..5) {
+                    val icon = when {
+                        rating >= i -> Icons.Filled.Star
+                        rating == i - 0.5f -> Icons.Outlined.StarHalf
+                        else -> Icons.Outlined.StarBorder
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clickable {
+                                val target = i.toFloat()
+                                onRatingChange(if (rating == target) target - 0.5f else target)
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            icon,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(starSize)
+                        )
+                    }
+                }
+            }
+        }
+        IconButton(onClick = { if (rating < 5f) onRatingChange(rating + 0.5f) }) {
+            Icon(Icons.Default.Add, contentDescription = "Increase Rating", tint = MaterialTheme.colorScheme.primary)
+        }
     }
-    return actualTitle
+}
+
+@Composable
+private fun ReviewTextField(text: String, onTextChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = text,
+        onValueChange = onTextChange,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(180.dp),
+        placeholder = { Text("Write your review...") },
+        shape = RoundedCornerShape(8.dp),
+        singleLine = false,
+        maxLines = 10
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DatePickerPopup(
+    showDialog: Boolean,
+    datePickerState: DatePickerState,
+    onDismiss: () -> Unit,
+    onDateSelected: (LocalDate) -> Unit
+) {
+    if (!showDialog) return
+
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                datePickerState.selectedDateMillis?.let { millis ->
+                    val date = Instant.ofEpochMilli(millis)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate()
+                    onDateSelected(date)
+                }
+                onDismiss()
+            }) {
+                Text("OK")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    ) {
+        DatePicker(state = datePickerState)
+    }
+}
+
+
+@Composable
+private fun DateAndPrivateGrid(
+    selectedDate: LocalDate,
+    isLocked: Boolean,
+    onDateClick: () -> Unit,
+    onLockToggle: (Boolean) -> Unit
+) {
+    val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
+
+    var labelState by remember { mutableStateOf(if (isLocked) "Private" else "Public") }
+    var showLabel by remember { mutableStateOf(true) }
+
+    LaunchedEffect(labelState) {
+        showLabel = true
+        delay(500)
+        showLabel = false
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth().height(75.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Read on...",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = selectedDate.format(formatter),
+                modifier = Modifier
+                    .clickable { onDateClick() }
+                    .padding(2.dp),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        Column(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            IconButton(
+                onClick = {
+                    onLockToggle(!isLocked)
+                    labelState = if (!isLocked) "Private" else "Public"
+                },
+                modifier = Modifier.padding(4.dp)
+            ) {
+                Icon(
+                    imageVector = if (isLocked) Icons.Filled.Lock else Icons.Filled.LockOpen,
+                    contentDescription = if (isLocked) "Locked" else "Unlocked",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            AnimatedVisibility(visible = showLabel) {
+                Text(
+                    text = labelState,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
 }
