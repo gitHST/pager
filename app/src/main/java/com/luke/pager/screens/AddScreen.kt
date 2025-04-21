@@ -49,7 +49,7 @@ fun AddScreen(bookViewModel: BookViewModel) {
 
         // Overlay floating search on top
         if (showSheet) {
-            SearchAndResultsModal(onDismiss = { showSheet = false })
+            SearchAndResultsModal(onDismiss = { showSheet = false }, bookViewModel)
         }
     }
 }

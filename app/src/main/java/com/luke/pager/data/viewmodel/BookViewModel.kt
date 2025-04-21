@@ -6,6 +6,7 @@ import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.entities.ReviewEntity
 import com.luke.pager.data.repo.BookRepository
 import com.luke.pager.data.repo.ReviewRepository
+import com.luke.pager.network.OpenLibraryBook
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -36,5 +37,35 @@ class BookViewModel(private val bookRepository: BookRepository, private val revi
             _allReviews.value = reviews.associateBy { it.bookId }
         }
     }
+
+    fun submitReview(
+        openBook: OpenLibraryBook,
+        rating: Float,
+        reviewText: String,
+        dateReviewed: String,
+        isPrivate: Boolean
+    ) {
+        viewModelScope.launch {
+            val book = BookEntity(
+                title = openBook.title,
+                authors = openBook.author_name?.joinToString(),
+                openlibraryKey = openBook.key,
+                firstPublishDate = openBook.first_publish_year?.toString()
+            )
+
+            val bookId = insertAndReturnId(book)
+
+            val review = ReviewEntity(
+                bookId = bookId,
+                rating = rating.toInt(),
+                reviewText = reviewText,
+                dateReviewed = dateReviewed,
+                private = isPrivate
+            )
+
+            reviewRepository.insertReview(review)
+        }
+    }
+
 
 }
