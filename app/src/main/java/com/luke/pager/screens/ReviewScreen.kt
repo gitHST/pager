@@ -30,7 +30,8 @@ fun ReviewScreen(
             Text("Review", fontSize = 24.sp)
             Spacer(modifier = Modifier.height(16.dp))
             review.dateReviewed?.let {
-                Text("Reviewed on: $it", fontSize = 14.sp)
+                val dateOnly = it.split(" ").firstOrNull() ?: it
+                Text("Reviewed on: $dateOnly", fontSize = 14.sp)
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(review.reviewText ?: "You have not reviewed this book", fontSize = 16.sp)

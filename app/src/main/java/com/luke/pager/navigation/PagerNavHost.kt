@@ -48,7 +48,7 @@ fun PagerNavHost(
         }
         composable("plus") {
             SwipeToNavigate(navController, currentRoute?.destination?.route.orEmpty(), navItems) {
-                SearchAndResultsModal(onDismiss = {})
+                SearchAndResultsModal(onDismiss = {}, bookViewModel = bookViewModel)
             }
         }
         composable("explore") {
