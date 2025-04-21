@@ -2,6 +2,7 @@ package com.luke.pager.screens.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,7 +15,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lock
@@ -43,6 +46,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusState
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.unit.dp
 import com.luke.pager.network.OpenLibraryBook
 import kotlinx.coroutines.delay
@@ -64,18 +69,37 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit) {
     )
 
     Box(modifier = Modifier.padding(8.dp)) {
+        val scrollState = rememberScrollState()
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(scrollState)
                 .animateContentSize()
         ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp, horizontal = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    "Go back",
+                    modifier = Modifier.clickable(onClick = onBack),
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Text(
+                    "Submit review",
+                    modifier = Modifier.clickable { /* handle submit here */ },
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
             Spacer(Modifier.height(8.dp))
             BookRowUIClickable(book = book, onClick = {})
-            Spacer(Modifier.height(8.dp))
-            RatingBar(rating) { rating = it }
-            Spacer(Modifier.height(8.dp))
-            ReviewTextField(reviewText) { reviewText = it }
             Spacer(Modifier.height(16.dp))
+            RatingBar(rating) { rating = it }
+            Spacer(Modifier.height(12.dp))
             DatePickerPopup(
                 showDialog = showDatePicker,
                 datePickerState = datePickerState,
@@ -85,12 +109,11 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit) {
             DateAndPrivateGrid(selectedDate, isLocked, onDateClick = { showDatePicker = true }) {
                 isLocked = it
             }
-            Spacer(Modifier.height(16.dp))
-            Text(
-                "Go back",
-                modifier = Modifier.clickable(onClick = onBack),
-                color = MaterialTheme.colorScheme.primary
-            )
+            Spacer(Modifier.height(12.dp))
+            ReviewTextField(reviewText) { reviewText = it }
+
+            Spacer(Modifier.height(8.dp))
+
         }
     }
 }
@@ -150,19 +173,35 @@ private fun RatingBar(rating: Float, onRatingChange: (Float) -> Unit) {
 }
 
 @Composable
-private fun ReviewTextField(text: String, onTextChange: (String) -> Unit) {
+private fun ReviewTextField(
+    text: String,
+    onTextChange: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    val reviewHeight by animateDpAsState(
+        targetValue = if (expanded) 320.dp else 180.dp,
+        label = "ReviewHeight"
+    )
+
     OutlinedTextField(
         value = text,
         onValueChange = onTextChange,
         modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp),
-        placeholder = { Text("Write your review...") },
+            .height(reviewHeight)
+            .onFocusChanged { focusState: FocusState ->
+                expanded = focusState.isFocused
+            },
+        placeholder = { Text("Review...") },
         shape = RoundedCornerShape(8.dp),
         singleLine = false,
-        maxLines = 10
+        maxLines = 20
     )
 }
+
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -236,7 +275,7 @@ private fun DateAndPrivateGrid(
                 text = selectedDate.format(formatter),
                 modifier = Modifier
                     .clickable { onDateClick() }
-                    .padding(2.dp),
+                    .padding(6.dp),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary
             )
