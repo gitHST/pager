@@ -11,10 +11,10 @@ private val ColorScheme = lightColorScheme(
     primaryContainer = PrimaryContainerLight,
     onPrimaryContainer = OnPrimaryContainer,
 
-    secondary = SecondaryGreyPink,
+    secondary = SecondaryGrey,
     onSecondary = Color.White,
     secondaryContainer = PrimaryContainerLight,
-    onSecondaryContainer = SecondaryGreyPink,
+    onSecondaryContainer = SecondaryGrey,
 
     tertiary = TertiaryGold,
     onTertiary = Color.Black,
@@ -26,6 +26,7 @@ private val ColorScheme = lightColorScheme(
 
     surface = PrimaryContainerLight,
     onSurface = PrimaryDark,
+    surfaceTint = Color.White,
 
     error = Color(0xFFB00020),
     onError = Color.White
@@ -41,4 +42,5 @@ fun PagerTheme(
         typography = Typography,
         content = content
     )
+
 }
