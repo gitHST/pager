@@ -40,10 +40,11 @@ class BookViewModel(private val bookRepository: BookRepository, private val revi
 
     fun submitReview(
         openBook: OpenLibraryBook,
-        rating: Float,
+        rating: Float?,
         reviewText: String,
         dateReviewed: String,
-        isPrivate: Boolean
+        isPrivate: Boolean,
+        hasSpoilers: Boolean
     ) {
         viewModelScope.launch {
             val book = BookEntity(
@@ -59,10 +60,11 @@ class BookViewModel(private val bookRepository: BookRepository, private val revi
 
             val review = ReviewEntity(
                 bookId = bookId,
-                rating = rating.toInt(),
+                rating = rating?.toInt(),
                 reviewText = sanitizedReviewText,
                 dateReviewed = dateReviewed,
-                private = isPrivate
+                private = isPrivate,
+                hasSpoilers = hasSpoilers
             )
 
             reviewRepository.insertReview(review)

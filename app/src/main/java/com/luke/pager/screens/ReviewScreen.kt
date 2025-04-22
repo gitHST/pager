@@ -115,8 +115,8 @@ fun ReviewScreen(
                 val dateOnly = it.split(" ").firstOrNull() ?: it
                 Text("Reviewed on: $dateOnly", fontSize = 14.sp)
             }
-            review.rating?.let { ratingInt ->
-                val rating = ratingInt.toFloat()
+            if (review.rating != null) {
+                val rating = review.rating.toFloat()
                 val starScale = 1.5f
                 val starSize = 24.dp * starScale
                 val starRowWidthFraction = 0.7f
@@ -152,6 +152,7 @@ fun ReviewScreen(
                     }
                 }
             }
+
 
             Spacer(modifier = Modifier.height(8.dp))
             Text(review.reviewText ?: "You have not reviewed this book", fontSize = 16.sp)
