@@ -1,5 +1,6 @@
 package com.luke.pager.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.luke.pager.data.entities.ReviewEntity
@@ -73,7 +75,8 @@ fun ReviewScreen(
                     DropdownMenu(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false },
-                        modifier = Modifier.padding(top = 0.dp),
+                        modifier = Modifier.padding(top = 0.dp)
+                            .background(Color.White, RoundedCornerShape(16.dp)),
                         shape = RoundedCornerShape(16.dp)
                     ) {
                         DropdownMenuItem(
