@@ -12,4 +12,11 @@ class ReviewViewModel(private val reviewRepository: ReviewRepository) : ViewMode
             reviewRepository.deleteReviewAndBookById(reviewId)
         }
     }
+
+    fun updateReviewText(reviewId: Long, newText: String) {
+        viewModelScope.launch {
+            reviewRepository.updateReviewText(reviewId, newText)
+        }
+    }
+
 }
