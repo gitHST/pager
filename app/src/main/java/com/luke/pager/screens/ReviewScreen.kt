@@ -43,6 +43,7 @@ fun ReviewScreen(
     reviews: Map<Long, ReviewEntity?>
 ) {
     val review = reviews[reviewId]
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     review?.let {
         Column(
@@ -96,7 +97,7 @@ fun ReviewScreen(
                             text = { Text("Delete") },
                             onClick = {
                                 menuExpanded = false
-                                // TODO: Handle delete logic
+                                showDeleteDialog = true
                             },
                             leadingIcon = {
                                 Icon(
@@ -105,6 +106,7 @@ fun ReviewScreen(
                                 )
                             }
                         )
+
                     }
                 }
             }
@@ -157,6 +159,37 @@ fun ReviewScreen(
             Spacer(modifier = Modifier.height(8.dp))
             Text(review.reviewText ?: "You have not reviewed this book", fontSize = 16.sp)
         }
+        if (showDeleteDialog) {
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                confirmButton = {
+                    androidx.compose.material3.Button(
+                        onClick = {
+                            showDeleteDialog = false
+                            // TODO: Handle actual delete logic
+                        },
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError
+                        ),
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        Text("Delete")
+                    }
+                },
+                dismissButton = {
+                    androidx.compose.material3.TextButton(
+                        onClick = { showDeleteDialog = false }
+                    ) {
+                        Text("Cancel")
+                    }
+                },
+                title = { Text("Confirm Deletion") },
+                text = { Text("Are you sure you want to delete this review? This action cannot be undone.") }
+            )
+        }
+
+
     } ?: run {
         Text(text = "Review not found", fontSize = 20.sp)
     }
