@@ -12,7 +12,6 @@ interface ReviewDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReview(review: ReviewEntity)
 
-    // Delete review
     @Query("DELETE FROM reviews WHERE id = :reviewId")
     suspend fun deleteReviewById(reviewId: Long)
 
@@ -22,7 +21,6 @@ interface ReviewDao {
     @Query("SELECT * FROM reviews WHERE book_id = :bookId LIMIT 1")
     suspend fun getReviewByBookId(bookId: Long): ReviewEntity?
 
-    // updateReviewText
     @Query("UPDATE reviews SET review_text = :newText WHERE id = :reviewId")
     suspend fun updateReviewText(reviewId: Long, newText: String)
 

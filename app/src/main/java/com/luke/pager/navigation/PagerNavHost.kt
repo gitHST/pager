@@ -36,7 +36,7 @@ fun PagerNavHost(
 
     NavHost(
         navController = navController,
-        startDestination = "diary"
+        startDestination = "plus"
     ) {
         composable("activity") {
             SwipeToNavigate(navController, currentRoute?.destination?.route.orEmpty(), navItems) {
