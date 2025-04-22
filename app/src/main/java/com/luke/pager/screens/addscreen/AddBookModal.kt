@@ -25,6 +25,8 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -68,6 +70,7 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
     var reviewText by remember { mutableStateOf("") }
     var rating by remember { mutableFloatStateOf(0f) }
     var isPrivate by remember { mutableStateOf(false) }
+    var spoilers by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState(
@@ -131,9 +134,14 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
                 onDismiss = { showDatePicker = false },
                 onDateSelected = { selectedDate = it }
             )
-            DateAndPrivateGrid(selectedDate, isPrivate, onDateClick = { showDatePicker = true }) {
-                isPrivate = it
-            }
+            DateAndPrivateGrid(
+                selectedDate,
+                isPrivate,
+                spoilers,
+                onDateClick = { showDatePicker = true },
+                onLockToggle = { isPrivate = it },
+                onSpoilerToggle = { spoilers = it }
+            )
             Spacer(Modifier.height(12.dp))
             ReviewTextField(reviewText) { reviewText = it }
 
@@ -268,25 +276,74 @@ private fun DatePickerPopup(
 private fun DateAndPrivateGrid(
     selectedDate: LocalDate,
     isLocked: Boolean,
+    spoilers: Boolean,
     onDateClick: () -> Unit,
-    onLockToggle: (Boolean) -> Unit
+    onLockToggle: (Boolean) -> Unit,
+    onSpoilerToggle: (Boolean) -> Unit
 ) {
     val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
 
-    var labelState by remember { mutableStateOf(if (isLocked) "Private" else "Public") }
-    var showLabel by remember { mutableStateOf(true) }
+    var privacyLabelState by remember { mutableStateOf(if (isLocked) "Private" else "Public") }
+    var privacyShowLabel by remember { mutableStateOf(false) }
+    var spoilerLabelState by remember { mutableStateOf(if (spoilers) "Spoilers" else "No spoilers") }
+    var spoilerShowLabel by remember { mutableStateOf(false) }
+    var firstCompositionDone by remember { mutableStateOf(false) }
 
-    LaunchedEffect(labelState) {
-        showLabel = true
-        delay(500)
-        showLabel = false
+    LaunchedEffect(privacyLabelState) {
+        if (firstCompositionDone) {
+            privacyShowLabel = true
+            delay(500)
+            privacyShowLabel = false
+        }
+    }
+
+    LaunchedEffect(spoilerLabelState) {
+        if (firstCompositionDone) {
+            spoilerShowLabel = true
+            delay(500)
+            spoilerShowLabel = false
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        firstCompositionDone = true
     }
 
     Row(
-        modifier = Modifier.fillMaxWidth().height(75.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(75.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+
+        Column(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            IconButton(
+                onClick = {
+                    onLockToggle(!isLocked)
+                    privacyLabelState = if (!isLocked) "Private" else "Public"
+                },
+                modifier = Modifier.padding(4.dp)
+            ) {
+                Icon(
+                    imageVector = if (isLocked) Icons.Filled.Lock else Icons.Filled.LockOpen,
+                    contentDescription = if (isLocked) "Locked" else "Unlocked",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            AnimatedVisibility(visible = privacyShowLabel) {
+                Text(
+                    text = privacyLabelState,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
         Column(
             modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -312,21 +369,22 @@ private fun DateAndPrivateGrid(
         ) {
             IconButton(
                 onClick = {
-                    onLockToggle(!isLocked)
-                    labelState = if (!isLocked) "Private" else "Public"
+                    val newSpoilers = !spoilers
+                    onSpoilerToggle(newSpoilers)
+                    spoilerLabelState = if (newSpoilers) "Spoilers" else "No spoilers"
                 },
                 modifier = Modifier.padding(4.dp)
             ) {
                 Icon(
-                    imageVector = if (isLocked) Icons.Filled.Lock else Icons.Filled.LockOpen,
-                    contentDescription = if (isLocked) "Locked" else "Unlocked",
+                    imageVector = if (spoilers) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                    contentDescription = if (spoilers) "Spoilers On" else "Spoilers Off",
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
 
-            AnimatedVisibility(visible = showLabel) {
+            AnimatedVisibility(visible = spoilerShowLabel) {
                 Text(
-                    text = labelState,
+                    text = spoilerLabelState,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
