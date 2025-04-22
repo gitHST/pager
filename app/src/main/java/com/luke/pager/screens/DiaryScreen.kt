@@ -120,7 +120,8 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onReviewClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = book.title, fontSize = 18.sp)
@@ -171,11 +172,6 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
         }
     }
 }
-
-
-
-
-
 
 fun getDateWithoutTime(dateString: String?): String {
     return try {
