@@ -21,8 +21,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.StarHalf
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.SentimentSatisfiedAlt
 import androidx.compose.material.icons.filled.Star
@@ -42,6 +43,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -53,6 +55,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.luke.pager.R
+import com.luke.pager.data.entities.Privacy
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.network.OpenLibraryBook
 import kotlinx.coroutines.delay
@@ -71,7 +74,7 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
     var rating by remember { mutableFloatStateOf(0f) }
     var spoilers by remember { mutableStateOf(false) }
     var hasRated by remember { mutableStateOf(false) }
-    var isPrivate by remember { mutableStateOf(false) }
+    var privacy by remember { mutableStateOf(Privacy.PUBLIC) }
     var reviewText by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -118,7 +121,7 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
 
                         val ratingToSubmit: Float? = if (hasRated) rating else null
 
-                        bookViewModel.submitReview(book, ratingToSubmit, reviewText, dateReviewed, isPrivate, spoilers)
+                        bookViewModel.submitReview(book, ratingToSubmit, reviewText, dateReviewed, privacy, spoilers)
 
                         navController.navigate("diary") {
                             popUpTo("review_screen") { inclusive = true }
@@ -142,10 +145,10 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
             )
             DateAndPrivateGrid(
                 selectedDate,
-                isPrivate,
+                privacy,
                 spoilers,
                 onDateClick = { showDatePicker = true },
-                onLockToggle = { isPrivate = it },
+                onLockToggle = { privacy = it },
                 onSpoilerToggle = { spoilers = it }
             )
             Spacer(Modifier.height(12.dp))
@@ -299,15 +302,19 @@ private fun DatePickerPopup(
 @Composable
 private fun DateAndPrivateGrid(
     selectedDate: LocalDate,
-    isLocked: Boolean,
+    privacy: Privacy,
     spoilers: Boolean,
     onDateClick: () -> Unit,
-    onLockToggle: (Boolean) -> Unit,
+    onLockToggle: (Privacy) -> Unit,
     onSpoilerToggle: (Boolean) -> Unit
 ) {
     val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
 
-    var privacyLabelState by remember { mutableStateOf(if (isLocked) "Private" else "Public") }
+    val privacyIcons = listOf(Icons.Filled.Public, Icons.Filled.Lock, Icons.Filled.Group)
+    val privacyLabels = listOf("Public", "Private", "Friends Only")
+    val currentPrivacyIcon = privacyIcons[privacy.ordinal]
+    val currentPrivacyLabel = privacyLabels[privacy.ordinal]
+
     var privacyShowLabel by remember { mutableStateOf(false) }
     var spoilerLabelState by remember { mutableStateOf(if (spoilers) "Spoilers" else "No spoilers") }
     var spoilerShowLabel by remember { mutableStateOf(false) }
@@ -324,10 +331,10 @@ private fun DateAndPrivateGrid(
         R.drawable.ic_mood_bad
     )
 
-    var currentSpoilerIconIndex by remember { mutableStateOf(0) }
+    var currentSpoilerIconIndex by remember { mutableIntStateOf(0) }
     val currentSpoilerIconRes = spoilerIcons[currentSpoilerIconIndex]
 
-    LaunchedEffect(privacyLabelState) {
+    LaunchedEffect(privacy) {
         if (firstCompositionDone) {
             privacyShowLabel = true
             delay(500)
@@ -362,21 +369,22 @@ private fun DateAndPrivateGrid(
         ) {
             IconButton(
                 onClick = {
-                    onLockToggle(!isLocked)
-                    privacyLabelState = if (!isLocked) "Private" else "Public"
+                    val nextOrdinal = (privacy.ordinal + 1) % Privacy.entries.size
+                    val newPrivacy = Privacy.entries[nextOrdinal]
+                    onLockToggle(newPrivacy)
                 },
                 modifier = Modifier.padding(4.dp)
             ) {
                 Icon(
-                    imageVector = if (isLocked) Icons.Filled.Lock else Icons.Filled.LockOpen,
-                    contentDescription = if (isLocked) "Locked" else "Unlocked",
+                    imageVector = currentPrivacyIcon,
+                    contentDescription = currentPrivacyLabel,
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
 
             AnimatedVisibility(visible = privacyShowLabel) {
                 Text(
-                    text = privacyLabelState,
+                    text = currentPrivacyLabel,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -445,4 +453,3 @@ private fun DateAndPrivateGrid(
         }
     }
 }
-
