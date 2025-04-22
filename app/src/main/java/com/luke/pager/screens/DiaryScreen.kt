@@ -161,7 +161,7 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
                             Icon(
                                 icon,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = MaterialTheme.colorScheme.tertiary,
                                 modifier = Modifier.height(starSize)
                             )
                         }
