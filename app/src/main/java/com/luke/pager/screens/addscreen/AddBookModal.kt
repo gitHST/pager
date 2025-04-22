@@ -67,12 +67,14 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookViewModel, navController : NavHostController) {
-    var reviewText by remember { mutableStateOf("") }
     var rating by remember { mutableFloatStateOf(0f) }
-    var isPrivate by remember { mutableStateOf(false) }
     var spoilers by remember { mutableStateOf(false) }
+    var hasRated by remember { mutableStateOf(false) }
+    var isPrivate by remember { mutableStateOf(false) }
+    var reviewText by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var showDatePicker by remember { mutableStateOf(false) }
+
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
     )
@@ -113,7 +115,10 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
                         val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
                         val dateReviewed = formatter.format(Date.from(finalDateTime.atZone(ZoneId.systemDefault()).toInstant()))
 
-                        bookViewModel.submitReview(book, rating, reviewText, dateReviewed, isPrivate)
+                        val ratingToSubmit: Float? = if (hasRated) rating else null
+
+                        bookViewModel.submitReview(book, ratingToSubmit, reviewText, dateReviewed, isPrivate, spoilers)
+
                         navController.navigate("diary") {
                             popUpTo("review_screen") { inclusive = true }
                             launchSingleTop = true
@@ -126,7 +131,7 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
             Spacer(Modifier.height(8.dp))
             BookRowUIClickable(book = book, onClick = {})
             Spacer(Modifier.height(16.dp))
-            RatingBar(rating) { rating = it }
+            RatingBar(rating, hasRated, { rating = it }, { hasRated = true })
             Spacer(Modifier.height(12.dp))
             DatePickerPopup(
                 showDialog = showDatePicker,
@@ -152,7 +157,12 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
 }
 
 @Composable
-private fun RatingBar(rating: Float, onRatingChange: (Float) -> Unit) {
+private fun RatingBar(
+    rating: Float,
+    hasRated: Boolean,
+    onRatingChange: (Float) -> Unit,
+    onUserInteracted: () -> Unit
+) {
     val starScale = 1.5f
     val starSize = 24.dp * starScale
     val starRowWidthFraction = 0.7f
@@ -164,7 +174,12 @@ private fun RatingBar(rating: Float, onRatingChange: (Float) -> Unit) {
             .fillMaxWidth()
             .height(starSize)
     ) {
-        IconButton(onClick = { if (rating > 0.0f) onRatingChange(rating - 0.5f) }) {
+        IconButton(onClick = {
+            if (rating > 0.0f) {
+                onRatingChange(rating - 0.5f)
+                onUserInteracted()
+            }
+        }) {
             Icon(Icons.Default.Remove, contentDescription = "Decrease Rating", tint = MaterialTheme.colorScheme.primary)
         }
         Box(
@@ -186,24 +201,31 @@ private fun RatingBar(rating: Float, onRatingChange: (Float) -> Unit) {
                             .clickable {
                                 val target = i.toFloat()
                                 onRatingChange(if (rating == target) target - 0.5f else target)
+                                onUserInteracted()
                             },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             icon,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.tertiary,
+                            tint = if (hasRated) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(starSize)
                         )
                     }
                 }
             }
         }
-        IconButton(onClick = { if (rating < 5f) onRatingChange(rating + 0.5f) }) {
+        IconButton(onClick = {
+            if (rating < 5f) {
+                onRatingChange(rating + 0.5f)
+                onUserInteracted()
+            }
+        }) {
             Icon(Icons.Default.Add, contentDescription = "Increase Rating", tint = MaterialTheme.colorScheme.primary)
         }
     }
 }
+
 
 @Composable
 private fun ReviewTextField(
