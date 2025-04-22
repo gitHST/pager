@@ -24,9 +24,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.SentimentSatisfiedAlt
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -50,8 +49,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.luke.pager.R
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.network.OpenLibraryBook
 import kotlinx.coroutines.delay
@@ -294,6 +295,7 @@ private fun DatePickerPopup(
 }
 
 
+
 @Composable
 private fun DateAndPrivateGrid(
     selectedDate: LocalDate,
@@ -310,6 +312,20 @@ private fun DateAndPrivateGrid(
     var spoilerLabelState by remember { mutableStateOf(if (spoilers) "Spoilers" else "No spoilers") }
     var spoilerShowLabel by remember { mutableStateOf(false) }
     var firstCompositionDone by remember { mutableStateOf(false) }
+
+    val spoilerIcons = listOf(
+        R.drawable.ic_sentiment_very_dissatisfied,
+        R.drawable.ic_sentiment_dissatisfied,
+        R.drawable.ic_sentiment_extremely_dissatisfied,
+        R.drawable.ic_sentiment_frustrated,
+        R.drawable.ic_sentiment_sad,
+        R.drawable.ic_sentiment_stressed,
+        R.drawable.ic_sentiment_worried,
+        R.drawable.ic_mood_bad
+    )
+
+    var currentSpoilerIconIndex by remember { mutableStateOf(0) }
+    val currentSpoilerIconRes = spoilerIcons[currentSpoilerIconIndex]
 
     LaunchedEffect(privacyLabelState) {
         if (firstCompositionDone) {
@@ -339,6 +355,7 @@ private fun DateAndPrivateGrid(
         verticalAlignment = Alignment.CenterVertically
     ) {
 
+        // Privacy Column
         Column(
             modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -366,6 +383,7 @@ private fun DateAndPrivateGrid(
             }
         }
 
+        // Date Column
         Column(
             modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -385,6 +403,7 @@ private fun DateAndPrivateGrid(
             )
         }
 
+        // Spoiler Column
         Column(
             modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -394,14 +413,26 @@ private fun DateAndPrivateGrid(
                     val newSpoilers = !spoilers
                     onSpoilerToggle(newSpoilers)
                     spoilerLabelState = if (newSpoilers) "Spoilers" else "No spoilers"
+
+                    if (newSpoilers) {
+                        currentSpoilerIconIndex = (currentSpoilerIconIndex + 1) % spoilerIcons.size
+                    }
                 },
                 modifier = Modifier.padding(4.dp)
             ) {
-                Icon(
-                    imageVector = if (spoilers) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                    contentDescription = if (spoilers) "Spoilers On" else "Spoilers Off",
-                    tint = MaterialTheme.colorScheme.primary
-                )
+                if (spoilers) {
+                    Icon(
+                        painter = painterResource(id = currentSpoilerIconRes),
+                        contentDescription = "Spoilers On",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Filled.SentimentSatisfiedAlt,
+                        contentDescription = "Spoilers Off",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
 
             AnimatedVisibility(visible = spoilerShowLabel) {
@@ -414,3 +445,4 @@ private fun DateAndPrivateGrid(
         }
     }
 }
+
