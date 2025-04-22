@@ -261,8 +261,8 @@ fun ReviewScreen(
                             Text("Cancel")
                         }
                     },
-                    title = { Text("Confirm Deletion") },
-                    text = { Text("Are you sure you want to delete this review? This action cannot be undone.") }
+                    title = { Text("Delete review") },
+                    text = { Text("Delete this review?") }
                 )
             }
         }
