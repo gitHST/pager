@@ -192,7 +192,7 @@ private fun RatingBar(rating: Float, onRatingChange: (Float) -> Unit) {
                         Icon(
                             icon,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = MaterialTheme.colorScheme.tertiary,
                             modifier = Modifier.size(starSize)
                         )
                     }
