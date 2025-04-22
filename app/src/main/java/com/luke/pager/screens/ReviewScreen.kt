@@ -40,7 +40,9 @@ import com.luke.pager.data.entities.ReviewEntity
 @Composable
 fun ReviewScreen(
     reviewId: Long,
-    reviews: Map<Long, ReviewEntity?>
+    reviews: Map<Long, ReviewEntity?>,
+    reviewViewModel: com.luke.pager.data.viewmodel.ReviewViewModel,
+    onDeleteSuccess: () -> Unit
 ) {
     val review = reviews[reviewId]
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -166,7 +168,8 @@ fun ReviewScreen(
                     androidx.compose.material3.Button(
                         onClick = {
                             showDeleteDialog = false
-                            // TODO: Handle actual delete logic
+                            reviewViewModel.deleteReviewAndBookById(reviewId)
+                            onDeleteSuccess()
                         },
                         colors = androidx.compose.material3.ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.error,
