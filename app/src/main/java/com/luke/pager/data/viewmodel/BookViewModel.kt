@@ -7,9 +7,12 @@ import com.luke.pager.data.entities.ReviewEntity
 import com.luke.pager.data.repo.BookRepository
 import com.luke.pager.data.repo.ReviewRepository
 import com.luke.pager.network.OpenLibraryBook
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.URL
 
 class BookViewModel(private val bookRepository: BookRepository, private val reviewRepository: ReviewRepository) : ViewModel() {
 
@@ -22,6 +25,20 @@ class BookViewModel(private val bookRepository: BookRepository, private val revi
     suspend fun insertAndReturnId(book: BookEntity): Long {
         return bookRepository.insertAndReturnId(book)
     }
+
+    suspend fun downloadCoverImage(coverId: Int?): ByteArray? {
+        return withContext(Dispatchers.IO) {
+            try {
+                coverId?.let {
+                    val url = URL("https://covers.openlibrary.org/b/id/$it-M.jpg")
+                    url.readBytes()
+                }
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }
+
 
     fun loadBooks() {
         viewModelScope.launch {
@@ -47,11 +64,14 @@ class BookViewModel(private val bookRepository: BookRepository, private val revi
         hasSpoilers: Boolean
     ) {
         viewModelScope.launch {
+            val coverImage = downloadCoverImage(openBook.cover_i)
+
             val book = BookEntity(
                 title = openBook.title,
                 authors = openBook.author_name?.joinToString(),
                 openlibraryKey = openBook.key,
-                firstPublishDate = openBook.first_publish_year?.toString()
+                firstPublishDate = openBook.first_publish_year?.toString(),
+                cover = coverImage
             )
 
             val bookId = insertAndReturnId(book)
@@ -68,6 +88,8 @@ class BookViewModel(private val bookRepository: BookRepository, private val revi
             )
 
             reviewRepository.insertReview(review)
+            loadBooks()
+            loadAllReviews()
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.luke.pager.screens
 
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,12 +16,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material.icons.outlined.StarHalf
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,8 +31,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -122,58 +132,98 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
             .fillMaxWidth()
             .clickable { onReviewClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(28.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = book.title, fontSize = 18.sp)
-            if (!book.authors.isNullOrBlank()) {
-                Text(text = "By ${book.authors}", fontSize = 14.sp)
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(60.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                var imageBitmap by remember { mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
+                var loading by remember { mutableStateOf(true) }
+
+                LaunchedEffect(book.cover) {
+                    book.cover?.let {
+                        loading = true
+                        val bitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
+                        imageBitmap = bitmap.asImageBitmap()
+                        loading = false
+                    }
+                }
+
+                if (loading && book.cover != null) {
+                    CircularProgressIndicator(modifier = Modifier.width(24.dp).height(24.dp))
+                } else if (imageBitmap != null) {
+                    Image(
+                        bitmap = imageBitmap!!,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+
+                }
             }
 
-            val reviewText = review?.reviewText?.takeIf { it.isNotBlank() }
-            val displayText = reviewText?.let {
-                if (it.length > trimAmount) it.take(trimAmount - 3) + "..." else it
-            } ?: "No review given"
+            Spacer(modifier = Modifier.width(12.dp))
 
-            val isPlaceholder = reviewText == null
+            Column {
+                Text(text = book.title, fontSize = 18.sp)
+                if (!book.authors.isNullOrBlank()) {
+                    Text(text = "By ${book.authors}", fontSize = 14.sp)
+                }
 
-            Text(
-                text = displayText,
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontStyle = if (isPlaceholder) FontStyle.Italic else FontStyle.Normal
+                val reviewText = review?.reviewText?.takeIf { it.isNotBlank() }
+                val displayText = reviewText?.let {
+                    if (it.length > trimAmount) it.take(trimAmount - 3) + "..." else it
+                } ?: "No review given"
+
+                val isPlaceholder = reviewText == null
+
+                Text(
+                    text = displayText,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontStyle = if (isPlaceholder) FontStyle.Italic else FontStyle.Normal
+                    )
                 )
-            )
 
-            if (review?.rating != null) {
-                val rating = review.rating.toFloat()
-                val starSize = 16.dp
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(modifier = Modifier.width(90.dp)) {
-                    for (i in 1..5) {
-                        val icon = when {
-                            rating >= i -> Icons.Filled.Star
-                            rating == i - 0.5f -> Icons.Outlined.StarHalf
-                            else -> Icons.Outlined.StarBorder
-                        }
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                icon,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.tertiary,
-                                modifier = Modifier.height(starSize)
-                            )
+                if (review?.rating != null) {
+                    val rating = review.rating.toFloat()
+                    val starSize = 16.dp
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(modifier = Modifier.width(90.dp)) {
+                        for (i in 1..5) {
+                            val icon = when {
+                                rating >= i -> Icons.Filled.Star
+                                rating == i - 0.5f -> Icons.Outlined.StarHalf
+                                else -> Icons.Outlined.StarBorder
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    icon,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.tertiary,
+                                    modifier = Modifier.height(starSize)
+                                )
+                            }
                         }
                     }
                 }
             }
-
         }
     }
 }
