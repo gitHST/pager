@@ -43,9 +43,16 @@ data class ReviewEntity(
     @ColumnInfo(name = "tags")
     val tags: String? = null,
 
-    @ColumnInfo(name = "private")
-    val private: Boolean = false,
+    @ColumnInfo(name = "privacy")
+    val privacy: Privacy = Privacy.PUBLIC,
 
     @ColumnInfo(name = "has_spoilers")
     val hasSpoilers: Boolean = false
 )
+
+
+enum class Privacy {
+    PUBLIC,
+    FRIENDS,
+    PRIVATE
+}
