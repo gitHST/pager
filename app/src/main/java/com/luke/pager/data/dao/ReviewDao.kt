@@ -13,6 +13,10 @@ interface ReviewDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReview(review: ReviewEntity)
 
+    // Delete review
+    @Query("DELETE FROM reviews WHERE id = :reviewId")
+    suspend fun deleteReviewById(reviewId: Long)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAndReturnId(review: ReviewEntity): Long
 
@@ -27,4 +31,7 @@ interface ReviewDao {
 
     @Query("SELECT * FROM reviews")
     suspend fun getAllReviews(): List<ReviewEntity>
+
+    @Query("SELECT book_id FROM reviews WHERE id = :reviewId")
+    suspend fun getBookIdByReviewId(reviewId: Long): Long?
 }
