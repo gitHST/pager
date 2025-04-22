@@ -135,12 +135,14 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
             } ?: "No review given"
 
             val isPlaceholder = reviewText == null
+
             Text(
                 text = displayText,
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (isPlaceholder) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontSize = 14.sp,
+                    color = if (isPlaceholder) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
+                )
             )
-
 
             if (review?.rating != null) {
                 val rating = review.rating.toFloat()
