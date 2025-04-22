@@ -40,6 +40,7 @@ Pager is an all in one android app for browsing and reviewing books and sharing 
 - Online 
   - The ability to share your reviews with friends and the world
   - The ability to follow other users and see their reviews
+      - Others reviews with spoilers will be hidden and revealed by button press
   - The ability to comment on other users reviews
   - The ability to like other users reviews
 - Explore
