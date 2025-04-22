@@ -62,9 +62,7 @@ fun ReviewScreen(
                     fontSize = 24.sp
                 )
 
-                Box(modifier = Modifier
-                    .align(Alignment.TopEnd)
-                ) {
+                Box(modifier = Modifier.align(Alignment.TopEnd)) {
                     IconButton(onClick = { menuExpanded = true }) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
@@ -72,26 +70,25 @@ fun ReviewScreen(
                         )
                     }
 
-                    DropdownMenuItem(
-                        text = { Text("Edit") },
-                        onClick = {
-                            menuExpanded = false
-                            // TODO: Handle edit logic
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Edit"
-                            )
-                        }
-                    )
-
                     DropdownMenu(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false },
                         modifier = Modifier.padding(top = 0.dp),
                         shape = RoundedCornerShape(16.dp)
                     ) {
+                        DropdownMenuItem(
+                            text = { Text("Edit") },
+                            onClick = {
+                                menuExpanded = false
+                                // TODO: Handle edit logic
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Edit"
+                                )
+                            }
+                        )
                         DropdownMenuItem(
                             text = { Text("Delete") },
                             onClick = {
@@ -144,7 +141,7 @@ fun ReviewScreen(
                                 Icon(
                                     icon,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
+                                    tint = MaterialTheme.colorScheme.tertiary,
                                     modifier = Modifier.height(starSize)
                                 )
                             }
