@@ -14,4 +14,7 @@ class ReviewRepository(private val reviewDao: ReviewDao, private val bookDao: Bo
             bookDao.deleteBookById(it)
         }
     }
+    suspend fun updateReviewText(reviewId: Long, newText: String) {
+        reviewDao.updateReviewText(reviewId, newText)
+    }
 }

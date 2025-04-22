@@ -5,7 +5,6 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import com.luke.pager.data.entities.ReviewEntity
 
 @Dao
@@ -23,8 +22,9 @@ interface ReviewDao {
     @Query("SELECT * FROM reviews WHERE book_id = :bookId LIMIT 1")
     suspend fun getReviewByBookId(bookId: Long): ReviewEntity?
 
-    @Update
-    suspend fun updateReview(review: ReviewEntity)
+    // updateReviewText
+    @Query("UPDATE reviews SET review_text = :newText WHERE id = :reviewId")
+    suspend fun updateReviewText(reviewId: Long, newText: String)
 
     @Delete
     suspend fun deleteReview(review: ReviewEntity)
