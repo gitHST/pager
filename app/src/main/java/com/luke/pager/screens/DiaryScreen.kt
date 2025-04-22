@@ -142,8 +142,8 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
             )
 
 
-            review?.rating?.let { ratingInt ->
-                val rating = ratingInt.toFloat()
+            if (review?.rating != null) {
+                val rating = review.rating.toFloat()
                 val starSize = 16.dp
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(modifier = Modifier.width(90.dp)) {
@@ -169,6 +169,7 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
                     }
                 }
             }
+
         }
     }
 }

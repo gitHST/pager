@@ -44,5 +44,8 @@ data class ReviewEntity(
     val tags: String? = null,
 
     @ColumnInfo(name = "private")
-    val private: Boolean = false
+    val private: Boolean = false,
+
+    @ColumnInfo(name = "has_spoilers")
+    val hasSpoilers: Boolean = false
 )
