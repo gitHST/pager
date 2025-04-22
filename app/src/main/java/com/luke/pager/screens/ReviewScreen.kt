@@ -20,13 +20,16 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material.icons.outlined.StarHalf
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -54,14 +58,14 @@ fun ReviewScreen(
 
     review?.let {
         var isEditing by remember { mutableStateOf(false) }
-        var editedText by remember { mutableStateOf(TextFieldValue(review.reviewText.orEmpty())) }
+        var localReviewText by remember { mutableStateOf(review.reviewText.orEmpty()) }
+        var editedText by remember { mutableStateOf(TextFieldValue(localReviewText)) }
         var menuExpanded by remember { mutableStateOf(false) }
 
         val textStyle = MaterialTheme.typography.bodyLarge.copy(
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Start
         )
-
 
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
@@ -70,6 +74,7 @@ fun ReviewScreen(
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // Header with menu
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -103,7 +108,7 @@ fun ReviewScreen(
                                     onClick = {
                                         menuExpanded = false
                                         isEditing = true
-                                        editedText = TextFieldValue(review.reviewText.orEmpty())
+                                        editedText = TextFieldValue(localReviewText)
                                     },
                                     leadingIcon = {
                                         Icon(
@@ -132,11 +137,13 @@ fun ReviewScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Date
                 review.dateReviewed?.let {
                     val dateOnly = it.split(" ").firstOrNull() ?: it
                     Text("Reviewed on: $dateOnly", fontSize = 14.sp)
                 }
 
+                // Rating Stars
                 if (review.rating != null) {
                     val rating = review.rating.toFloat()
                     val starScale = 1.5f
@@ -175,54 +182,88 @@ fun ReviewScreen(
                     }
                 }
 
-            Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-            val sharedModifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
+                // Review Text / Edit
+                val sharedModifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
 
-            if (isEditing) {
-                Box(modifier = sharedModifier) {
-                    BasicTextField(
-                        value = editedText,
-                        onValueChange = { editedText = it },
-                        textStyle = textStyle,
-                        modifier = Modifier.fillMaxWidth(),
-                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
-                    )
-                }
-            } else {
-                Box(modifier = sharedModifier) {
-                    Text(
-                        review.reviewText ?: "You have not reviewed this book",
-                        fontSize = 16.sp,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                if (isEditing) {
+                    Box(modifier = sharedModifier) {
+                        BasicTextField(
+                            value = editedText,
+                            onValueChange = { editedText = it },
+                            textStyle = textStyle,
+                            modifier = Modifier.fillMaxWidth(),
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
+                        )
+                    }
+                } else {
+                    Box(modifier = sharedModifier) {
+                        Text(
+                            localReviewText.ifBlank { "No review given" },
+                            fontSize = 16.sp,
+                            modifier = Modifier.fillMaxWidth(),
+                            style = textStyle,
+                            fontStyle = if (localReviewText.isBlank()) FontStyle.Italic else FontStyle.Normal
+                        )
+                    }
                 }
             }
-}
 
             // Floating Save/Cancel Buttons
             if (isEditing) {
                 Row(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(16.dp), // distance from bottom-right corner
+                        .padding(16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Button(onClick = {
                         reviewViewModel.updateReviewText(reviewId, editedText.text)
+                        localReviewText = editedText.text
                         isEditing = false
                     }) {
                         Text("Save")
                     }
                     Button(onClick = {
                         isEditing = false
-                        editedText = TextFieldValue(review.reviewText.orEmpty())
+                        editedText = TextFieldValue(localReviewText)
                     }) {
                         Text("Cancel")
                     }
                 }
+            }
+
+            // Delete Dialog
+            if (showDeleteDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDeleteDialog = false },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                showDeleteDialog = false
+                                reviewViewModel.deleteReviewAndBookById(reviewId)
+                                onDeleteSuccess()
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError
+                            ),
+                            shape = RoundedCornerShape(20.dp)
+                        ) {
+                            Text("Delete")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDeleteDialog = false }) {
+                            Text("Cancel")
+                        }
+                    },
+                    title = { Text("Confirm Deletion") },
+                    text = { Text("Are you sure you want to delete this review? This action cannot be undone.") }
+                )
             }
         }
     }

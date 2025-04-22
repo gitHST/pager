@@ -117,9 +117,8 @@ fun SearchAndResultsModal(
     ) { paddingValues ->
         Box(
             modifier = Modifier
-                .padding(paddingValues) // this does nothing visible in your case, but silences the warning
+                .padding(paddingValues)
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.6f))
                 .clickable(
                     onClick = onDismiss,
                     indication = null,
@@ -129,7 +128,6 @@ fun SearchAndResultsModal(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.1f))
                     .clickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() }
