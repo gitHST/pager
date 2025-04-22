@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.luke.pager.data.viewmodel.BookViewModel
+import com.luke.pager.data.viewmodel.ReviewViewModel
 import com.luke.pager.screens.ActivityScreen
 import com.luke.pager.screens.DiaryScreen
 import com.luke.pager.screens.ExploreScreen
@@ -21,6 +22,7 @@ import com.luke.pager.screens.addscreen.SearchAndResultsModal
 fun PagerNavHost(
     navController: NavHostController,
     bookViewModel: BookViewModel,
+    reviewViewModel: ReviewViewModel,
 ) {
     val navItems = listOf(
         NavItem("activity", "Activity"),
@@ -64,7 +66,7 @@ fun PagerNavHost(
         composable("review_screen/{reviewId}") { backStackEntry ->
             val reviewId = backStackEntry.arguments?.getString("reviewId")?.toLongOrNull() ?: 0L
             val reviews by bookViewModel.allReviews.collectAsState()
-            ReviewScreen(reviewId = reviewId, reviews = reviews)
+            ReviewScreen(reviewId = reviewId, reviews = reviews, reviewViewModel = reviewViewModel, onDeleteSuccess = { navController.popBackStack() })
         }
     }
 }
