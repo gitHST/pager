@@ -3,6 +3,7 @@ package com.luke.pager.data.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.luke.pager.data.entities.BookEntity
+import com.luke.pager.data.entities.Privacy
 import com.luke.pager.data.entities.ReviewEntity
 import com.luke.pager.data.repo.BookRepository
 import com.luke.pager.data.repo.ReviewRepository
@@ -60,7 +61,7 @@ class BookViewModel(private val bookRepository: BookRepository, private val revi
         rating: Float?,
         reviewText: String,
         dateReviewed: String,
-        isPrivate: Boolean,
+        privacy: Privacy,
         hasSpoilers: Boolean
     ) {
         viewModelScope.launch {
@@ -83,7 +84,7 @@ class BookViewModel(private val bookRepository: BookRepository, private val revi
                 rating = rating?.toInt(),
                 reviewText = sanitizedReviewText,
                 dateReviewed = dateReviewed,
-                private = isPrivate,
+                privacy = privacy,
                 hasSpoilers = hasSpoilers
             )
 
