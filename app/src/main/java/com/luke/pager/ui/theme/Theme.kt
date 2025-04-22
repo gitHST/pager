@@ -32,6 +32,33 @@ private val ColorScheme = lightColorScheme(
     onError = Color.White
 )
 
+private val BlueColorScheme = lightColorScheme(
+    primary = PrimaryDark,
+    onPrimary = Color.White,
+    primaryContainer = NiceBlue,
+    onPrimaryContainer = OnPrimaryContainer,
+
+    secondary = SecondaryGrey,
+    onSecondary = Color.White,
+    secondaryContainer = NiceBlue,
+    onSecondaryContainer = SecondaryGrey,
+
+    tertiary = TertiaryGold,
+    onTertiary = Color.Black,
+    tertiaryContainer = NiceBlue,
+    onTertiaryContainer = TertiaryGold,
+
+    background = NiceBlue,
+    onBackground = PrimaryDark,
+
+    surface = NiceBlue,
+    onSurface = PrimaryDark,
+    surfaceTint = Color.White,
+
+    error = Color(0xFFB00020),
+    onError = Color.White
+)
+
 
 @Composable
 fun PagerTheme(
