@@ -24,10 +24,12 @@ Pager is an all in one android app for browsing and reviewing books and sharing 
   - The ability to mark reviews as public, just friends, or private
   - The ability to mark any date as the date read
 - View books
-  - The ability to sort diary by date reviewed, rating, title, name of author, and date published.
   - The ability to see book covers in diary
   - The ability to delete reviews
+  - The ability to edit review text, publicity, rating, and spoilers
 ### `Version 1.0.0 "Bookworm"`
+- View books
+    - The ability to sort diary by date reviewed, rating, title, name of author, and date published.
 - Quotes
     - The ability to add quotes for your books
     - The ability to view a carousel of all your books and their quotes
@@ -36,6 +38,10 @@ Pager is an all in one android app for browsing and reviewing books and sharing 
 - UI
     - Fully polished User Interface
     - Full dark mode integration
+- Settings
+    - Will have a settings page
+    - The ability to change theme
+    - The ability to set preferences
 ### `Version 2.0.0 "Book Club"`
 - Online 
   - The ability to share your reviews with friends and the world
