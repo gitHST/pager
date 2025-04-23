@@ -13,11 +13,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material.icons.outlined.StarHalf
@@ -40,15 +44,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.luke.pager.data.entities.BookEntity
+import com.luke.pager.data.entities.Privacy
 import com.luke.pager.data.entities.ReviewEntity
 import com.luke.pager.data.viewmodel.BookViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+// TODO Normalise height
 
 @Composable
 fun DiaryScreen(
@@ -126,7 +133,7 @@ fun DiaryScreen(
 
 @Composable
 fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit) {
-    val trimAmount = 40
+    val trimAmount = 37
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -177,8 +184,14 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
             Column {
                 Text(text = book.title, fontSize = 18.sp)
                 if (!book.authors.isNullOrBlank()) {
-                    Text(text = "By ${book.authors}", fontSize = 14.sp)
+                    Text(
+                        text = "By ${book.authors}",
+                        fontSize = 14.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
+
 
                 val reviewText = review?.reviewText?.takeIf { it.isNotBlank() }
                 val displayText = reviewText?.let {
@@ -187,14 +200,36 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
 
                 val isPlaceholder = reviewText == null
 
-                Text(
-                    text = displayText,
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontStyle = if (isPlaceholder) FontStyle.Italic else FontStyle.Normal
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (review != null) {
+                        val privacyIcon = when (review.privacy) {
+                            Privacy.PUBLIC -> Icons.Filled.Public
+                            Privacy.PRIVATE -> Icons.Filled.Lock
+                            Privacy.FRIENDS -> Icons.Filled.Group
+                        }
+
+                        Icon(
+                            imageVector = privacyIcon,
+                            contentDescription = "Privacy Icon",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(
+                        text = displayText,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontStyle = if (isPlaceholder) FontStyle.Italic else FontStyle.Normal
+                        )
                     )
-                )
+                }
+
 
                 if (review?.rating != null) {
                     val rating = review.rating.toFloat()
@@ -251,5 +286,3 @@ fun getDateWithoutTime(dateString: String?): String {
         "Unknown Date"
     }
 }
-
-

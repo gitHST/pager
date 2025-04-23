@@ -135,7 +135,7 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
             Spacer(Modifier.height(8.dp))
             BookRowUIClickable(book = book, onClick = {})
             Spacer(Modifier.height(16.dp))
-            RatingBar(rating, hasRated, { rating = it }, { hasRated = true })
+            StarRatingBar(rating, hasRated, { rating = it }, { hasRated = true })
             Spacer(Modifier.height(12.dp))
             DatePickerPopup(
                 showDialog = showDatePicker,
@@ -143,7 +143,7 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
                 onDismiss = { showDatePicker = false },
                 onDateSelected = { selectedDate = it }
             )
-            DateAndPrivateGrid(
+            DatePrivacySpoilerGrid(
                 selectedDate,
                 privacy,
                 spoilers,
@@ -161,13 +161,13 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
 }
 
 @Composable
-private fun RatingBar(
+fun StarRatingBar(
     rating: Float,
     hasRated: Boolean,
     onRatingChange: (Float) -> Unit,
-    onUserInteracted: () -> Unit
+    onUserInteracted: () -> Unit,
+    starScale: Float = 1.5f
 ) {
-    val starScale = 1.5f
     val starSize = 24.dp * starScale
     val starRowWidthFraction = 0.7f
 
@@ -300,7 +300,7 @@ private fun DatePickerPopup(
 
 
 @Composable
-private fun DateAndPrivateGrid(
+private fun DatePrivacySpoilerGrid(
     selectedDate: LocalDate,
     privacy: Privacy,
     spoilers: Boolean,

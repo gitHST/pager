@@ -32,4 +32,7 @@ interface ReviewDao {
 
     @Query("SELECT book_id FROM reviews WHERE id = :reviewId")
     suspend fun getBookIdByReviewId(reviewId: Long): Long?
+
+    @Query("UPDATE reviews SET rating = :newRating WHERE id = :reviewId")
+    suspend fun updateReviewRating(reviewId: Long, newRating: Float)
 }

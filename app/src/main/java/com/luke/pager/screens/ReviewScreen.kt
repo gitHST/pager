@@ -31,26 +31,34 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.luke.pager.data.entities.ReviewEntity
+import com.luke.pager.data.viewmodel.ReviewViewModel
+import com.luke.pager.screens.addscreen.StarRatingBar
 
 @Composable
 fun ReviewScreen(
     reviewId: Long,
     reviews: Map<Long, ReviewEntity?>,
-    reviewViewModel: com.luke.pager.data.viewmodel.ReviewViewModel,
+    reviewViewModel: ReviewViewModel,
     onDeleteSuccess: () -> Unit
 ) {
     val review = reviews[reviewId]
@@ -61,11 +69,27 @@ fun ReviewScreen(
         var localReviewText by remember { mutableStateOf(review.reviewText.orEmpty()) }
         var editedText by remember { mutableStateOf(TextFieldValue(localReviewText)) }
         var menuExpanded by remember { mutableStateOf(false) }
+        val focusRequester = remember { FocusRequester() }
+        val keyboardController = LocalSoftwareKeyboardController.current
+        var localRating by remember { mutableFloatStateOf(review.rating?.toFloat() ?: 0f) }
+        var tempDisplayRating by remember { mutableFloatStateOf(review.rating?.toFloat() ?: 0f) }
+
+
+
 
         val textStyle = MaterialTheme.typography.bodyLarge.copy(
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Start
         )
+
+        LaunchedEffect(isEditing) {
+            if (isEditing) {
+                editedText = editedText.copy(selection = TextRange(editedText.text.length))
+                focusRequester.requestFocus()
+                keyboardController?.show()
+            }
+        }
+
 
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
@@ -140,47 +164,59 @@ fun ReviewScreen(
                 // Date
                 review.dateReviewed?.let {
                     val dateOnly = it.split(" ").firstOrNull() ?: it
-                    Text("Reviewed on: $dateOnly", fontSize = 14.sp)
+                    Text("Finished reading on: $dateOnly", fontSize = 14.sp)
                 }
 
                 // Rating Stars
-                if (review.rating != null) {
-                    val rating = review.rating.toFloat()
-                    val starScale = 1.5f
-                    val starSize = 24.dp * starScale
-                    val starRowWidthFraction = 0.7f
-
+                if (isEditing) {
                     Spacer(modifier = Modifier.height(8.dp))
+                    StarRatingBar(
+                        rating = localRating,
+                        hasRated = true,
+                        onRatingChange = { newRating: Float -> localRating = newRating },
+                        onUserInteracted = {},
+                        starScale = 1.0f,
+                    )
+                } else {
+                    if (tempDisplayRating > 0f) {
+                        val rating = tempDisplayRating
+                        val starScale = 1.5f
+                        val starSize = 24.dp * starScale
+                        val starRowWidthFraction = 0.7f
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(starRowWidthFraction)
-                            .height(starSize)
-                    ) {
-                        Row(modifier = Modifier.matchParentSize()) {
-                            for (i in 1..5) {
-                                val icon = when {
-                                    rating >= i -> Icons.Filled.Star
-                                    rating == i - 0.5f -> Icons.Outlined.StarHalf
-                                    else -> Icons.Outlined.StarBorder
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .fillMaxHeight(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        icon,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.tertiary,
-                                        modifier = Modifier.height(starSize)
-                                    )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(starRowWidthFraction)
+                                .height(starSize)
+                        ) {
+                            Row(modifier = Modifier.matchParentSize()) {
+                                for (i in 1..5) {
+                                    val icon = when {
+                                        rating >= i -> Icons.Filled.Star
+                                        rating == i - 0.5f -> Icons.Outlined.StarHalf
+                                        else -> Icons.Outlined.StarBorder
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .fillMaxHeight(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            icon,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.tertiary,
+                                            modifier = Modifier.height(starSize)
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                 }
+
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -195,9 +231,12 @@ fun ReviewScreen(
                             value = editedText,
                             onValueChange = { editedText = it },
                             textStyle = textStyle,
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(focusRequester),
                             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
                         )
+
                     }
                 } else {
                     Box(modifier = sharedModifier) {
@@ -222,7 +261,9 @@ fun ReviewScreen(
                 ) {
                     Button(onClick = {
                         reviewViewModel.updateReviewText(reviewId, editedText.text)
+                        reviewViewModel.updateReviewRating(reviewId, localRating)
                         localReviewText = editedText.text
+                        tempDisplayRating = localRating
                         isEditing = false
                     }) {
                         Text("Save")
