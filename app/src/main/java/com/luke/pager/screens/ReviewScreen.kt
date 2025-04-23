@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -53,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import com.luke.pager.data.entities.ReviewEntity
 import com.luke.pager.data.viewmodel.ReviewViewModel
 import com.luke.pager.screens.addscreen.PrivacyToggle
+import com.luke.pager.screens.addscreen.SpoilerToggle
 import com.luke.pager.screens.addscreen.StarRatingBar
 
 @Composable
@@ -75,6 +77,8 @@ fun ReviewScreen(
         var localRating by remember { mutableFloatStateOf(review.rating?.toFloat() ?: 0f) }
         var tempDisplayRating by remember { mutableFloatStateOf(review.rating?.toFloat() ?: 0f) }
         var localPrivacy by remember { mutableStateOf(review.privacy) }
+        var localSpoilers by remember { mutableStateOf(review.hasSpoilers) }
+        var currentSpoilerIconIndex by remember { mutableIntStateOf(0) }
         val textStyle = MaterialTheme.typography.bodyLarge.copy(
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Start
@@ -157,12 +161,6 @@ fun ReviewScreen(
                     }
                 }
 
-                if (!isEditing) {
-                    Spacer(modifier = Modifier.height(32.dp))
-                } else {
-                    PrivacyToggle(privacy = localPrivacy, onLockToggle = { localPrivacy = it })
-                }
-
                 // Date
                 review.dateReviewed?.let {
                     val dateOnly = it.split(" ").firstOrNull() ?: it
@@ -221,8 +219,29 @@ fun ReviewScreen(
                     }
                 }
 
+                if (isEditing) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(75.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                            PrivacyToggle(privacy = localPrivacy, onLockToggle = { localPrivacy = it })
+                        }
+                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                            SpoilerToggle(
+                                spoilers = localSpoilers,
+                                currentSpoilerIconIndex = currentSpoilerIconIndex,
+                                onSpoilerToggle = { newSpoilers, newIconIndex ->
+                                    localSpoilers = newSpoilers
+                                    currentSpoilerIconIndex = newIconIndex
+                                }
+                            )
+                        }
+                    }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                }
 
                 // Review Text / Edit
                 val sharedModifier = Modifier

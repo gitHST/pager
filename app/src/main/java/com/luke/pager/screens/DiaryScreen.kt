@@ -49,7 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.luke.pager.data.entities.BookEntity
-import com.luke.pager.data.entities.Privacy
 import com.luke.pager.data.entities.ReviewEntity
 import com.luke.pager.data.viewmodel.BookViewModel
 import java.text.SimpleDateFormat

@@ -1,5 +1,6 @@
 package com.luke.pager.data.entities
 
+import Privacy
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
@@ -49,10 +50,3 @@ data class ReviewEntity(
     @ColumnInfo(name = "has_spoilers")
     val hasSpoilers: Boolean = false
 )
-
-
-enum class Privacy {
-    PUBLIC,
-    PRIVATE,
-    FRIENDS
-}

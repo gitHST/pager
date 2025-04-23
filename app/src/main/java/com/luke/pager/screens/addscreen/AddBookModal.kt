@@ -1,5 +1,6 @@
 package com.luke.pager.screens.addscreen
 
+import Privacy
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
@@ -55,7 +56,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.luke.pager.R
-import com.luke.pager.data.entities.Privacy
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.network.OpenLibraryBook
 import kotlinx.coroutines.delay

@@ -1,11 +1,11 @@
 package com.luke.pager.data.dao
 
+import Privacy
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.luke.pager.data.entities.Privacy
 import com.luke.pager.data.entities.ReviewEntity
 
 @Dao
