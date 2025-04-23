@@ -1,5 +1,6 @@
 package com.luke.pager.screens
 
+import Privacy
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -19,12 +20,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.StarHalf
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
-import androidx.compose.material.icons.outlined.StarHalf
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -238,7 +239,7 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
                         for (i in 1..5) {
                             val icon = when {
                                 rating >= i -> Icons.Filled.Star
-                                rating == i - 0.5f -> Icons.Outlined.StarHalf
+                                rating == i - 0.5f -> Icons.AutoMirrored.Outlined.StarHalf
                                 else -> Icons.Outlined.StarBorder
                             }
                             Box(
