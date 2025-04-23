@@ -34,7 +34,7 @@ class BookViewModel(private val bookRepository: BookRepository, private val revi
                     val url = URL("https://covers.openlibrary.org/b/id/$it-M.jpg")
                     url.readBytes()
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
         }
