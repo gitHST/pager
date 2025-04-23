@@ -7,6 +7,7 @@ Use this checklist before releasing a version of the app on GitHub.
 ## 📦 Code & Project
 
 - [ ] Code compiles with no errors or warnings
+- [ ] Removed unused screens from nav bar and nav host
 - [ ] All lint and static analysis issues resolved
 - [ ] Logs removed or wrapped with debug flags
 - [ ] No hardcoded strings (use `strings.xml`)
@@ -15,7 +16,6 @@ Use this checklist before releasing a version of the app on GitHub.
 - [ ] Database migrations implemented and tested (Room)
 - [ ] Unused resources/imports removed
 - [ ] Proguard/R8 rules configured
-- [ ] Jetpack Compose previews build (if used)
 
 ---
 
@@ -40,6 +40,14 @@ Use this checklist before releasing a version of the app on GitHub.
 ## 🚀 Build & Release
 
 - [ ] Signed release APK/AAB generated
+  - Build > Generate Signed Bundle / APK. 
+  - Select APK > Next. 
+  - Choose your keystore file, key alias, and passwords. 
+  - Select release as the build variant. 
+  - Check the box V2 (Full APK Signature). 
+  - Click Finish. 
+  - The signed APK will be in: 
+  - app/release
 - [ ] Proguard mapping file saved
 - [ ] Changelog written for this version
 - [ ] Release tag created (e.g. `v1.0.0`)

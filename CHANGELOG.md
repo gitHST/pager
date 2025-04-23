@@ -20,3 +20,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+## [0.1.0] - 2025-04-23
+### Added
+- OpenLibrary API integration for book search.
+- Book cover image loading
+- Book Rating and reviewing system
+- Edit and delete functionality to reviews
+
+### Fixed
+- Minor UI theme issues
+
+### Changed
+- New "Add book" page layout and functionality
