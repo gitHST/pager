@@ -38,6 +38,10 @@ Pager is an all in one android app for browsing and reviewing books and sharing 
 - UI
     - Fully polished User Interface
     - Full dark mode integration
+- Settings
+    - Will have a settings page
+    - The ability to change theme
+    - The ability to set preferences
 ### `Version 2.0.0 "Book Club"`
 - Online 
   - The ability to share your reviews with friends and the world
