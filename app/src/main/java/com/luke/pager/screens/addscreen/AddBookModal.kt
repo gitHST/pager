@@ -92,46 +92,19 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
                 .verticalScroll(scrollState)
                 .animateContentSize()
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp, horizontal = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    "Go back",
-                    modifier = Modifier.clickable(onClick = onBack),
-                    color = MaterialTheme.colorScheme.primary
-                )
+            SubmitReviewHeader(
+                onBack = onBack,
+                book = book,
+                selectedDate = selectedDate,
+                rating = rating,
+                hasRated = hasRated,
+                reviewText = reviewText,
+                privacy = privacy,
+                spoilers = spoilers,
+                bookViewModel = bookViewModel,
+                navController = navController
+            )
 
-                Text(
-                    "Submit review",
-                    modifier = Modifier.clickable
-                    {
-                        val now = LocalDate.now()
-
-                        val finalDateTime = if (selectedDate != now) {
-                            selectedDate.atStartOfDay()
-                        } else {
-                            selectedDate.atTime(LocalTime.now())
-                        }
-
-                        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-                        val dateReviewed = formatter.format(Date.from(finalDateTime.atZone(ZoneId.systemDefault()).toInstant()))
-
-                        val ratingToSubmit: Float? = if (hasRated) rating else null
-
-                        bookViewModel.submitReview(book, ratingToSubmit, reviewText, dateReviewed, privacy, spoilers)
-
-                        navController.navigate("diary") {
-                            popUpTo("review_screen") { inclusive = true }
-                            launchSingleTop = true
-                        }
-
-                    },
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
             Spacer(Modifier.height(8.dp))
             BookRowUIClickable(book = book, onClick = {})
             Spacer(Modifier.height(16.dp))
@@ -143,7 +116,7 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
                 onDismiss = { showDatePicker = false },
                 onDateSelected = { selectedDate = it }
             )
-            DatePrivacySpoilerGrid(
+            PrivacyDateSpoilersRow(
                 selectedDate,
                 privacy,
                 spoilers,
@@ -300,7 +273,7 @@ private fun DatePickerPopup(
 
 
 @Composable
-private fun DatePrivacySpoilerGrid(
+private fun PrivacyDateSpoilersRow(
     selectedDate: LocalDate,
     privacy: Privacy,
     spoilers: Boolean,
@@ -308,18 +281,157 @@ private fun DatePrivacySpoilerGrid(
     onLockToggle: (Privacy) -> Unit,
     onSpoilerToggle: (Boolean) -> Unit
 ) {
-    val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
+    var currentSpoilerIconIndex by remember { mutableIntStateOf(0) }
 
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(75.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        PrivacyToggle(privacy, onLockToggle)
+
+        DatePickerDisplay(selectedDate, onDateClick)
+
+        SpoilerToggle(spoilers, currentSpoilerIconIndex) { newSpoilers, newIconIndex ->
+            onSpoilerToggle(newSpoilers)
+            currentSpoilerIconIndex = newIconIndex
+        }
+    }
+}
+
+@Composable
+fun SubmitReviewHeader(
+    onBack: () -> Unit,
+    book: OpenLibraryBook,
+    selectedDate: LocalDate,
+    rating: Float,
+    hasRated: Boolean,
+    reviewText: String,
+    privacy: Privacy,
+    spoilers: Boolean,
+    bookViewModel: BookViewModel,
+    navController: NavHostController
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp, horizontal = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            "Go back",
+            modifier = Modifier.clickable(onClick = onBack),
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        Text(
+            "Submit review",
+            modifier = Modifier.clickable {
+                val now = LocalDate.now()
+                val finalDateTime = if (selectedDate != now) {
+                    selectedDate.atStartOfDay()
+                } else {
+                    selectedDate.atTime(LocalTime.now())
+                }
+
+                val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                val dateReviewed = formatter.format(Date.from(finalDateTime.atZone(ZoneId.systemDefault()).toInstant()))
+
+                val ratingToSubmit: Float? = if (hasRated) rating else null
+
+                bookViewModel.submitReview(book, ratingToSubmit, reviewText, dateReviewed, privacy, spoilers)
+
+                navController.navigate("diary") {
+                    popUpTo("review_screen") { inclusive = true }
+                    launchSingleTop = true
+                }
+            },
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
+}
+
+
+
+@Composable
+fun PrivacyToggle(
+    privacy: Privacy,
+    onLockToggle: (Privacy) -> Unit
+) {
     val privacyIcons = listOf(Icons.Filled.Public, Icons.Filled.Lock, Icons.Filled.Group)
     val privacyLabels = listOf("Public", "Private", "Friends Only")
     val currentPrivacyIcon = privacyIcons[privacy.ordinal]
     val currentPrivacyLabel = privacyLabels[privacy.ordinal]
 
     var privacyShowLabel by remember { mutableStateOf(false) }
-    var spoilerLabelState by remember { mutableStateOf(if (spoilers) "Spoilers" else "No spoilers") }
-    var spoilerShowLabel by remember { mutableStateOf(false) }
     var firstCompositionDone by remember { mutableStateOf(false) }
 
+    LaunchedEffect(privacy) {
+        if (firstCompositionDone) {
+            privacyShowLabel = true
+            delay(500)
+            privacyShowLabel = false
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        firstCompositionDone = true
+    }
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        IconButton(onClick = {
+            val nextOrdinal = (privacy.ordinal + 1) % Privacy.entries.size
+            val newPrivacy = Privacy.entries[nextOrdinal]
+            onLockToggle(newPrivacy)
+        }) {
+            Icon(
+                imageVector = currentPrivacyIcon,
+                contentDescription = currentPrivacyLabel,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        AnimatedVisibility(visible = privacyShowLabel) {
+            Text(
+                text = currentPrivacyLabel,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+fun DatePickerDisplay(
+    selectedDate: LocalDate,
+    onDateClick: () -> Unit
+) {
+    val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = "Read on...",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = selectedDate.format(formatter),
+            modifier = Modifier
+                .clickable { onDateClick() }
+                .padding(6.dp),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
+}
+
+@Composable
+fun SpoilerToggle(
+    spoilers: Boolean,
+    currentSpoilerIconIndex: Int,
+    onSpoilerToggle: (Boolean, Int) -> Unit
+) {
     val spoilerIcons = listOf(
         R.drawable.ic_sentiment_very_dissatisfied,
         R.drawable.ic_sentiment_dissatisfied,
@@ -330,17 +442,10 @@ private fun DatePrivacySpoilerGrid(
         R.drawable.ic_sentiment_worried,
         R.drawable.ic_mood_bad
     )
-
-    var currentSpoilerIconIndex by remember { mutableIntStateOf(0) }
     val currentSpoilerIconRes = spoilerIcons[currentSpoilerIconIndex]
-
-    LaunchedEffect(privacy) {
-        if (firstCompositionDone) {
-            privacyShowLabel = true
-            delay(500)
-            privacyShowLabel = false
-        }
-    }
+    var spoilerLabelState by remember { mutableStateOf(if (spoilers) "Spoilers" else "No spoilers") }
+    var spoilerShowLabel by remember { mutableStateOf(false) }
+    var firstCompositionDone by remember { mutableStateOf(false) }
 
     LaunchedEffect(spoilerLabelState) {
         if (firstCompositionDone) {
@@ -354,102 +459,36 @@ private fun DatePrivacySpoilerGrid(
         firstCompositionDone = true
     }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(75.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-
-        // Privacy Column
-        Column(
-            modifier = Modifier.weight(1f),
-            horizontalAlignment = Alignment.CenterHorizontally
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        IconButton(
+            onClick = {
+                val newSpoilers = !spoilers
+                val newIconIndex = (currentSpoilerIconIndex + 1) % spoilerIcons.size
+                onSpoilerToggle(newSpoilers, newIconIndex)
+                spoilerLabelState = if (newSpoilers) "Spoilers" else "No spoilers"
+            }
         ) {
-            IconButton(
-                onClick = {
-                    val nextOrdinal = (privacy.ordinal + 1) % Privacy.entries.size
-                    val newPrivacy = Privacy.entries[nextOrdinal]
-                    onLockToggle(newPrivacy)
-                },
-                modifier = Modifier.padding(4.dp)
-            ) {
+            if (spoilers) {
                 Icon(
-                    imageVector = currentPrivacyIcon,
-                    contentDescription = currentPrivacyLabel,
+                    painter = painterResource(id = currentSpoilerIconRes),
+                    contentDescription = "Spoilers On",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Filled.SentimentSatisfiedAlt,
+                    contentDescription = "Spoilers Off",
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
-
-            AnimatedVisibility(visible = privacyShowLabel) {
-                Text(
-                    text = currentPrivacyLabel,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
         }
 
-        // Date Column
-        Column(
-            modifier = Modifier.weight(1f),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        AnimatedVisibility(visible = spoilerShowLabel) {
             Text(
-                text = "Read on...",
+                text = spoilerLabelState,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Text(
-                text = selectedDate.format(formatter),
-                modifier = Modifier
-                    .clickable { onDateClick() }
-                    .padding(6.dp),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-
-        // Spoiler Column
-        Column(
-            modifier = Modifier.weight(1f),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            IconButton(
-                onClick = {
-                    val newSpoilers = !spoilers
-                    onSpoilerToggle(newSpoilers)
-                    spoilerLabelState = if (newSpoilers) "Spoilers" else "No spoilers"
-
-                    if (newSpoilers) {
-                        currentSpoilerIconIndex = (currentSpoilerIconIndex + 1) % spoilerIcons.size
-                    }
-                },
-                modifier = Modifier.padding(4.dp)
-            ) {
-                if (spoilers) {
-                    Icon(
-                        painter = painterResource(id = currentSpoilerIconRes),
-                        contentDescription = "Spoilers On",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Filled.SentimentSatisfiedAlt,
-                        contentDescription = "Spoilers Off",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
-            AnimatedVisibility(visible = spoilerShowLabel) {
-                Text(
-                    text = spoilerLabelState,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
         }
     }
 }

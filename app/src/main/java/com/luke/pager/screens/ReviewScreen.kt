@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.luke.pager.data.entities.ReviewEntity
 import com.luke.pager.data.viewmodel.ReviewViewModel
+import com.luke.pager.screens.addscreen.PrivacyToggle
 import com.luke.pager.screens.addscreen.StarRatingBar
 
 @Composable
@@ -73,10 +74,7 @@ fun ReviewScreen(
         val keyboardController = LocalSoftwareKeyboardController.current
         var localRating by remember { mutableFloatStateOf(review.rating?.toFloat() ?: 0f) }
         var tempDisplayRating by remember { mutableFloatStateOf(review.rating?.toFloat() ?: 0f) }
-
-
-
-
+        var localPrivacy by remember { mutableStateOf(review.privacy) }
         val textStyle = MaterialTheme.typography.bodyLarge.copy(
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Start
@@ -159,7 +157,11 @@ fun ReviewScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                if (!isEditing) {
+                    Spacer(modifier = Modifier.height(32.dp))
+                } else {
+                    PrivacyToggle(privacy = localPrivacy, onLockToggle = { localPrivacy = it })
+                }
 
                 // Date
                 review.dateReviewed?.let {
@@ -177,6 +179,8 @@ fun ReviewScreen(
                         onUserInteracted = {},
                         starScale = 1.0f,
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+
                 } else {
                     if (tempDisplayRating > 0f) {
                         val rating = tempDisplayRating
@@ -262,6 +266,7 @@ fun ReviewScreen(
                     Button(onClick = {
                         reviewViewModel.updateReviewText(reviewId, editedText.text)
                         reviewViewModel.updateReviewRating(reviewId, localRating)
+                        reviewViewModel.updateReviewPrivacy(reviewId, localPrivacy)
                         localReviewText = editedText.text
                         tempDisplayRating = localRating
                         isEditing = false

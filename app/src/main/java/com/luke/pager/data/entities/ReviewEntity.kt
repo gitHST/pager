@@ -53,6 +53,6 @@ data class ReviewEntity(
 
 enum class Privacy {
     PUBLIC,
-    FRIENDS,
-    PRIVATE
+    PRIVATE,
+    FRIENDS
 }
