@@ -2,6 +2,7 @@ package com.luke.pager.data.repo
 
 import com.luke.pager.data.dao.BookDao
 import com.luke.pager.data.dao.ReviewDao
+import com.luke.pager.data.entities.Privacy
 import com.luke.pager.data.entities.ReviewEntity
 
 class ReviewRepository(private val reviewDao: ReviewDao, private val bookDao: BookDao) {
@@ -19,5 +20,8 @@ class ReviewRepository(private val reviewDao: ReviewDao, private val bookDao: Bo
     }
     suspend fun updateReviewRating(reviewId: Long, newRating: Float) {
         reviewDao.updateReviewRating(reviewId, newRating)
+    }
+    suspend fun updateReviewPrivacy(reviewId: Long, privacy: Privacy) {
+        reviewDao.updateReviewPrivacy(reviewId, privacy)
     }
 }

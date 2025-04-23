@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.luke.pager.data.entities.Privacy
 import com.luke.pager.data.entities.ReviewEntity
 
 @Dao
@@ -35,4 +36,7 @@ interface ReviewDao {
 
     @Query("UPDATE reviews SET rating = :newRating WHERE id = :reviewId")
     suspend fun updateReviewRating(reviewId: Long, newRating: Float)
+
+    @Query("UPDATE reviews SET privacy = :newPrivacy WHERE id = :reviewId")
+    suspend fun updateReviewPrivacy(reviewId: Long, newPrivacy: Privacy)
 }
