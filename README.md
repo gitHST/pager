@@ -27,6 +27,25 @@ Pager is an all in one android app for browsing and reviewing books and sharing 
   - The ability to see book covers in diary
   - The ability to delete reviews
   - The ability to edit review text, publicity, rating, and spoilers
+### `Version 0.2.1 "Housekeeping"`
+- Development
+  - Code style
+    - Integrate ktlint
+    - Configure auto formatting with gradle task
+  - Code coverage
+    - Set up JaCoCo for unit test coverage
+  - Testing
+    - Implement JUnit 5 for unit testing
+    - Use MockK for mocking dependencies
+    - Add basic test coverage
+  - Structure & Code Quality
+    - Modularize code
+    - Refactor and clean up code
+  - CI/CD
+    - Set up Github Actions to automate:
+      - Lint checks
+      - Unit tests
+      - Coverage Reporting
 ### `Version 1.0.0 "Bookworm"`
 - View books
     - The ability to sort diary by date reviewed, rating, title, name of author, and date published.
