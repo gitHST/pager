@@ -1,9 +1,9 @@
 package com.luke.pager.data.viewmodel
 
+import Privacy
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.luke.pager.data.entities.BookEntity
-import com.luke.pager.data.entities.Privacy
 import com.luke.pager.data.entities.ReviewEntity
 import com.luke.pager.data.repo.BookRepository
 import com.luke.pager.data.repo.ReviewRepository

@@ -1,8 +1,8 @@
 package com.luke.pager.data.repo
 
+import Privacy
 import com.luke.pager.data.dao.BookDao
 import com.luke.pager.data.dao.ReviewDao
-import com.luke.pager.data.entities.Privacy
 import com.luke.pager.data.entities.ReviewEntity
 
 class ReviewRepository(private val reviewDao: ReviewDao, private val bookDao: BookDao) {
