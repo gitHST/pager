@@ -19,4 +19,10 @@ class ReviewViewModel(private val reviewRepository: ReviewRepository) : ViewMode
         }
     }
 
+    fun updateReviewRating(reviewId: Long, newRating: Float) {
+        viewModelScope.launch {
+            reviewRepository.updateReviewRating(reviewId, newRating)
+        }
+    }
+
 }

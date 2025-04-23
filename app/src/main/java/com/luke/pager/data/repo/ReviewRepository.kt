@@ -17,4 +17,7 @@ class ReviewRepository(private val reviewDao: ReviewDao, private val bookDao: Bo
     suspend fun updateReviewText(reviewId: Long, newText: String) {
         reviewDao.updateReviewText(reviewId, newText)
     }
+    suspend fun updateReviewRating(reviewId: Long, newRating: Float) {
+        reviewDao.updateReviewRating(reviewId, newRating)
+    }
 }
