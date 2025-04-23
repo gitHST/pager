@@ -25,11 +25,11 @@ fun PagerNavHost(
     reviewViewModel: ReviewViewModel,
 ) {
     val navItems = listOf(
-        NavItem("activity", "Activity"),
+        // NavItem("activity", "Activity"),
         NavItem("diary", "Diary"),
         NavItem("plus", "+"),
-        NavItem("search", "Search"),
-        NavItem("quotes", "Quotes")
+        // NavItem("search", "Search"),
+        // NavItem("quotes", "Quotes")
     )
 
     val currentRoute by navController.currentBackStackEntryAsState()
