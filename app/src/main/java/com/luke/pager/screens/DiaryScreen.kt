@@ -176,7 +176,6 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
                         contentScale = ContentScale.Crop
                     )
                 } else {
-                    // Optional: Placeholder when no image exists
                     Box(modifier = Modifier.fillMaxSize()) {
                         Text("No cover", fontSize = 10.sp)
                     }

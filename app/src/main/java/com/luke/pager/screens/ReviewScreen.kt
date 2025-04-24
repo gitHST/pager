@@ -53,9 +53,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.luke.pager.data.entities.ReviewEntity
 import com.luke.pager.data.viewmodel.ReviewViewModel
-import com.luke.pager.screens.addscreen.PrivacyToggle
-import com.luke.pager.screens.addscreen.SpoilerToggle
-import com.luke.pager.screens.addscreen.StarRatingBar
+import com.luke.pager.screens.addscreen.addcomponents.StarRatingBar
+import com.luke.pager.screens.addscreen.addcomponents.SpoilerToggle
+import com.luke.pager.screens.addscreen.addcomponents.PrivacyToggle
 
 @Composable
 fun ReviewScreen(
