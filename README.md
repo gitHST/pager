@@ -46,7 +46,7 @@ Pager is an all in one android app for browsing and reviewing books and sharing 
 
     <img src="img/0.2.0/edit.png" alt="img_7.png" width="200"/>
   
-### `Version 0.2.1 "Housekeeping"`
+### `Version 0.3.0 "Housekeeping"`
 - Development
   - Code style
     - Integrate ktlint
