@@ -222,12 +222,15 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
 
                     Text(
                         text = displayText,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.bodyLarge.copy(
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurface,
                             fontStyle = if (isPlaceholder) FontStyle.Italic else FontStyle.Normal
                         )
                     )
+
                 }
 
 
