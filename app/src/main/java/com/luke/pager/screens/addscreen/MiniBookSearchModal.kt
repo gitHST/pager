@@ -46,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.luke.pager.data.viewmodel.BookViewModel
@@ -74,6 +75,8 @@ fun SearchAndResultsModal(
     var isLoading by remember { mutableStateOf(false) }
     var selectedBook by remember { mutableStateOf<OpenLibraryBook?>(null) }
     var containerHeight by remember { mutableIntStateOf(0) }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    var cursorVisible by remember { mutableStateOf(true) }
 
     LaunchedEffect(searchQuery) {
         searchJob?.cancel()
@@ -83,7 +86,6 @@ fun SearchAndResultsModal(
             isLoading = false
             return@LaunchedEffect
         }
-
 
         val currentQuery = searchQuery
 
@@ -165,9 +167,17 @@ fun SearchAndResultsModal(
                             SearchBar(
                                 query = searchQuery,
                                 onQueryChange = { searchQuery = it },
-                                onSearch = {},
+                                onSearch = {
+                                    keyboardController?.hide() // Hides the keyboard
+                                    cursorVisible = false
+                                },
                                 active = active,
-                                onActiveChange = { active = it },
+                                onActiveChange = { isActive ->
+                                    active = isActive
+                                    if (isActive) {
+                                        cursorVisible = true
+                                    }
+                                },
                                 placeholder = { Text("Search books...") },
                                 modifier = Modifier
                                     .fillMaxWidth()
