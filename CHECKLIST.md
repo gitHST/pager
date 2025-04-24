@@ -59,7 +59,7 @@ Use this checklist before releasing a version of the app on GitHub.
 
 - [ ] `README.md` includes:
     - [ ] Project description
-    - [ ] Updated version badge
+    - [ ] Updated version badge (Don't forget pls!)
     - [ ] Screenshots or demo GIFs
     - [ ] Build/setup instructions
     - [ ] Tech stack/libraries
