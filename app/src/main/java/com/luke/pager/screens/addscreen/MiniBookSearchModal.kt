@@ -139,8 +139,8 @@ fun SearchAndResultsModal(
                         .fillMaxHeight(0.9f)
                         .wrapContentHeight()
                         .align(Alignment.Center)
-                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(28.dp))
-                        .padding(horizontal = 12.dp, vertical = 0.dp)
+                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
+                        .padding(horizontal = 24.dp, vertical = 0.dp)
                 ) {
                     AnimatedContent(
                         targetState = selectedBook,
@@ -156,6 +156,7 @@ fun SearchAndResultsModal(
                                 navController = navController
                             )
                         } else {
+                            @Suppress("DEPRECATION")
                             SearchBar(
                                 query = searchQuery,
                                 onQueryChange = { searchQuery = it },

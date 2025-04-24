@@ -90,7 +90,6 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
     var reviewText by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var showDatePicker by remember { mutableStateOf(false) }
-
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
     )
@@ -115,47 +114,38 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
                 .padding(vertical = 16.dp, horizontal = 8.dp)
         )
 
-
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.background)
+                .verticalScroll(scrollState)
+                .animateContentSize()
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .animateContentSize()
-            ) {
-                Spacer(Modifier.height(48.dp))
-                BookRowUIClickable(book = book, onClick = {})
-                Spacer(Modifier.height(16.dp))
-                StarRatingBar(rating, hasRated, { rating = it }, { hasRated = true })
-                Spacer(Modifier.height(12.dp))
-                DatePickerPopup(
-                    showDialog = showDatePicker,
-                    datePickerState = datePickerState,
-                    onDismiss = { showDatePicker = false },
-                    onDateSelected = { selectedDate = it }
-                )
-                PrivacyDateSpoilersRow(
-                    selectedDate,
-                    privacy,
-                    spoilers,
-                    onDateClick = { showDatePicker = true },
-                    onLockToggle = { privacy = it },
-                    onSpoilerToggle = { spoilers = it }
-                )
-                Spacer(Modifier.height(12.dp))
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    ReviewTextField(reviewText, { reviewText = it }, scrollState)
-                }
-                Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(48.dp))
+            BookRowUIClickable(book = book, onClick = {})
+            Spacer(Modifier.height(16.dp))
+            StarRatingBar(rating, hasRated, { rating = it }, { hasRated = true })
+            Spacer(Modifier.height(12.dp))
+            DatePickerPopup(
+                showDialog = showDatePicker,
+                datePickerState = datePickerState,
+                onDismiss = { showDatePicker = false },
+                onDateSelected = { selectedDate = it }
+            )
+            PrivacyDateSpoilersRow(
+                selectedDate,
+                privacy,
+                spoilers,
+                onDateClick = { showDatePicker = true },
+                onLockToggle = { privacy = it },
+                onSpoilerToggle = { spoilers = it }
+            )
+            Spacer(Modifier.height(12.dp))
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                ReviewTextField(reviewText, { reviewText = it }, scrollState)
             }
+            Spacer(Modifier.height(8.dp))
         }
     }
-
 }
 
 @Composable
@@ -250,7 +240,7 @@ private fun ReviewTextField(
             }
         },
         modifier = Modifier
-            .fillMaxWidth(0.9f)
+            .fillMaxWidth()
             .heightIn(min = 180.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(MaterialTheme.colorScheme.surface)
