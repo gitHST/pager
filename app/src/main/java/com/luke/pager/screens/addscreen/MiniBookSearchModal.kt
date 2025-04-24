@@ -184,7 +184,7 @@ fun SearchAndResultsModal(
                                     .offset(y = (-4).dp),
                                 windowInsets = WindowInsets(0.dp),
                                 colors = SearchBarDefaults.colors(
-                                    containerColor = if (active) Color.Transparent else MaterialTheme.colorScheme.surface,
+                                    containerColor = Color.Transparent,
                                     dividerColor = Color.Transparent
                                 )
                             ) {
