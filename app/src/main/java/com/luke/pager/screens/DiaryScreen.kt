@@ -165,7 +165,7 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
                 }
 
                 if (loading && book.cover != null) {
-                    CircularProgressIndicator(modifier = Modifier.width(24.dp).height(24.dp))
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
                 } else if (imageBitmap != null) {
                     Image(
                         bitmap = imageBitmap!!,
@@ -175,7 +175,11 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
                             .clip(RoundedCornerShape(12.dp)),
                         contentScale = ContentScale.Crop
                     )
-
+                } else {
+                    // Optional: Placeholder when no image exists
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        Text("No cover", fontSize = 10.sp)
+                    }
                 }
             }
 

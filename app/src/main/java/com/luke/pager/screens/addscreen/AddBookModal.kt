@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.SentimentSatisfiedAlt
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePickerState
@@ -386,6 +388,8 @@ fun SubmitReviewHeader(
         targetValue = targetBorderColor,
         animationSpec = tween(durationMillis = 300) // change duration here (300ms example)
     )
+    var isSubmitting by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
 
     Row(
@@ -412,7 +416,9 @@ fun SubmitReviewHeader(
                 .clip(RoundedCornerShape(16.dp))
                 .background(MaterialTheme.colorScheme.surface)
                 .border(1.dp, animatedBorderColor, RoundedCornerShape(16.dp))
-                .clickable {
+                .clickable(enabled = !isSubmitting) {
+                    isSubmitting = true
+
                     val now = LocalDate.now()
                     val finalDateTime = if (selectedDate != now) {
                         selectedDate.atStartOfDay()
@@ -422,23 +428,36 @@ fun SubmitReviewHeader(
 
                     val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
                     val dateReviewed = formatter.format(Date.from(finalDateTime.atZone(ZoneId.systemDefault()).toInstant()))
-
                     val ratingToSubmit: Float? = if (hasRated) rating else null
 
-                    bookViewModel.submitReview(book, ratingToSubmit, reviewText, dateReviewed, privacy, spoilers)
-
-                    navController.navigate("diary") {
-                        popUpTo("review_screen") { inclusive = true }
-                        launchSingleTop = true
+                    coroutineScope.launch {
+                        bookViewModel.submitReview(book, ratingToSubmit, reviewText, dateReviewed, privacy, spoilers) {
+                            navController.navigate("diary") {
+                                popUpTo("review_screen") { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        }
                     }
                 }
                 .padding(horizontal = 6.dp, vertical = 6.dp)
         ) {
-            Text(
-                text = " Submit review ",
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.bodyMedium
-            )
+            if (isSubmitting) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Submitting...", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyMedium)
+                }
+            } else {
+                Text(
+                    text = " Submit review ",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
 }
