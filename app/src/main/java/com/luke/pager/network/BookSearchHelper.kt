@@ -27,7 +27,7 @@ suspend fun searchBooksSmart(rawQuery: String): SearchResult {
         } else {
             SearchResult(emptyList(), "An unexpected HTTP error occurred.")
         }
-    } catch (e: IOException) {
+    } catch (_: IOException) {
         return SearchResult(emptyList(), "Network error. Please check your connection.")
     } catch (e: Exception) {
         return SearchResult(emptyList(), "Unknown error: ${e.localizedMessage ?: "No message"}")
