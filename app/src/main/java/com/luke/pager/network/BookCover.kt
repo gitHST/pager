@@ -2,6 +2,7 @@ package com.luke.pager.network
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -41,7 +42,6 @@ fun BookCover(coverId: Int?, modifier: Modifier = Modifier) {
 
     val maxWidth = 80.dp
     val maxHeight = 120.dp
-    val actualHeight = maxWidth / aspectRatio
 
     Box(
         modifier = modifier
@@ -50,9 +50,9 @@ fun BookCover(coverId: Int?, modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center
     ) {
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .width(maxWidth)
-                .height(actualHeight.coerceAtMost(maxHeight))
+                .aspectRatio(aspectRatio)
                 .clip(RoundedCornerShape(14.dp))
         ) {
             Image(
@@ -62,6 +62,8 @@ fun BookCover(coverId: Int?, modifier: Modifier = Modifier) {
                 modifier = Modifier.matchParentSize()
             )
         }
+
+
 
         when (painterState) {
             is AsyncImagePainter.State.Loading -> {
