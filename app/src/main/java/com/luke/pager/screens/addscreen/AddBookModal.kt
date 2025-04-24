@@ -2,7 +2,9 @@ package com.luke.pager.screens.addscreen
 
 import Privacy
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -95,8 +97,6 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
 
     Box(modifier = Modifier.fillMaxSize()) {
         val scrollState = rememberScrollState()
-
-        // Absolute positioned header
         SubmitReviewHeader(
             onBack = onBack,
             book = book,
@@ -108,44 +108,51 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
             spoilers = spoilers,
             bookViewModel = bookViewModel,
             navController = navController,
+            scrollState = scrollState, // pass scrollState
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .fillMaxWidth()
                 .padding(vertical = 16.dp, horizontal = 8.dp)
         )
 
-        // Scrollable content
-        Column(
+
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(top = 48.dp) // Spacer height for header
-                .animateContentSize()
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.background)
         ) {
-            Spacer(Modifier.height(8.dp))
-            BookRowUIClickable(book = book, onClick = {})
-            Spacer(Modifier.height(16.dp))
-            StarRatingBar(rating, hasRated, { rating = it }, { hasRated = true })
-            Spacer(Modifier.height(12.dp))
-            DatePickerPopup(
-                showDialog = showDatePicker,
-                datePickerState = datePickerState,
-                onDismiss = { showDatePicker = false },
-                onDateSelected = { selectedDate = it }
-            )
-            PrivacyDateSpoilersRow(
-                selectedDate,
-                privacy,
-                spoilers,
-                onDateClick = { showDatePicker = true },
-                onLockToggle = { privacy = it },
-                onSpoilerToggle = { spoilers = it }
-            )
-            Spacer(Modifier.height(12.dp))
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                ReviewTextField(reviewText, { reviewText = it }, scrollState)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .animateContentSize()
+            ) {
+                Spacer(Modifier.height(48.dp))
+                BookRowUIClickable(book = book, onClick = {})
+                Spacer(Modifier.height(16.dp))
+                StarRatingBar(rating, hasRated, { rating = it }, { hasRated = true })
+                Spacer(Modifier.height(12.dp))
+                DatePickerPopup(
+                    showDialog = showDatePicker,
+                    datePickerState = datePickerState,
+                    onDismiss = { showDatePicker = false },
+                    onDateSelected = { selectedDate = it }
+                )
+                PrivacyDateSpoilersRow(
+                    selectedDate,
+                    privacy,
+                    spoilers,
+                    onDateClick = { showDatePicker = true },
+                    onLockToggle = { privacy = it },
+                    onSpoilerToggle = { spoilers = it }
+                )
+                Spacer(Modifier.height(12.dp))
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    ReviewTextField(reviewText, { reviewText = it }, scrollState)
+                }
+                Spacer(Modifier.height(8.dp))
             }
-            Spacer(Modifier.height(8.dp))
         }
     }
 
@@ -349,21 +356,30 @@ fun SubmitReviewHeader(
     spoilers: Boolean,
     bookViewModel: BookViewModel,
     navController: NavHostController,
+    scrollState: androidx.compose.foundation.ScrollState,
     modifier: Modifier = Modifier
 ) {
+    val targetBorderColor = if (scrollState.value > 0) Color.LightGray else Color.Transparent
+    val animatedBorderColor by animateColorAsState(
+        targetValue = targetBorderColor,
+        animationSpec = tween(durationMillis = 300) // change duration here (300ms example)
+    )
+
+
     Row(
         modifier = modifier.zIndex(2f),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color.White)
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .border(1.dp, animatedBorderColor, RoundedCornerShape(16.dp))
                 .clickable(onClick = onBack)
-                .padding(horizontal = 12.dp, vertical = 6.dp)
+                .padding(horizontal = 6.dp, vertical = 6.dp)
         ) {
             Text(
-                text = "Go back",
+                text = " Go back ",
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.bodyMedium
             )
@@ -371,8 +387,9 @@ fun SubmitReviewHeader(
 
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color.White)
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .border(1.dp, animatedBorderColor, RoundedCornerShape(16.dp))
                 .clickable {
                     val now = LocalDate.now()
                     val finalDateTime = if (selectedDate != now) {
@@ -393,16 +410,18 @@ fun SubmitReviewHeader(
                         launchSingleTop = true
                     }
                 }
-                .padding(horizontal = 12.dp, vertical = 6.dp)
+                .padding(horizontal = 6.dp, vertical = 6.dp)
         ) {
             Text(
-                text = "Submit review",
+                text = " Submit review ",
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.bodyMedium
             )
         }
     }
 }
+
+
 
 @Composable
 fun PrivacyToggle(
