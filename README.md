@@ -65,7 +65,6 @@ Pager is an all in one android app for browsing and reviewing books and sharing 
       - Lint checks
       - Unit tests
       - Coverage Reporting
-  - Add Proguard Rules
   - Disable landscape mode
 ### `Version 1.0.0 "Bookworm"`
 - View books
