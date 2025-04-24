@@ -59,10 +59,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
@@ -82,7 +84,13 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookViewModel, navController : NavHostController) {
+fun ReviewBook(
+    book: OpenLibraryBook,
+    onBack: () -> Unit,
+    bookViewModel: BookViewModel,
+    navController: NavHostController,
+    containerHeight: Int
+) {
     var rating by remember { mutableFloatStateOf(0f) }
     var spoilers by remember { mutableStateOf(false) }
     var hasRated by remember { mutableStateOf(false) }
@@ -141,7 +149,7 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
             )
             Spacer(Modifier.height(12.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                ReviewTextField(reviewText, { reviewText = it }, scrollState)
+                ReviewTextField(reviewText, { reviewText = it }, scrollState, containerHeight)
             }
             Spacer(Modifier.height(8.dp))
         }
@@ -223,10 +231,13 @@ fun StarRatingBar(
 private fun ReviewTextField(
     text: String,
     onTextChange: (String) -> Unit,
-    scrollState: androidx.compose.foundation.ScrollState
+    scrollState: androidx.compose.foundation.ScrollState,
+    containerHeight: Int
 ) {
     val coroutineScope = rememberCoroutineScope()
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+    val density = LocalDensity.current
+    val minHeightDp: Dp = with(density) { containerHeight.toDp() }
 
     BasicTextField(
         value = text,
@@ -241,7 +252,7 @@ private fun ReviewTextField(
         },
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 180.dp)
+            .heightIn(min = minHeightDp - 362.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(MaterialTheme.colorScheme.surface)
             .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))

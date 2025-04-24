@@ -37,6 +37,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -44,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.luke.pager.data.viewmodel.BookViewModel
@@ -74,6 +76,7 @@ fun SearchAndResultsModal(
     var searchJob by remember { mutableStateOf<Job?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     var selectedBook by remember { mutableStateOf<OpenLibraryBook?>(null) }
+    var containerHeight by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(searchQuery) {
         searchJob?.cancel()
@@ -141,8 +144,11 @@ fun SearchAndResultsModal(
                         .align(Alignment.Center)
                         .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
                         .padding(horizontal = 24.dp, vertical = 0.dp)
+                        .onGloballyPositioned { coordinates ->
+                            containerHeight = coordinates.size.height
+                        }
                 ) {
-                    AnimatedContent(
+                AnimatedContent(
                         targetState = selectedBook,
                         transitionSpec = {
                             fadeIn(animationSpec = tween(200)).togetherWith(fadeOut(animationSpec = tween(200)))
@@ -153,8 +159,10 @@ fun SearchAndResultsModal(
                                 book = book,
                                 onBack = { selectedBook = null },
                                 bookViewModel = bookViewModel,
-                                navController = navController
+                                navController = navController,
+                                containerHeight = containerHeight
                             )
+
                         } else {
                             @Suppress("DEPRECATION")
                             SearchBar(
