@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -148,10 +149,12 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
         ) {
             Box(
                 modifier = Modifier
-                    .width(60.dp)
+                    .fillMaxWidth(0.2f)
+                    .aspectRatio(0.66f)
                     .clip(RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
-            ) {
+            )
+            {
                 var imageBitmap by remember { mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
                 var loading by remember { mutableStateOf(true) }
 
