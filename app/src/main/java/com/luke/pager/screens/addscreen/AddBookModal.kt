@@ -330,19 +330,40 @@ private fun PrivacyDateSpoilersRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(75.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        PrivacyToggle(privacy, onLockToggle)
+        // Fixed space for Privacy, center justified
+        Box(
+            modifier = Modifier
+                .weight(1f),
+            contentAlignment = Alignment.Center
+        ) {
+            PrivacyToggle(privacy, onLockToggle)
+        }
 
-        DatePickerDisplay(selectedDate, onDateClick)
+        // Date in the center
+        Box(
+            modifier = Modifier
+                .weight(1f),
+            contentAlignment = Alignment.Center
+        ) {
+            DatePickerDisplay(selectedDate, onDateClick)
+        }
 
-        SpoilerToggle(spoilers, currentSpoilerIconIndex) { newSpoilers, newIconIndex ->
-            onSpoilerToggle(newSpoilers)
-            currentSpoilerIconIndex = newIconIndex
+        // Fixed space for Spoilers, center justified
+        Box(
+            modifier = Modifier
+                .weight(1f),
+            contentAlignment = Alignment.Center
+        ) {
+            SpoilerToggle(spoilers, currentSpoilerIconIndex) { newSpoilers, newIconIndex ->
+                onSpoilerToggle(newSpoilers)
+                currentSpoilerIconIndex = newIconIndex
+            }
         }
     }
 }
+
 
 @Composable
 fun SubmitReviewHeader(
@@ -479,7 +500,7 @@ fun DatePickerDisplay(
     val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = "Read on...",
+            text = "  Read on...",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
