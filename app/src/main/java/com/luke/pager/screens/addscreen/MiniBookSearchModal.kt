@@ -57,9 +57,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-// TODO Make this not grey out the background, or just make it look nice idk
-
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun SearchAndResultsModal(
@@ -84,9 +81,9 @@ fun SearchAndResultsModal(
         if (searchQuery.isBlank()) {
             books = emptyList()
             isLoading = false
-            active = false
             return@LaunchedEffect
         }
+
 
         val currentQuery = searchQuery
 
