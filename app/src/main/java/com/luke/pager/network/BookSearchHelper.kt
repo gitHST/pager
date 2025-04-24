@@ -30,8 +30,9 @@ suspend fun searchBooksSmart(rawQuery: String): SearchResult {
     } catch (e: IOException) {
         return SearchResult(emptyList(), "Network error. Please check your connection.")
     } catch (e: Exception) {
-        return SearchResult(emptyList(), "Unknown error occurred.")
+        return SearchResult(emptyList(), "Unknown error: ${e.localizedMessage ?: "No message"}")
     }
+
 
 
     val combined = (titleResponse.docs + authorResponse.docs)
