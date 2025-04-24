@@ -62,7 +62,8 @@ class BookViewModel(private val bookRepository: BookRepository, private val revi
         reviewText: String,
         dateReviewed: String,
         privacy: Privacy,
-        hasSpoilers: Boolean
+        hasSpoilers: Boolean,
+        onSuccess: () -> Unit // Add callback for navigation
     ) {
         viewModelScope.launch {
             val coverImage = downloadCoverImage(openBook.cover_i)
@@ -91,6 +92,8 @@ class BookViewModel(private val bookRepository: BookRepository, private val revi
             reviewRepository.insertReview(review)
             loadBooks()
             loadAllReviews()
+            onSuccess() // Navigate after state is ready
         }
     }
+
 }
