@@ -66,7 +66,7 @@ fun ReviewBook(
             spoilers = spoilers,
             bookViewModel = bookViewModel,
             navController = navController,
-            scrollState = scrollState, // pass scrollState
+            scrollState = scrollState,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .fillMaxWidth()

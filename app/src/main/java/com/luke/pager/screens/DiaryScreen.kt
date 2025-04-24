@@ -58,7 +58,6 @@ import com.luke.pager.data.viewmodel.BookViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-// TODO Normalise height
 
 @Composable
 fun DiaryScreen(
