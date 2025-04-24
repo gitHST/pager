@@ -36,7 +36,7 @@ data class ReviewEntity(
     val dateReviewed: String? = null,
 
     @ColumnInfo(name = "rating")
-    val rating: Int? = null,
+    val rating: Float? = null,
 
     @ColumnInfo(name = "review_text")
     val reviewText: String? = null,
