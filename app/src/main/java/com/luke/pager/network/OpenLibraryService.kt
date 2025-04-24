@@ -5,9 +5,9 @@ data class OpenLibrarySearchResponse(
 )
 
 data class OpenLibraryBook(
-    val key: String,  // e.g. "/works/OL12345W"
+    val key: String,
     val title: String,
     val author_name: List<String>?,
-    val cover_i: Int?,  // cover image id
+    val cover_i: Int?,
     val first_publish_year: Int?
 )
