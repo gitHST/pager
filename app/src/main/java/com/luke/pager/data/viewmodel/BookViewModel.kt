@@ -81,7 +81,7 @@ class BookViewModel(private val bookRepository: BookRepository, private val revi
 
             val review = ReviewEntity(
                 bookId = bookId,
-                rating = rating?.toInt(),
+                rating = rating,
                 reviewText = sanitizedReviewText,
                 dateReviewed = dateReviewed,
                 privacy = privacy,
