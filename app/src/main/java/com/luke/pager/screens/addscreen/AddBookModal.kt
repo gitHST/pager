@@ -3,7 +3,8 @@ package com.luke.pager.screens.addscreen
 import Privacy
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,10 +15,13 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.StarHalf
@@ -36,7 +40,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -47,18 +50,25 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusState
-import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import com.luke.pager.R
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.network.OpenLibraryBook
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
@@ -83,28 +93,35 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
         initialSelectedDateMillis = selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
     )
 
-    Box(modifier = Modifier.padding(8.dp)) {
+    Box(modifier = Modifier.fillMaxSize()) {
         val scrollState = rememberScrollState()
 
+        // Absolute positioned header
+        SubmitReviewHeader(
+            onBack = onBack,
+            book = book,
+            selectedDate = selectedDate,
+            rating = rating,
+            hasRated = hasRated,
+            reviewText = reviewText,
+            privacy = privacy,
+            spoilers = spoilers,
+            bookViewModel = bookViewModel,
+            navController = navController,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .padding(vertical = 16.dp, horizontal = 8.dp)
+        )
+
+        // Scrollable content
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
+                .padding(top = 48.dp) // Spacer height for header
                 .animateContentSize()
         ) {
-            SubmitReviewHeader(
-                onBack = onBack,
-                book = book,
-                selectedDate = selectedDate,
-                rating = rating,
-                hasRated = hasRated,
-                reviewText = reviewText,
-                privacy = privacy,
-                spoilers = spoilers,
-                bookViewModel = bookViewModel,
-                navController = navController
-            )
-
             Spacer(Modifier.height(8.dp))
             BookRowUIClickable(book = book, onClick = {})
             Spacer(Modifier.height(16.dp))
@@ -125,12 +142,13 @@ fun ReviewBook(book: OpenLibraryBook, onBack: () -> Unit, bookViewModel : BookVi
                 onSpoilerToggle = { spoilers = it }
             )
             Spacer(Modifier.height(12.dp))
-            ReviewTextField(reviewText) { reviewText = it }
-
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                ReviewTextField(reviewText, { reviewText = it }, scrollState)
+            }
             Spacer(Modifier.height(8.dp))
-
         }
     }
+
 }
 
 @Composable
@@ -207,30 +225,48 @@ fun StarRatingBar(
 @Composable
 private fun ReviewTextField(
     text: String,
-    onTextChange: (String) -> Unit
+    onTextChange: (String) -> Unit,
+    scrollState: androidx.compose.foundation.ScrollState
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
 
-    val reviewHeight by animateDpAsState(
-        targetValue = if (expanded) 320.dp else 180.dp,
-        label = "ReviewHeight"
-    )
-
-    OutlinedTextField(
+    BasicTextField(
         value = text,
-        onValueChange = onTextChange,
+        onValueChange = {
+            onTextChange(it)
+            coroutineScope.launch {
+                textLayoutResult?.let { layout ->
+                    val lastLineBottom = layout.getLineBottom(layout.lineCount - 1)
+                    scrollState.animateScrollTo(lastLineBottom.toInt())
+                }
+            }
+        },
         modifier = Modifier
-            .fillMaxWidth()
-            .height(reviewHeight)
-            .onFocusChanged { focusState: FocusState ->
-                expanded = focusState.isFocused
-            },
-        placeholder = { Text("Review...") },
-        shape = RoundedCornerShape(8.dp),
+            .fillMaxWidth(0.9f)
+            .heightIn(min = 180.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+            .padding(16.dp),
+        textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         singleLine = false,
-        maxLines = 20
+        maxLines = Int.MAX_VALUE,
+        onTextLayout = { textLayoutResult = it },
+        keyboardOptions = KeyboardOptions.Default.copy(
+            imeAction = ImeAction.Default,
+            keyboardType = KeyboardType.Text
+        ),
+        decorationBox = { innerTextField ->
+            if (text.isEmpty()) {
+                Text("Review...", style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
+            }
+            innerTextField()
+        }
     )
 }
+
 
 
 
@@ -312,48 +348,61 @@ fun SubmitReviewHeader(
     privacy: Privacy,
     spoilers: Boolean,
     bookViewModel: BookViewModel,
-    navController: NavHostController
+    navController: NavHostController,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp, horizontal = 8.dp),
+        modifier = modifier.zIndex(2f),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(
-            "Go back",
-            modifier = Modifier.clickable(onClick = onBack),
-            color = MaterialTheme.colorScheme.primary
-        )
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color.White)
+                .clickable(onClick = onBack)
+                .padding(horizontal = 12.dp, vertical = 6.dp)
+        ) {
+            Text(
+                text = "Go back",
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
 
-        Text(
-            "Submit review",
-            modifier = Modifier.clickable {
-                val now = LocalDate.now()
-                val finalDateTime = if (selectedDate != now) {
-                    selectedDate.atStartOfDay()
-                } else {
-                    selectedDate.atTime(LocalTime.now())
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color.White)
+                .clickable {
+                    val now = LocalDate.now()
+                    val finalDateTime = if (selectedDate != now) {
+                        selectedDate.atStartOfDay()
+                    } else {
+                        selectedDate.atTime(LocalTime.now())
+                    }
+
+                    val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                    val dateReviewed = formatter.format(Date.from(finalDateTime.atZone(ZoneId.systemDefault()).toInstant()))
+
+                    val ratingToSubmit: Float? = if (hasRated) rating else null
+
+                    bookViewModel.submitReview(book, ratingToSubmit, reviewText, dateReviewed, privacy, spoilers)
+
+                    navController.navigate("diary") {
+                        popUpTo("review_screen") { inclusive = true }
+                        launchSingleTop = true
+                    }
                 }
-
-                val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-                val dateReviewed = formatter.format(Date.from(finalDateTime.atZone(ZoneId.systemDefault()).toInstant()))
-
-                val ratingToSubmit: Float? = if (hasRated) rating else null
-
-                bookViewModel.submitReview(book, ratingToSubmit, reviewText, dateReviewed, privacy, spoilers)
-
-                navController.navigate("diary") {
-                    popUpTo("review_screen") { inclusive = true }
-                    launchSingleTop = true
-                }
-            },
-            color = MaterialTheme.colorScheme.primary
-        )
+                .padding(horizontal = 12.dp, vertical = 6.dp)
+        ) {
+            Text(
+                text = "Submit review",
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
     }
 }
-
-
 
 @Composable
 fun PrivacyToggle(
