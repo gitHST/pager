@@ -53,7 +53,7 @@ fun BookCover(coverId: Int?, modifier: Modifier = Modifier) {
             modifier = Modifier
                 .width(maxWidth)
                 .height(actualHeight.coerceAtMost(maxHeight))
-                .clip(RoundedCornerShape(6.dp)) // slightly less radius for smoother corners
+                .clip(RoundedCornerShape(14.dp))
         ) {
             Image(
                 painter = painter,
