@@ -1,5 +1,5 @@
 # Pager
-![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.2.2-blue.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Platform](https://img.shields.io/badge/platform-Android-green.svg)
 ![Made with Kotlin](https://img.shields.io/badge/made%20with-Kotlin-7F52FF.svg)
