@@ -53,9 +53,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.luke.pager.data.entities.ReviewEntity
 import com.luke.pager.data.viewmodel.ReviewViewModel
-import com.luke.pager.screens.addscreen.addcomponents.StarRatingBar
-import com.luke.pager.screens.addscreen.addcomponents.SpoilerToggle
 import com.luke.pager.screens.addscreen.addcomponents.PrivacyToggle
+import com.luke.pager.screens.addscreen.addcomponents.SpoilerToggle
+import com.luke.pager.screens.addscreen.addcomponents.StarRatingBar
 
 @Composable
 fun ReviewScreen(
@@ -100,7 +100,6 @@ fun ReviewScreen(
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Header with menu
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -161,13 +160,11 @@ fun ReviewScreen(
                     }
                 }
 
-                // Date
                 review.dateReviewed?.let {
                     val dateOnly = it.split(" ").firstOrNull() ?: it
                     Text("Finished reading on: $dateOnly", fontSize = 14.sp)
                 }
 
-                // Rating Stars
                 if (isEditing) {
                     Spacer(modifier = Modifier.height(8.dp))
                     StarRatingBar(
@@ -243,7 +240,6 @@ fun ReviewScreen(
 
                 }
 
-                // Review Text / Edit
                 val sharedModifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
@@ -274,7 +270,6 @@ fun ReviewScreen(
                 }
             }
 
-            // Floating Save/Cancel Buttons
             if (isEditing) {
                 Row(
                     modifier = Modifier
@@ -301,7 +296,6 @@ fun ReviewScreen(
                 }
             }
 
-            // Delete Dialog
             if (showDeleteDialog) {
                 AlertDialog(
                     onDismissRequest = { showDeleteDialog = false },

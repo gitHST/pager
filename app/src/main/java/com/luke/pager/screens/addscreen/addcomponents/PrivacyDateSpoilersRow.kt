@@ -51,7 +51,6 @@ fun PrivacyDateSpoilersRow(
             .height(75.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Fixed space for Privacy, center justified
         Box(
             modifier = Modifier
                 .weight(1f),
@@ -60,7 +59,6 @@ fun PrivacyDateSpoilersRow(
             PrivacyToggle(privacy, onLockToggle)
         }
 
-        // Date in the center
         Box(
             modifier = Modifier
                 .weight(1f),
@@ -69,7 +67,6 @@ fun PrivacyDateSpoilersRow(
             DatePickerDisplay(selectedDate, onDateClick)
         }
 
-        // Fixed space for Spoilers, center justified
         Box(
             modifier = Modifier
                 .weight(1f),

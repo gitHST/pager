@@ -58,7 +58,7 @@ fun SubmitReviewHeader(
     val targetBorderColor = if (scrollState.value > 0) Color.LightGray else Color.Transparent
     val animatedBorderColor by animateColorAsState(
         targetValue = targetBorderColor,
-        animationSpec = tween(durationMillis = 300) // change duration here (300ms example)
+        animationSpec = tween(durationMillis = 300)
     )
     var isSubmitting by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
