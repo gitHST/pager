@@ -70,7 +70,7 @@ class BookViewModel(private val bookRepository: BookRepository, private val revi
 
             val book = BookEntity(
                 title = openBook.title,
-                authors = openBook.author_name?.joinToString(),
+                authors = openBook.authorName?.joinToString(),
                 openlibraryKey = openBook.key,
                 firstPublishDate = openBook.firstPublishYear?.toString(),
                 cover = coverImage
