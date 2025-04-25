@@ -47,9 +47,12 @@ class SearchBooksSmartTest {
 
     @Test
     fun `searchBooksSmart handles HttpException 503`() = runTest {
-        coEvery { OpenLibraryService.api.searchBooks(any(), any()) } throws HttpException(Response.error<Any>(503,
-            "".toResponseBody(null)
-        ))
+        coEvery { OpenLibraryService.api.searchBooks(any(), any()) } throws HttpException(
+            Response.error<Any>(
+                503,
+                "".toResponseBody(null)
+            )
+        )
 
         val result = searchBooksSmart("Adventure")
 

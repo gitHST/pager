@@ -66,8 +66,14 @@ class SubmitReviewHeaderTest {
         val formatter = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
         val expectedDatePrefix = formatter.format(java.util.Date()).substring(0, 10) // yyyy-MM-dd
 
-        bookViewModel.submitReview(book, rating, reviewText,
-            "$expectedDatePrefix 12:00:00", privacy, spoilers) {
+        bookViewModel.submitReview(
+            book,
+            rating,
+            reviewText,
+            "$expectedDatePrefix 12:00:00",
+            privacy,
+            spoilers
+        ) {
             navController.navigate("diary") {
                 popUpTo("review_screen") { inclusive = true }
                 launchSingleTop = true

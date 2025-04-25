@@ -24,7 +24,7 @@ class BookRepositoryTest {
     }
 
     @Test
-    fun `insertAndReturnId should call DAO method`() = runTest  {
+    fun `insertAndReturnId should call DAO method`() = runTest {
         val book = BookEntity(title = "Test Book")
         coEvery { bookDao.insertAndReturnId(book) } returns 1L
 
@@ -35,7 +35,7 @@ class BookRepositoryTest {
     }
 
     @Test
-    fun `getAllBooks should return flow from DAO`() = runTest  {
+    fun `getAllBooks should return flow from DAO`() = runTest {
         val books = listOf(BookEntity(title = "Book1"))
         coEvery { bookDao.getAllBooks() } returns flowOf(books)
 
