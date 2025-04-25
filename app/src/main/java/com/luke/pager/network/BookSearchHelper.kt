@@ -85,6 +85,6 @@ fun String.normalizeTitle(): String {
 
 fun String.stripLeadingArticle(): String {
     return this.trimStart()
-        .replace(Regex("""^(the|a|an)\s+"""), "")
+        .replace(Regex("""^(the|a|an)\s+""", RegexOption.IGNORE_CASE), "")
         .trim()
 }
