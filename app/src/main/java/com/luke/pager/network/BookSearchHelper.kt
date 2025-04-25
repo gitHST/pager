@@ -37,7 +37,7 @@ suspend fun searchBooksSmart(rawQuery: String): SearchResult {
     for (book in combined) {
         val normTitle = book.title.normalizeTitle()
         val strippedTitle = normTitle.stripLeadingArticle()
-        val author = book.author_name?.firstOrNull()?.lowercase() ?: continue
+        val author = book.authorName?.firstOrNull()?.lowercase() ?: continue
         val key = strippedTitle to author
         val existing = seen[key]
         val keepThis = existing == null || normTitle.length > existing.title.normalizeTitle().length
@@ -46,7 +46,7 @@ suspend fun searchBooksSmart(rawQuery: String): SearchResult {
 
     for ((_, book) in seen) {
         val titleLower = book.title.lowercase()
-        val authorMatch = book.author_name?.any { it.equals(query, ignoreCase = true) } == true
+        val authorMatch = book.authorName?.any { it.equals(query, ignoreCase = true) } == true
         val titleMatch = titleLower.contains(lowerQuery)
         val lengthPenalty = (book.title.length - query.length).coerceAtLeast(0)
         val finalScore = when {
