@@ -22,15 +22,16 @@ import com.luke.pager.screens.addscreen.SearchAndResultsModal
 fun PagerNavHost(
     navController: NavHostController,
     bookViewModel: BookViewModel,
-    reviewViewModel: ReviewViewModel,
+    reviewViewModel: ReviewViewModel
 ) {
-    val navItems = listOf(
-        // NavItem("activity", "Activity"),
-        NavItem("diary", "Diary"),
-        NavItem("plus", "+"),
-        // NavItem("search", "Search"),
-        // NavItem("quotes", "Quotes")
-    )
+    val navItems =
+        listOf(
+            // NavItem("activity", "Activity"),
+            NavItem("diary", "Diary"),
+            NavItem("plus", "+")
+            // NavItem("search", "Search"),
+            // NavItem("quotes", "Quotes")
+        )
 
     val currentRoute by navController.currentBackStackEntryAsState()
 
@@ -66,7 +67,12 @@ fun PagerNavHost(
         composable("review_screen/{reviewId}") { backStackEntry ->
             val reviewId = backStackEntry.arguments?.getString("reviewId")?.toLongOrNull() ?: 0L
             val reviews by bookViewModel.allReviews.collectAsState()
-            ReviewScreen(reviewId = reviewId, reviews = reviews, reviewViewModel = reviewViewModel, onDeleteSuccess = { navController.popBackStack() })
+            ReviewScreen(
+                reviewId = reviewId,
+                reviews = reviews,
+                reviewViewModel = reviewViewModel,
+                onDeleteSuccess = { navController.popBackStack() }
+            )
         }
     }
 }

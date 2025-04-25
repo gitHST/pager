@@ -1,5 +1,5 @@
 [versions]
-agp = "8.9.1"  # Android Gradle Plugin version
+agp = "8.9.2"  # Android Gradle Plugin version
 material = "1.12.0"
 appcompat = "1.7.0"
 kotlin = "2.1.20"  # Kotlin version
@@ -9,16 +9,17 @@ junitVersion = "1.2.1"  # JUnit version (for testing)
 espressoCore = "3.6.1"  # Espresso Core version
 lifecycleRuntimeKtx = "2.8.7"  # Lifecycle Runtime KTX version
 activityCompose = "1.10.1"  # Activity Compose version
-composeBom = "2025.04.00"  # Compose BOM version
-composeFont = "1.7.8"
-composeAnimation = "1.7.8"
+composeBom = "2025.04.01"  # Compose BOM version
+composeFont = "1.8.0"
+composeAnimation = "1.8.0"
 composeMaterialIcons = "1.7.8"
 lifecycleViewModelCompose = "2.8.7"  # Lifecycle ViewModel Compose version (updated)
 androidx-navigation-compose = "2.8.9"
-room = "2.7.0"  # Use the latest version if available
+room = "2.7.1"  # Use the latest version if available
 ksp = "2.1.20-2.0.0"
 retrofit = "2.9.0"
 coil = "2.5.0"  # Coil version
+ktlint = "11.6.0"
 
 
 
@@ -60,3 +61,4 @@ jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = 
 android-library = { id = "com.android.library", version.ref = "agp" }
 google-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }

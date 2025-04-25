@@ -50,7 +50,8 @@ fun ReviewTextField(
                 }
             }
         },
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .heightIn(min = minHeightDp - 362.dp)
             .clip(RoundedCornerShape(8.dp))
@@ -62,7 +63,8 @@ fun ReviewTextField(
         singleLine = false,
         maxLines = Int.MAX_VALUE,
         onTextLayout = { textLayoutResult = it },
-        keyboardOptions = KeyboardOptions.Default.copy(
+        keyboardOptions =
+        KeyboardOptions.Default.copy(
             imeAction = ImeAction.Default,
             keyboardType = KeyboardType.Text
         ),

@@ -1,13 +1,14 @@
 package com.luke.pager.network
 
-data class OpenLibrarySearchResponse(
-    val docs: List<OpenLibraryBook>
-)
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
-data class OpenLibraryBook(
-    val key: String,
-    val title: String,
-    val authorName: List<String>?,
-    val coverIndex: Int?,
-    val firstPublishYear: Int?
-)
+object OpenLibraryService {
+    val api: OpenLibraryApi by lazy {
+        Retrofit.Builder()
+            .baseUrl("https://openlibrary.org/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(OpenLibraryApi::class.java)
+    }
+}

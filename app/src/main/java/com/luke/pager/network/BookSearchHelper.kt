@@ -49,29 +49,33 @@ suspend fun searchBooksSmart(rawQuery: String): SearchResult {
         val authorMatch = book.authorName?.any { it.equals(query, ignoreCase = true) } == true
         val titleMatch = titleLower.contains(lowerQuery)
         val lengthPenalty = (book.title.length - query.length).coerceAtLeast(0)
-        val finalScore = when {
-            authorMatch -> 300
-            titleMatch -> 200 - (lengthPenalty / 3)
-            else -> 100
-        }
+        val finalScore =
+            when {
+                authorMatch -> 300
+                titleMatch -> 200 - (lengthPenalty / 3)
+                else -> 100
+            }
         result += finalScore to book
     }
 
-    val sorted = result
-        .sortedWith(compareByDescending<Pair<Int, OpenLibraryBook>> { it.first }
-            .thenBy { it.second.title.lowercase() })
-        .map { it.second }
+    val sorted =
+        result
+            .sortedWith(
+                compareByDescending<Pair<Int, OpenLibraryBook>> { it.first }
+                    .thenBy { it.second.title.lowercase() }
+            )
+            .map { it.second }
 
     return SearchResult(sorted)
 }
 
 fun String.normalizeTitle(): String {
     return this.lowercase()
-        .replace(Regex("""^["'“”‘’]+|["'“”‘’]+$"""), "")   // remove leading/trailing quotes
-        .replace(Regex("""\s*\(.*?\)"""), "")              // remove parentheses and content
-        .replace(Regex(""":.*$"""), "")                    // remove subtitles after colon
-        .replace(Regex("""-.*$"""), "")                    // remove subtitles after dash
-        .replace(Regex("""\s+"""), " ")                    // collapse whitespace
+        .replace(Regex("""^["'“”‘’]+|["'“”‘’]+$"""), "") // remove leading/trailing quotes
+        .replace(Regex("""\s*\(.*?\)"""), "") // remove parentheses and content
+        .replace(Regex(""":.*$"""), "") // remove subtitles after colon
+        .replace(Regex("""-.*$"""), "") // remove subtitles after dash
+        .replace(Regex("""\s+"""), " ") // collapse whitespace
         .trim()
 }
 

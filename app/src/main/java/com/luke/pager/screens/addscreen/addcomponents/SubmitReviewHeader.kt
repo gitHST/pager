@@ -63,13 +63,13 @@ fun SubmitReviewHeader(
     var isSubmitting by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
-
     Row(
         modifier = modifier.zIndex(2f),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .clip(RoundedCornerShape(16.dp))
                 .background(MaterialTheme.colorScheme.surface)
                 .border(1.dp, animatedBorderColor, RoundedCornerShape(16.dp))
@@ -84,7 +84,8 @@ fun SubmitReviewHeader(
         }
 
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .clip(RoundedCornerShape(16.dp))
                 .background(MaterialTheme.colorScheme.surface)
                 .border(1.dp, animatedBorderColor, RoundedCornerShape(16.dp))
@@ -92,11 +93,12 @@ fun SubmitReviewHeader(
                     isSubmitting = true
 
                     val now = LocalDate.now()
-                    val finalDateTime = if (selectedDate != now) {
-                        selectedDate.atStartOfDay()
-                    } else {
-                        selectedDate.atTime(LocalTime.now())
-                    }
+                    val finalDateTime =
+                        if (selectedDate != now) {
+                            selectedDate.atStartOfDay()
+                        } else {
+                            selectedDate.atTime(LocalTime.now())
+                        }
 
                     val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
                     val dateReviewed = formatter.format(Date.from(finalDateTime.atZone(ZoneId.systemDefault()).toInstant()))
@@ -133,4 +135,3 @@ fun SubmitReviewHeader(
         }
     }
 }
-

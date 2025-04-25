@@ -58,7 +58,6 @@ import com.luke.pager.data.viewmodel.BookViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-
 @Composable
 fun DiaryScreen(
     navController: NavController,
@@ -72,22 +71,23 @@ fun DiaryScreen(
         bookViewModel.loadAllReviews()
     }
 
-    val booksWithReviews = books.mapNotNull { book ->
-        val review = reviews[book.id]
-        if (review?.dateReviewed != null) {
-            Pair(book, review)
-        } else {
-            null
+    val booksWithReviews =
+        books.mapNotNull { book ->
+            val review = reviews[book.id]
+            if (review?.dateReviewed != null) {
+                Pair(book, review)
+            } else {
+                null
+            }
         }
-    }
 
     val sortedBooks = booksWithReviews.sortedByDescending { (_, review) -> review.dateReviewed }
     val groupedBooks = sortedBooks.groupBy { (_, review) -> getDateWithoutTime(review.dateReviewed) }
 
-
     Column(modifier = Modifier.fillMaxSize()) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             contentAlignment = Alignment.TopCenter
@@ -104,7 +104,8 @@ fun DiaryScreen(
             }
         } else {
             LazyColumn(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -132,12 +133,16 @@ fun DiaryScreen(
     }
 }
 
-
 @Composable
-fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit) {
+fun BookItem(
+    book: BookEntity,
+    review: ReviewEntity?,
+    onReviewClick: () -> Unit
+) {
     val trimAmount = 37
     Card(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .clickable { onReviewClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -149,13 +154,13 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxWidth(0.2f)
                     .aspectRatio(0.66f)
                     .clip(RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
-            )
-            {
+            ) {
                 var imageBitmap by remember { mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
                 var loading by remember { mutableStateOf(true) }
 
@@ -174,7 +179,8 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
                     Image(
                         bitmap = imageBitmap!!,
                         contentDescription = null,
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp)),
                         contentScale = ContentScale.Crop
@@ -191,7 +197,8 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
                                 imageVector = Icons.Filled.Book,
                                 contentDescription = "No Cover Icon",
                                 tint = Color.LightGray,
-                                modifier = Modifier
+                                modifier =
+                                Modifier
                                     .fillMaxWidth(0.5f)
                                     .aspectRatio(1f)
                                     .clip(RoundedCornerShape(12.dp))
@@ -204,7 +211,6 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
                             )
                         }
                     }
-
                 }
             }
 
@@ -221,11 +227,11 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
                     )
                 }
 
-
                 val reviewText = review?.reviewText?.takeIf { it.isNotBlank() }
-                val displayText = reviewText?.let {
-                    if (it.length > trimAmount) it.take(trimAmount - 3) + "..." else it
-                } ?: "No review given"
+                val displayText =
+                    reviewText?.let {
+                        if (it.length > trimAmount) it.take(trimAmount - 3) + "..." else it
+                    } ?: "No review given"
 
                 val isPlaceholder = reviewText == null
 
@@ -233,11 +239,12 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (review != null) {
-                        val privacyIcon = when (review.privacy) {
-                            Privacy.PUBLIC -> Icons.Filled.Public
-                            Privacy.PRIVATE -> Icons.Filled.Lock
-                            Privacy.FRIENDS -> Icons.Filled.Group
-                        }
+                        val privacyIcon =
+                            when (review.privacy) {
+                                Privacy.PUBLIC -> Icons.Filled.Public
+                                Privacy.PRIVATE -> Icons.Filled.Lock
+                                Privacy.FRIENDS -> Icons.Filled.Group
+                            }
 
                         Icon(
                             imageVector = privacyIcon,
@@ -253,15 +260,14 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
                         text = displayText,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.bodyLarge.copy(
+                        style =
+                        MaterialTheme.typography.bodyLarge.copy(
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSurface,
                             fontStyle = if (isPlaceholder) FontStyle.Italic else FontStyle.Normal
                         )
                     )
-
                 }
-
 
                 if (review?.rating != null) {
                     val rating = review.rating.toFloat()
@@ -269,13 +275,15 @@ fun BookItem(book: BookEntity, review: ReviewEntity?, onReviewClick: () -> Unit)
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(modifier = Modifier.width(90.dp)) {
                         for (i in 1..5) {
-                            val icon = when {
-                                rating >= i -> Icons.Filled.Star
-                                rating == i - 0.5f -> Icons.AutoMirrored.Outlined.StarHalf
-                                else -> Icons.Outlined.StarBorder
-                            }
+                            val icon =
+                                when {
+                                    rating >= i -> Icons.Filled.Star
+                                    rating == i - 0.5f -> Icons.AutoMirrored.Outlined.StarHalf
+                                    else -> Icons.Outlined.StarBorder
+                                }
                             Box(
-                                modifier = Modifier
+                                modifier =
+                                Modifier
                                     .weight(1f)
                                     .fillMaxHeight(),
                                 contentAlignment = Alignment.Center
@@ -301,9 +309,10 @@ fun getDateWithoutTime(dateString: String?): String {
         val reviewDate = inputFormat.parse(dateString ?: "") ?: return "Unknown Date"
 
         val calendarNow = java.util.Calendar.getInstance()
-        val calendarReview = java.util.Calendar.getInstance().apply {
-            time = reviewDate
-        }
+        val calendarReview =
+            java.util.Calendar.getInstance().apply {
+                time = reviewDate
+            }
 
         val yearDifference = calendarNow.get(java.util.Calendar.YEAR) - calendarReview.get(java.util.Calendar.YEAR)
         val monthFormat = SimpleDateFormat("MMMM", Locale.getDefault())
