@@ -57,6 +57,7 @@ import androidx.navigation.NavHostController
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.network.BookCover
 import com.luke.pager.network.OpenLibraryBook
+import com.luke.pager.network.SearchResult
 import com.luke.pager.network.searchBooksSmart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -68,7 +69,8 @@ import kotlinx.coroutines.launch
 fun SearchAndResultsModal(
     onDismiss: () -> Unit,
     bookViewModel: BookViewModel,
-    navController: NavHostController
+    navController: NavHostController,
+    searchBooks: suspend (String) -> SearchResult = ::searchBooksSmart
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
@@ -112,7 +114,7 @@ fun SearchAndResultsModal(
 
         val deferredResult =
             async {
-                searchBooksSmart(currentQuery)
+                searchBooks(currentQuery)
             }
 
         searchJob =
