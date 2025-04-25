@@ -20,8 +20,7 @@ ksp = "2.1.20-2.0.0"
 retrofit = "2.9.0"
 coil = "2.5.0"  # Coil version
 ktlint = "11.6.0"
-
-
+mockk = "1.13.10"
 
 
 [libraries]
@@ -53,6 +52,7 @@ compose-animation = { module = "androidx.compose.animation:animation", version.r
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 material-symbols-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "composeMaterialIcons" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 
 
 [plugins]
