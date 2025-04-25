@@ -7,11 +7,9 @@ import com.luke.pager.data.dao.ReviewDao
 import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.entities.ReviewEntity
 
-
 @Database(entities = [BookEntity::class, ReviewEntity::class], version = 9, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
-
     abstract fun bookDao(): BookDao
-    abstract fun reviewDao(): ReviewDao
 
+    abstract fun reviewDao(): ReviewDao
 }

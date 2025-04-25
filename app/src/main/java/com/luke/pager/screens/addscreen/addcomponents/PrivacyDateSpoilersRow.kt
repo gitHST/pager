@@ -27,13 +27,15 @@ fun PrivacyDateSpoilersRow(
     var currentSpoilerIconIndex by remember { mutableIntStateOf(0) }
 
     Row(
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .height(75.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .weight(1f),
             contentAlignment = Alignment.Center
         ) {
@@ -41,7 +43,8 @@ fun PrivacyDateSpoilersRow(
         }
 
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .weight(1f),
             contentAlignment = Alignment.Center
         ) {
@@ -49,7 +52,8 @@ fun PrivacyDateSpoilersRow(
         }
 
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .weight(1f),
             contentAlignment = Alignment.Center
         ) {

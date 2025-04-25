@@ -23,7 +23,10 @@ interface ReviewDao {
     suspend fun getReviewByBookId(bookId: Long): ReviewEntity?
 
     @Query("UPDATE reviews SET review_text = :newText WHERE id = :reviewId")
-    suspend fun updateReviewText(reviewId: Long, newText: String)
+    suspend fun updateReviewText(
+        reviewId: Long,
+        newText: String
+    )
 
     @Delete
     suspend fun deleteReview(review: ReviewEntity)
@@ -35,8 +38,14 @@ interface ReviewDao {
     suspend fun getBookIdByReviewId(reviewId: Long): Long?
 
     @Query("UPDATE reviews SET rating = :newRating WHERE id = :reviewId")
-    suspend fun updateReviewRating(reviewId: Long, newRating: Float)
+    suspend fun updateReviewRating(
+        reviewId: Long,
+        newRating: Float
+    )
 
     @Query("UPDATE reviews SET privacy = :newPrivacy WHERE id = :reviewId")
-    suspend fun updateReviewPrivacy(reviewId: Long, newPrivacy: Privacy)
+    suspend fun updateReviewPrivacy(
+        reviewId: Long,
+        newPrivacy: Privacy
+    )
 }

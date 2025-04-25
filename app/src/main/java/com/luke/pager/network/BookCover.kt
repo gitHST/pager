@@ -24,7 +24,10 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 
 @Composable
-fun BookCover(coverId: Int?, modifier: Modifier = Modifier) {
+fun BookCover(
+    coverId: Int?,
+    modifier: Modifier = Modifier
+) {
     val coverUrl = coverId?.let { "https://covers.openlibrary.org/b/id/$it-M.jpg" }
 
     val painter = rememberAsyncImagePainter(model = coverUrl)
@@ -44,13 +47,15 @@ fun BookCover(coverId: Int?, modifier: Modifier = Modifier) {
     val maxHeight = 120.dp
 
     Box(
-        modifier = modifier
+        modifier =
+        modifier
             .width(maxWidth)
             .height(maxHeight),
         contentAlignment = Alignment.Center
     ) {
         Box(
-            modifier = modifier
+            modifier =
+            modifier
                 .width(maxWidth)
                 .aspectRatio(aspectRatio)
                 .clip(RoundedCornerShape(14.dp))

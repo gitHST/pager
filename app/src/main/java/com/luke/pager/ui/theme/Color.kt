@@ -10,4 +10,3 @@ val NiceBlue = Color(0xFFB7CACC)
 
 val SecondaryGrey = Color(0xFF7E7E7E)
 val TertiaryGold = Color(0xFFFFC508)
-

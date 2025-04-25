@@ -26,7 +26,8 @@ fun DatePickerDisplay(
         )
         Text(
             text = selectedDate.format(formatter),
-            modifier = Modifier
+            modifier =
+            Modifier
                 .clickable { onDateClick() }
                 .padding(6.dp),
             style = MaterialTheme.typography.bodyLarge,

@@ -79,10 +79,11 @@ fun ReviewScreen(
         var localPrivacy by remember { mutableStateOf(review.privacy) }
         var localSpoilers by remember { mutableStateOf(review.hasSpoilers) }
         var currentSpoilerIconIndex by remember { mutableIntStateOf(0) }
-        val textStyle = MaterialTheme.typography.bodyLarge.copy(
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Start
-        )
+        val textStyle =
+            MaterialTheme.typography.bodyLarge.copy(
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Start
+            )
 
         LaunchedEffect(isEditing) {
             if (isEditing) {
@@ -92,16 +93,17 @@ fun ReviewScreen(
             }
         }
 
-
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
                     contentAlignment = Alignment.Center
@@ -123,7 +125,8 @@ fun ReviewScreen(
                             DropdownMenu(
                                 expanded = menuExpanded,
                                 onDismissRequest = { menuExpanded = false },
-                                modifier = Modifier
+                                modifier =
+                                Modifier
                                     .padding(top = 0.dp)
                                     .background(Color.White, RoundedCornerShape(16.dp)),
                                 shape = RoundedCornerShape(16.dp)
@@ -172,10 +175,9 @@ fun ReviewScreen(
                         hasRated = true,
                         onRatingChange = { newRating: Float -> localRating = newRating },
                         onUserInteracted = {},
-                        starScale = 1.0f,
+                        starScale = 1.0f
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-
                 } else {
                     if (tempDisplayRating > 0f) {
                         val rating = tempDisplayRating
@@ -186,19 +188,22 @@ fun ReviewScreen(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Box(
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .fillMaxWidth(starRowWidthFraction)
                                 .height(starSize)
                         ) {
                             Row(modifier = Modifier.matchParentSize()) {
                                 for (i in 1..5) {
-                                    val icon = when {
-                                        rating >= i -> Icons.Filled.Star
-                                        rating == i - 0.5f -> Icons.AutoMirrored.Outlined.StarHalf
-                                        else -> Icons.Outlined.StarBorder
-                                    }
+                                    val icon =
+                                        when {
+                                            rating >= i -> Icons.Filled.Star
+                                            rating == i - 0.5f -> Icons.AutoMirrored.Outlined.StarHalf
+                                            else -> Icons.Outlined.StarBorder
+                                        }
                                     Box(
-                                        modifier = Modifier
+                                        modifier =
+                                        Modifier
                                             .weight(1f)
                                             .fillMaxHeight(),
                                         contentAlignment = Alignment.Center
@@ -218,7 +223,8 @@ fun ReviewScreen(
 
                 if (isEditing) {
                     Row(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .fillMaxWidth()
                             .height(75.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly
@@ -237,12 +243,12 @@ fun ReviewScreen(
                             )
                         }
                     }
-
                 }
 
-                val sharedModifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
+                val sharedModifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
 
                 if (isEditing) {
                     Box(modifier = sharedModifier) {
@@ -250,12 +256,12 @@ fun ReviewScreen(
                             value = editedText,
                             onValueChange = { editedText = it },
                             textStyle = textStyle,
-                            modifier = Modifier
+                            modifier =
+                            Modifier
                                 .fillMaxWidth()
                                 .focusRequester(focusRequester),
                             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
                         )
-
                     }
                 } else {
                     Box(modifier = sharedModifier) {
@@ -272,7 +278,8 @@ fun ReviewScreen(
 
             if (isEditing) {
                 Row(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .align(Alignment.BottomEnd)
                         .padding(16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -306,7 +313,8 @@ fun ReviewScreen(
                                 reviewViewModel.deleteReviewAndBookById(reviewId)
                                 onDeleteSuccess()
                             },
-                            colors = ButtonDefaults.buttonColors(
+                            colors =
+                            ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.error,
                                 contentColor = MaterialTheme.colorScheme.onError
                             ),
