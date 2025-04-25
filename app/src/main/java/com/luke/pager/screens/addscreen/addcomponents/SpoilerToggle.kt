@@ -25,16 +25,17 @@ fun SpoilerToggle(
     currentSpoilerIconIndex: Int,
     onSpoilerToggle: (Boolean, Int) -> Unit
 ) {
-    val spoilerIcons = listOf(
-        R.drawable.ic_sentiment_very_dissatisfied,
-        R.drawable.ic_sentiment_dissatisfied,
-        R.drawable.ic_sentiment_extremely_dissatisfied,
-        R.drawable.ic_sentiment_frustrated,
-        R.drawable.ic_sentiment_sad,
-        R.drawable.ic_sentiment_stressed,
-        R.drawable.ic_sentiment_worried,
-        R.drawable.ic_mood_bad
-    )
+    val spoilerIcons =
+        listOf(
+            R.drawable.ic_sentiment_very_dissatisfied,
+            R.drawable.ic_sentiment_dissatisfied,
+            R.drawable.ic_sentiment_extremely_dissatisfied,
+            R.drawable.ic_sentiment_frustrated,
+            R.drawable.ic_sentiment_sad,
+            R.drawable.ic_sentiment_stressed,
+            R.drawable.ic_sentiment_worried,
+            R.drawable.ic_mood_bad
+        )
     val currentSpoilerIconRes = spoilerIcons[currentSpoilerIconIndex]
     var spoilerLabelState by remember { mutableStateOf(if (spoilers) "Spoilers" else "No spoilers") }
     var spoilerShowLabel by remember { mutableStateOf(false) }
@@ -56,11 +57,12 @@ fun SpoilerToggle(
         IconButton(
             onClick = {
                 val newSpoilers = !spoilers
-                val newIconIndex = if (newSpoilers) {
-                    (currentSpoilerIconIndex + 1) % spoilerIcons.size
-                } else {
-                    currentSpoilerIconIndex
-                }
+                val newIconIndex =
+                    if (newSpoilers) {
+                        (currentSpoilerIconIndex + 1) % spoilerIcons.size
+                    } else {
+                        currentSpoilerIconIndex
+                    }
                 onSpoilerToggle(newSpoilers, newIconIndex)
                 spoilerLabelState = if (newSpoilers) "Spoilers" else "No spoilers"
             }

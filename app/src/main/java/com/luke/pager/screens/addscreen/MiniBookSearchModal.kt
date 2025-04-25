@@ -63,7 +63,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun SearchAndResultsModal(
@@ -92,13 +91,13 @@ fun SearchAndResultsModal(
     if (forceCompressed && imeVisible) {
         forceCompressed = false
     }
-    val targetHeight = when {
-        selectedBook != null -> screenHeight / 1.5f
-        forceCompressed || imeVisible -> screenHeight / 2.2f
-        else -> screenHeight / 1.5f
-    }
+    val targetHeight =
+        when {
+            selectedBook != null -> screenHeight / 1.5f
+            forceCompressed || imeVisible -> screenHeight / 2.2f
+            else -> screenHeight / 1.5f
+        }
     val animatedMaxHeight by animateDpAsState(targetHeight)
-
 
     LaunchedEffect(searchQuery) {
         searchJob?.cancel()
@@ -111,28 +110,30 @@ fun SearchAndResultsModal(
 
         val currentQuery = searchQuery
 
-        val deferredResult = async {
-            searchBooksSmart(currentQuery)
-        }
-
-        searchJob = launch {
-            delay(500)
-            if (currentQuery == searchQuery) {
-                isLoading = true
-                val result = deferredResult.await()
-                books = result.books
-                isLoading = false
-                active = true
-
-                result.errorMessage?.let {
-                    coroutineScope.launch {
-                        snackbarHostState.showSnackbar(it)
-                    }
-                }
-            } else {
-                deferredResult.cancel()
+        val deferredResult =
+            async {
+                searchBooksSmart(currentQuery)
             }
-        }
+
+        searchJob =
+            launch {
+                delay(500)
+                if (currentQuery == searchQuery) {
+                    isLoading = true
+                    val result = deferredResult.await()
+                    books = result.books
+                    isLoading = false
+                    active = true
+
+                    result.errorMessage?.let {
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(it)
+                        }
+                    }
+                } else {
+                    deferredResult.cancel()
+                }
+            }
     }
 
     Scaffold(
@@ -140,7 +141,8 @@ fun SearchAndResultsModal(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
                 .clickable(
@@ -150,7 +152,8 @@ fun SearchAndResultsModal(
                 )
         ) {
             Box(
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .clickable(
                         indication = null,
@@ -158,7 +161,8 @@ fun SearchAndResultsModal(
                     ) { onDismiss() }
             ) {
                 Column(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxWidth(0.9f)
                         .align(Alignment.TopCenter)
                         .padding(top = animatedTopPadding)
@@ -170,7 +174,7 @@ fun SearchAndResultsModal(
                             containerHeight = coordinates.size.height
                         }
                 ) {
-                AnimatedContent(
+                    AnimatedContent(
                         targetState = selectedBook,
                         transitionSpec = {
                             fadeIn(animationSpec = tween(200)).togetherWith(fadeOut(animationSpec = tween(200)))
@@ -184,7 +188,6 @@ fun SearchAndResultsModal(
                                 navController = navController,
                                 containerHeight = containerHeight
                             )
-
                         } else {
                             @Suppress("DEPRECATION")
                             SearchBar(
@@ -202,18 +205,21 @@ fun SearchAndResultsModal(
                                     }
                                 },
                                 placeholder = { Text("Search books...") },
-                                modifier = Modifier
+                                modifier =
+                                Modifier
                                     .fillMaxWidth()
                                     .offset(y = (-4).dp),
                                 windowInsets = WindowInsets(0.dp),
-                                colors = SearchBarDefaults.colors(
+                                colors =
+                                SearchBarDefaults.colors(
                                     containerColor = Color.Transparent,
                                     dividerColor = Color.Transparent
                                 )
                             ) {
                                 if (isLoading) {
                                     Box(
-                                        modifier = Modifier
+                                        modifier =
+                                        Modifier
                                             .fillMaxWidth()
                                             .padding(16.dp),
                                         contentAlignment = Alignment.Center
@@ -225,7 +231,8 @@ fun SearchAndResultsModal(
                                         if (books.isEmpty() && !isLoading && searchQuery.isNotBlank()) {
                                             item {
                                                 Box(
-                                                    modifier = Modifier
+                                                    modifier =
+                                                    Modifier
                                                         .fillMaxWidth()
                                                         .padding(24.dp),
                                                     contentAlignment = Alignment.Center
@@ -254,10 +261,14 @@ fun SearchAndResultsModal(
 }
 
 @Composable
-fun BookRowUIClickable(book: OpenLibraryBook, onClick: () -> Unit) {
+fun BookRowUIClickable(
+    book: OpenLibraryBook,
+    onClick: () -> Unit
+) {
     Column {
         Row(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth()
                 .clickable { onClick() }
                 .padding(vertical = 8.dp),
@@ -282,5 +293,3 @@ fun BookRowUIClickable(book: OpenLibraryBook, onClick: () -> Unit) {
         HorizontalDivider()
     }
 }
-
-

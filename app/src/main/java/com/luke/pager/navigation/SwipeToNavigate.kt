@@ -18,7 +18,8 @@ fun SwipeToNavigate(
     val setDragAmount = 50
 
     Box(
-        modifier = Modifier.pointerInput(Unit) {
+        modifier =
+        Modifier.pointerInput(Unit) {
             detectHorizontalDragGestures { change, dragAmount ->
                 if (dragAmount > setDragAmount) {
                     val previousIndex = (currentIndex - 1).coerceAtLeast(0)

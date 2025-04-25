@@ -56,17 +56,17 @@ class MainActivity : ComponentActivity() {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
 
-        val db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "pager-db")
-            .fallbackToDestructiveMigration(true)
-            .build()
-            .apply {
-                GlobalScope.launch {
-                    // 👇 comment out this line to keep the database
-                    // clearAllTables()
-                    // seedDatabaseIfEmpty(this@apply)
+        val db =
+            Room.databaseBuilder(applicationContext, AppDatabase::class.java, "pager-db")
+                .fallbackToDestructiveMigration(true)
+                .build()
+                .apply {
+                    GlobalScope.launch {
+                        // 👇 comment out this line to keep the database
+                        // clearAllTables()
+                        // seedDatabaseIfEmpty(this@apply)
+                    }
                 }
-
-            }
         val bookDao = db.bookDao()
         val reviewDao = db.reviewDao()
         val bookRepo = BookRepository(bookDao)
@@ -86,7 +86,10 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun PagerAppUI(bookViewModel: BookViewModel, reviewViewModel: ReviewViewModel) {
+fun PagerAppUI(
+    bookViewModel: BookViewModel,
+    reviewViewModel: ReviewViewModel
+) {
     PagerTheme {
         val navController = rememberNavController()
         val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -98,10 +101,11 @@ fun PagerAppUI(bookViewModel: BookViewModel, reviewViewModel: ReviewViewModel) {
             if (animatedTargetColor == null) {
                 delay(1)
             }
-            animatedTargetColor = when (currentRoute) {
-                "plus" -> NiceBlue
-                else -> Color(0xFFF7FEFF)
-            }
+            animatedTargetColor =
+                when (currentRoute) {
+                    "plus" -> NiceBlue
+                    else -> Color(0xFFF7FEFF)
+                }
         }
 
         val animatedBackgroundColor by animateColorAsState(
@@ -110,7 +114,8 @@ fun PagerAppUI(bookViewModel: BookViewModel, reviewViewModel: ReviewViewModel) {
         )
 
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .background(animatedBackgroundColor)
         ) {
@@ -118,7 +123,8 @@ fun PagerAppUI(bookViewModel: BookViewModel, reviewViewModel: ReviewViewModel) {
                 painter = painterResource(id = R.drawable.clean_gray_paper),
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds,
-                modifier = Modifier
+                modifier =
+                Modifier
                     .fillMaxSize()
                     .alpha(0.9f)
             )
@@ -128,7 +134,8 @@ fun PagerAppUI(bookViewModel: BookViewModel, reviewViewModel: ReviewViewModel) {
                 bottomBar = { BottomNavBar(navController) }
             ) { paddingValues ->
                 Box(
-                    modifier = Modifier
+                    modifier =
+                    Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
                 ) {

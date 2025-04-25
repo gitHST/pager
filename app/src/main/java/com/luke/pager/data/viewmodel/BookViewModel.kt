@@ -16,7 +16,6 @@ import kotlinx.coroutines.withContext
 import java.net.URL
 
 class BookViewModel(private val bookRepository: BookRepository, private val reviewRepository: ReviewRepository) : ViewModel() {
-
     private val _books = MutableStateFlow<List<BookEntity>>(emptyList())
     val books: StateFlow<List<BookEntity>> get() = _books
 
@@ -39,7 +38,6 @@ class BookViewModel(private val bookRepository: BookRepository, private val revi
             }
         }
     }
-
 
     fun loadBooks() {
         viewModelScope.launch {
@@ -68,26 +66,28 @@ class BookViewModel(private val bookRepository: BookRepository, private val revi
         viewModelScope.launch {
             val coverImage = downloadCoverImage(openBook.coverIndex)
 
-            val book = BookEntity(
-                title = openBook.title,
-                authors = openBook.authorName?.joinToString(),
-                openlibraryKey = openBook.key,
-                firstPublishDate = openBook.firstPublishYear?.toString(),
-                cover = coverImage
-            )
+            val book =
+                BookEntity(
+                    title = openBook.title,
+                    authors = openBook.authorName?.joinToString(),
+                    openlibraryKey = openBook.key,
+                    firstPublishDate = openBook.firstPublishYear?.toString(),
+                    cover = coverImage
+                )
 
             val bookId = insertAndReturnId(book)
 
             val sanitizedReviewText = reviewText.takeIf { it.isNotBlank() }
 
-            val review = ReviewEntity(
-                bookId = bookId,
-                rating = rating,
-                reviewText = sanitizedReviewText,
-                dateReviewed = dateReviewed,
-                privacy = privacy,
-                hasSpoilers = hasSpoilers
-            )
+            val review =
+                ReviewEntity(
+                    bookId = bookId,
+                    rating = rating,
+                    reviewText = sanitizedReviewText,
+                    dateReviewed = dateReviewed,
+                    privacy = privacy,
+                    hasSpoilers = hasSpoilers
+                )
 
             reviewRepository.insertReview(review)
             loadBooks()
@@ -95,5 +95,4 @@ class BookViewModel(private val bookRepository: BookRepository, private val revi
             onSuccess()
         }
     }
-
 }

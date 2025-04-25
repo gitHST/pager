@@ -36,7 +36,8 @@ fun StarRatingBar(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
-        modifier = Modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
             .height(starSize)
     ) {
@@ -49,19 +50,22 @@ fun StarRatingBar(
             Icon(Icons.Default.Remove, contentDescription = "Decrease Rating", tint = MaterialTheme.colorScheme.primary)
         }
         Box(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxWidth(starRowWidthFraction)
                 .height(starSize)
         ) {
             Row(modifier = Modifier.matchParentSize()) {
                 for (i in 1..5) {
-                    val icon = when {
-                        rating >= i -> Icons.Filled.Star
-                        rating == i - 0.5f -> Icons.AutoMirrored.Outlined.StarHalf
-                        else -> Icons.Outlined.StarBorder
-                    }
+                    val icon =
+                        when {
+                            rating >= i -> Icons.Filled.Star
+                            rating == i - 0.5f -> Icons.AutoMirrored.Outlined.StarHalf
+                            else -> Icons.Outlined.StarBorder
+                        }
                     Box(
-                        modifier = Modifier
+                        modifier =
+                        Modifier
                             .weight(1f)
                             .fillMaxHeight()
                             .clickable {

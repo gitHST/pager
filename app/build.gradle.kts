@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.google.ksp)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ktlint)
 }
 
 android {
@@ -47,6 +48,10 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+
+    ktlint {
+        disabledRules.set(setOf("function-naming"))
     }
 
     buildFeatures {

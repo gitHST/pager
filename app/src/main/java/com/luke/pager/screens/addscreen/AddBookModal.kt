@@ -49,9 +49,10 @@ fun ReviewBook(
     var reviewText by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var showDatePicker by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-    )
+    val datePickerState =
+        rememberDatePickerState(
+            initialSelectedDateMillis = selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        )
 
     Box(modifier = Modifier.fillMaxSize()) {
         val scrollState = rememberScrollState()
@@ -67,14 +68,16 @@ fun ReviewBook(
             bookViewModel = bookViewModel,
             navController = navController,
             scrollState = scrollState,
-            modifier = Modifier
+            modifier =
+            Modifier
                 .align(Alignment.TopCenter)
                 .fillMaxWidth()
                 .padding(vertical = 16.dp, horizontal = 8.dp)
         )
 
         Column(
-            modifier = Modifier
+            modifier =
+            Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
                 .animateContentSize()
