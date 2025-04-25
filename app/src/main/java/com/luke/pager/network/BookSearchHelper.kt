@@ -3,13 +3,10 @@ package com.luke.pager.network
 import retrofit2.HttpException
 import java.io.IOException
 
-
 data class SearchResult(
     val books: List<OpenLibraryBook>,
     val errorMessage: String? = null
 )
-
-
 
 suspend fun searchBooksSmart(rawQuery: String): SearchResult {
     val query = rawQuery.trim()
@@ -32,8 +29,6 @@ suspend fun searchBooksSmart(rawQuery: String): SearchResult {
     } catch (e: Exception) {
         return SearchResult(emptyList(), "Unknown error: ${e.localizedMessage ?: "No message"}")
     }
-
-
 
     val combined = (titleResponse.docs + authorResponse.docs)
     val seen = mutableMapOf<Pair<String, String>, OpenLibraryBook>()
@@ -70,10 +65,7 @@ suspend fun searchBooksSmart(rawQuery: String): SearchResult {
     return SearchResult(sorted)
 }
 
-
-
-
-    fun String.normalizeTitle(): String {
+fun String.normalizeTitle(): String {
     return this.lowercase()
         .replace(Regex("""^["'“”‘’]+|["'“”‘’]+$"""), "")   // remove leading/trailing quotes
         .replace(Regex("""\s*\(.*?\)"""), "")              // remove parentheses and content

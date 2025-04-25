@@ -73,7 +73,6 @@ fun SearchAndResultsModal(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
-
     var searchQuery by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
     var books by remember { mutableStateOf<List<OpenLibraryBook>>(emptyList()) }
@@ -84,29 +83,21 @@ fun SearchAndResultsModal(
     val keyboardController = LocalSoftwareKeyboardController.current
     var hasActivatedOnce by remember { mutableStateOf(false) }
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-
     val imePadding = WindowInsets.ime.asPaddingValues()
     val imeVisible by remember {
         derivedStateOf { imePadding.calculateBottomPadding() > 0.dp }
     }
-
     val animatedTopPadding by animateDpAsState(36.dp)
-
     var forceCompressed by remember { mutableStateOf(false) }
-
     if (forceCompressed && imeVisible) {
         forceCompressed = false
     }
-
     val targetHeight = when {
         selectedBook != null -> screenHeight / 1.5f
         forceCompressed || imeVisible -> screenHeight / 2.2f
         else -> screenHeight / 1.5f
     }
-
     val animatedMaxHeight by animateDpAsState(targetHeight)
-
-
 
 
     LaunchedEffect(searchQuery) {
@@ -200,7 +191,7 @@ fun SearchAndResultsModal(
                                 query = searchQuery,
                                 onQueryChange = { searchQuery = it },
                                 onSearch = {
-                                    keyboardController?.hide() // Hides the keyboard
+                                    keyboardController?.hide()
                                 },
                                 active = active,
                                 onActiveChange = { isActive ->
@@ -272,14 +263,14 @@ fun BookRowUIClickable(book: OpenLibraryBook, onClick: () -> Unit) {
                 .padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            BookCover(book.cover_i)
+            BookCover(book.coverIndex)
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(book.title, style = MaterialTheme.typography.bodyLarge)
-                book.author_name?.let {
+                book.authorName?.let {
                     Text(it.joinToString(), style = MaterialTheme.typography.bodySmall)
                 }
-                book.first_publish_year?.let {
+                book.firstPublishYear?.let {
                     Text(
                         it.toString(),
                         style = MaterialTheme.typography.bodySmall,
