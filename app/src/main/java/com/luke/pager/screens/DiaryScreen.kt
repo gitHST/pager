@@ -161,17 +161,21 @@ fun BookItem(
                     .clip(RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                var imageBitmap by remember { mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
-                var loading by remember { mutableStateOf(true) }
+                var imageBitmap by remember(book.id) { mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
+                var loading by remember(book.id) { mutableStateOf(true) }
 
-                LaunchedEffect(book.cover) {
-                    book.cover?.let {
+                LaunchedEffect(book.cover, book.id) {
+                    if (book.cover != null) {
                         loading = true
-                        val bitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
+                        val bitmap = BitmapFactory.decodeByteArray(book.cover, 0, book.cover.size)
                         imageBitmap = bitmap.asImageBitmap()
+                        loading = false
+                    } else {
+                        imageBitmap = null
                         loading = false
                     }
                 }
+
 
                 if (loading && book.cover != null) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp))
