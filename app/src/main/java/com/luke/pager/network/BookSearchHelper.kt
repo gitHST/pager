@@ -15,6 +15,10 @@ suspend fun searchBooksSmart(rawQuery: String): SearchResult {
     val titleResponse: OpenLibrarySearchResponse
     val authorResponse: OpenLibrarySearchResponse
 
+    println("Calling API with query: $query")
+    println("Base URL: ${OpenLibraryService.api}")
+
+
     try {
         titleResponse = OpenLibraryService.api.searchBooks(title = query)
         authorResponse = OpenLibraryService.api.searchBooks(author = query)
