@@ -50,10 +50,6 @@ android {
         jvmTarget = "1.8"
     }
 
-    ktlint {
-        disabledRules.set(setOf("function-naming"))
-    }
-
     buildFeatures {
         compose = true
     }
