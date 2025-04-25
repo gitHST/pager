@@ -63,8 +63,6 @@ fun BookCover(coverId: Int?, modifier: Modifier = Modifier) {
             )
         }
 
-
-
         when (painterState) {
             is AsyncImagePainter.State.Loading -> {
                 CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)

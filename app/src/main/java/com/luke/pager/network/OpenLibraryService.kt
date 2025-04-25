@@ -7,7 +7,7 @@ data class OpenLibrarySearchResponse(
 data class OpenLibraryBook(
     val key: String,
     val title: String,
-    val author_name: List<String>?,
-    val cover_i: Int?,
-    val first_publish_year: Int?
+    val authorName: List<String>?,
+    val coverIndex: Int?,
+    val firstPublishYear: Int?
 )
