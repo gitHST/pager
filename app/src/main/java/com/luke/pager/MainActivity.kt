@@ -1,6 +1,8 @@
 // MainActivity.kt
 package com.luke.pager
 
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -45,6 +47,15 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val screenLayout = resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK
+        val isLargeScreen = screenLayout == Configuration.SCREENLAYOUT_SIZE_LARGE || screenLayout == Configuration.SCREENLAYOUT_SIZE_XLARGE
+        val isFoldableOrTablet = isLargeScreen || isDeviceFoldable()
+
+        if (!isFoldableOrTablet) {
+            @Suppress("SourceLockedOrientationActivity")
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
+
         val db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "pager-db")
             .fallbackToDestructiveMigration(true)
             .build()
@@ -66,6 +77,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             PagerAppUI(bookViewModel, reviewViewModel)
         }
+    }
+
+    private fun isDeviceFoldable(): Boolean {
+        val config = resources.configuration
+        return config.smallestScreenWidthDp >= 600
     }
 }
 
