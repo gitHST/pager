@@ -176,7 +176,6 @@ fun BookItem(
                     }
                 }
 
-
                 if (loading && book.cover != null) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp))
                 } else if (imageBitmap != null) {

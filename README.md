@@ -98,6 +98,5 @@ Pager is an all in one android app for browsing and reviewing books and sharing 
 ## Possible feature ideas
 #### Book calendar
 #### Statistics page
-#### 
 ## Contact me
 Email: Lukew2048@gmail.com
