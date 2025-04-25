@@ -11,6 +11,8 @@ data class OpenLibraryBook(
     val title: String,
     @SerializedName("author_name")
     val authorName: List<String>?,
+    @SerializedName("cover_i")
     val coverIndex: Int?,
+    @SerializedName("first_publish_year")
     val firstPublishYear: Int?
 )
