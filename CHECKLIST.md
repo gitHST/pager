@@ -30,7 +30,6 @@ Use this checklist before releasing a version of the app on GitHub.
 ## 🧪 Testing
 
 - [ ] All unit tests pass
-- [ ] All UI tests pass (if any)
 - [ ] Manual testing across devices, orientations, themes
 - [ ] Accessibility basics tested (TalkBack, font scaling)
 - [ ] Crash handling tested (if integrated)
