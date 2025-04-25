@@ -41,7 +41,7 @@ class SearchBooksSmartTest {
 
         assertNull(result.errorMessage)
         assertEquals(2, result.books.size)
-        assertTrue(result.books.any { it.title == "Great Adventure" })
+        assertTrue(result.books.any { it.title == "The Great Adventure" })
         assertTrue(result.books.any { it.title == "Adventure Time" })
     }
 
