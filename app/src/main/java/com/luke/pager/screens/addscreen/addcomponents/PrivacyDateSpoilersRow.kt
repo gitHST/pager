@@ -188,7 +188,11 @@ fun SpoilerToggle(
         IconButton(
             onClick = {
                 val newSpoilers = !spoilers
-                val newIconIndex = (currentSpoilerIconIndex + 1) % spoilerIcons.size
+                val newIconIndex = if (newSpoilers) {
+                    (currentSpoilerIconIndex + 1) % spoilerIcons.size
+                } else {
+                    currentSpoilerIconIndex
+                }
                 onSpoilerToggle(newSpoilers, newIconIndex)
                 spoilerLabelState = if (newSpoilers) "Spoilers" else "No spoilers"
             }
