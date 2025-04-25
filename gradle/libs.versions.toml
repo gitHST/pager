@@ -19,7 +19,7 @@ room = "2.7.1"  # Use the latest version if available
 ksp = "2.1.20-2.0.0"
 retrofit = "2.9.0"
 coil = "2.5.0"  # Coil version
-ktlint = "11.6.0"
+ktlint = "11.6.0" # suppress upgrade
 mockk = "1.13.10"
 kotlin-test = "1.7.3"
 
@@ -55,7 +55,6 @@ retrofit-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref 
 material-symbols-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "composeMaterialIcons" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlin-test" }
-
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

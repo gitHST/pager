@@ -65,7 +65,7 @@ android {
 
     @Suppress("UnstableApiUsage")
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.14"
     }
 
     packaging.resources {
@@ -75,6 +75,22 @@ android {
 
 jacoco {
     toolVersion = "0.8.10"
+}
+
+tasks.withType<Test> {
+    useJUnit()
+    extensions.configure<JacocoTaskExtension> {
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
+    }
+}
+
+tasks.named("ktlintCheck") {
+    group = "verification"
+}
+
+tasks.named("ktlintFormat") {
+    group = "formatting"
 }
 
 tasks.register<JacocoReport>("jacocoTestReport") {
@@ -107,7 +123,8 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     classDirectories.setFrom(files(debugTree, kotlinDebugTree))
     sourceDirectories.setFrom(files("src/main/java", "src/main/kotlin"))
     executionData.setFrom(fileTree(buildDirFile) {
-        include("**/jacoco/testDebugUnitTest.exec")
+        include("**/jacoco/testDebugUnitTest.exec",
+            "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
     })
 }
 
