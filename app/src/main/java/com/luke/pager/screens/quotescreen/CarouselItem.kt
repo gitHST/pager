@@ -13,50 +13,46 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 
 @Composable
-fun CarouselItem(imageBitmap: ImageBitmap, distanceFromFront: Int, scrollOffset: Float) {
-    val clampedDistance = distanceFromFront.coerceIn(-2, 2)
+fun CarouselItemContinuous(imageBitmap: ImageBitmap, continuousDistance: Float, isDummy: Boolean) {
 
-    val targetScale = when (clampedDistance) {
-        0 -> 1.2f
-        1, -1 -> 1.0f
-        else -> 0.8f
+    val translateDensity = LocalDensity.current
+
+
+    var scale = 1.2f
+    var rotationY = 0f
+    var alpha = if (!isDummy) 1f else 0f
+    var translationX = 0f
+
+    if (continuousDistance >= 0) {
+        scale = 1.2f - (0.2f * kotlin.math.abs(continuousDistance).coerceAtMost(1f))
+        rotationY = continuousDistance.coerceIn(-2f, 2f) * -20f
+    } else {
+        alpha = 1f + (1f * continuousDistance.coerceAtMost(1f))
+        translationX = with(translateDensity) { (60 * continuousDistance).dp.toPx() }
     }
-
-    val targetRotationY = when {
-        clampedDistance == 0 -> 0f
-        clampedDistance > 0 -> -20f * clampedDistance
-        else -> 20f * -clampedDistance
-    }
-
-    val baseAlpha = when (clampedDistance) {
-        0 -> 1f
-        1, -1 -> 0.8f
-        else -> 0.5f
-    }
-
-    // Adjust front alpha based on scrollOffset
-    val adjustedAlpha = if (clampedDistance == 0) {
-        (1f - scrollOffset).coerceIn(0.3f, 1f)
-    } else baseAlpha
-
-    val animatedScale by animateFloatAsState(targetValue = targetScale)
-    val animatedRotationY by animateFloatAsState(targetValue = targetRotationY)
-    val animatedAlpha by animateFloatAsState(targetValue = adjustedAlpha)
+    val animatedScale by animateFloatAsState(scale)
+    val animatedRotationY by animateFloatAsState(rotationY)
+    val animatedAlpha by animateFloatAsState(alpha)
+    val animatedTranslationX by animateFloatAsState(translationX)
 
     Box(
         modifier = Modifier
-            .width(120.dp)
+            .width(110.dp)
             .aspectRatio(2f / 3f)
             .graphicsLayer {
                 scaleX = animatedScale
                 scaleY = animatedScale
-                rotationY = animatedRotationY
-                alpha = animatedAlpha
+                this.translationX = animatedTranslationX
+                this.rotationY = animatedRotationY
+                this.alpha = animatedAlpha
                 cameraDistance = 8 * density
             }
+            .zIndex(-continuousDistance)
             .clip(RoundedCornerShape(8.dp))
     ) {
         Image(
