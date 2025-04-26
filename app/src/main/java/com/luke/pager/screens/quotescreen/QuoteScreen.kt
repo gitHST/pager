@@ -6,7 +6,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -22,11 +23,15 @@ import com.luke.pager.data.viewmodel.BookViewModel
 fun QuotesScreen(viewModel: BookViewModel) {
     val bookList by viewModel.books.collectAsState()
 
+
     val booksWithCovers = bookList.mapNotNull { book ->
         book.cover?.let { coverBytes ->
             byteArrayToImageBitmap(coverBytes) to book
         }
     }
+
+    val listState = rememberLazyListState()
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (booksWithCovers.isEmpty()) {
@@ -35,16 +40,21 @@ fun QuotesScreen(viewModel: BookViewModel) {
             }
         } else {
             LazyRow(
+                state = listState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(horizontal = 32.dp, vertical = 64.dp)
             ) {
-                items(booksWithCovers) { (imageBitmap, book) ->
-                    CarouselItem(imageBitmap)
+                val scrollOffset = listState.firstVisibleItemScrollOffset / 300f
+
+                itemsIndexed(booksWithCovers) { index, (imageBitmap, book) ->
+                    val distanceFromFront = index - listState.firstVisibleItemIndex
+                    CarouselItem(imageBitmap, distanceFromFront, scrollOffset)
                 }
             }
+
         }
     }
 }
