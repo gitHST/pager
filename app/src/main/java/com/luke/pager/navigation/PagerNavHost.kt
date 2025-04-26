@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.luke.pager.data.viewmodel.BookViewModel
+import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.data.viewmodel.ReviewViewModel
 import com.luke.pager.screens.ActivityScreen
 import com.luke.pager.screens.DiaryScreen
@@ -22,15 +23,16 @@ import com.luke.pager.screens.addscreen.SearchAndResultsModal
 fun PagerNavHost(
     navController: NavHostController,
     bookViewModel: BookViewModel,
-    reviewViewModel: ReviewViewModel
+    reviewViewModel: ReviewViewModel,
+    quoteViewModel: QuoteViewModel
 ) {
     val navItems =
         listOf(
             // NavItem("activity", "Activity"),
             NavItem("diary", "Diary"),
-            NavItem("plus", "+")
+            NavItem("plus", "+"),
             // NavItem("search", "Search"),
-            // NavItem("quotes", "Quotes")
+            NavItem("quotes", "Quotes")
         )
 
     val currentRoute by navController.currentBackStackEntryAsState()
