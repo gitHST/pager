@@ -49,6 +49,12 @@ Pager is an all in one android app for browsing and reviewing books and sharing 
       - Coverage Reporting
   - Disable landscape mode
 
+### `Version 0.4.0 "Voltaire"`
+- Quotes
+  - The ability to add quotes for a book
+  - The ability to view diary books in a carousel
+  - The ability to view all quotes you've added to a book under it in the carousel
+
 ### `Version 1.0.0 "Bookworm"`
 - View books
     - The ability to sort diary by date reviewed, rating, title, name of author, and date published.
