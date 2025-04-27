@@ -2,6 +2,7 @@ package com.luke.pager.screens.quotescreen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -83,39 +84,46 @@ fun QuotesScreen(viewModel: BookViewModel) {
             }
         }
     }
+    Column() {
+        Box(modifier = Modifier.fillMaxSize().weight(0.4f)) {
+            if (booksWithConvertedCovers.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("No books with covers", fontSize = 24.sp)
+                }
+            } else {
+                val firstVisibleItemIndex by remember {
+                    derivedStateOf { listState.firstVisibleItemIndex }
+                }
+                val firstVisibleItemScrollOffset by remember {
+                    derivedStateOf { listState.firstVisibleItemScrollOffset }
+                }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        if (booksWithConvertedCovers.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("No books with covers", fontSize = 24.sp)
-            }
-        } else {
-            val firstVisibleItemIndex by remember {
-                derivedStateOf { listState.firstVisibleItemIndex }
-            }
-            val firstVisibleItemScrollOffset by remember {
-                derivedStateOf { listState.firstVisibleItemScrollOffset }
-            }
+                LazyRow(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy((-30).dp),
+                    contentPadding = PaddingValues(horizontal = 32.dp, vertical = 64.dp)
+                ) {
+                    itemsIndexed(
+                        booksWithConvertedCovers,
+                        key = { _, item -> item.book.id }) { index, item ->
+                        val rawDistance = index - firstVisibleItemIndex
+                        val continuousDistance =
+                            rawDistance - (firstVisibleItemScrollOffset / itemWidthPx)
 
-            LazyRow(
-                state = listState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy((-30).dp),
-                contentPadding = PaddingValues(horizontal = 32.dp, vertical = 64.dp)
-            ) {
-                itemsIndexed(booksWithConvertedCovers, key = { _, item -> item.book.id }) { index, item ->
-                    val rawDistance = index - firstVisibleItemIndex
-                    val continuousDistance = rawDistance - (firstVisibleItemScrollOffset / itemWidthPx)
-
-                    CarouselItemContinuous(
-                        imageBitmap = item.imageBitmap,
-                        continuousDistance = continuousDistance,
-                        isDummy = item.isDummy
-                    )
+                        CarouselItemContinuous(
+                            imageBitmap = item.imageBitmap,
+                            continuousDistance = continuousDistance,
+                            isDummy = item.isDummy
+                        )
+                    }
                 }
             }
+        }
+        Box(modifier = Modifier.weight(0.6f)) {
+            Text("Placeholder", fontSize = 24.sp)
         }
     }
 }
