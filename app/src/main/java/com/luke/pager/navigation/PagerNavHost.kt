@@ -14,9 +14,9 @@ import com.luke.pager.data.viewmodel.ReviewViewModel
 import com.luke.pager.screens.ActivityScreen
 import com.luke.pager.screens.DiaryScreen
 import com.luke.pager.screens.ExploreScreen
-import com.luke.pager.screens.quotescreen.QuotesScreen
 import com.luke.pager.screens.ReviewScreen
 import com.luke.pager.screens.addscreen.SearchAndResultsModal
+import com.luke.pager.screens.quotescreen.QuotesScreen
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -63,7 +63,7 @@ fun PagerNavHost(
         }
         composable("quotes") {
             SwipeToNavigate(navController, currentRoute?.destination?.route.orEmpty(), navItems) {
-                QuotesScreen(bookViewModel)
+                QuotesScreen(bookViewModel, quoteViewModel)
             }
         }
         composable("review_screen/{reviewId}") { backStackEntry ->
