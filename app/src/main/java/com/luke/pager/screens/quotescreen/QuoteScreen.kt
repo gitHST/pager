@@ -1,26 +1,34 @@
 package com.luke.pager.screens.quotescreen
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -29,15 +37,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.createBitmap
 import com.luke.pager.data.entities.BookEntity
-import com.luke.pager.data.entities.QuoteEntity
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -140,49 +149,8 @@ fun QuotesScreen(bookViewModel: BookViewModel, quoteViewModel: QuoteViewModel) {
                 }
             }
         }
-        Box(modifier = Modifier.weight(0.4f).padding(16.dp)) {
-            val coroutineScope = rememberCoroutineScope()
 
-            var selectedBookIndex by remember { mutableIntStateOf(0) }
-            val selectableBooks = booksWithConvertedCovers.filter { !it.isDummy }
-
-            var quoteText by remember { mutableStateOf(TextFieldValue("")) }
-            var pageNumberText by remember { mutableStateOf(TextFieldValue("")) }
-
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (selectableBooks.isNotEmpty()) {
-                    DropdownMenuBox(selectableBooks, selectedBookIndex) {
-                        selectedBookIndex = it
-                    }
-                }
-
-                OutlinedTextField(
-                    value = quoteText,
-                    onValueChange = { quoteText = it },
-                    label = { Text("Quote Text") },
-                    singleLine = false,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Button(onClick = {
-                    val bookId = selectableBooks.getOrNull(selectedBookIndex)?.book?.id
-                    if (!quoteText.text.isBlank() && bookId != null) {
-                        val pageNum = pageNumberText.text.toIntOrNull()
-                        coroutineScope.launch {
-                            quoteViewModel.addQuote(
-                                QuoteEntity(bookId = bookId, quoteText = quoteText.text, pageNumber = pageNum)
-                            )
-                            quoteViewModel.loadQuotesForBook(bookId)
-                            quoteText = TextFieldValue("")
-                            pageNumberText = TextFieldValue("")
-                        }
-                    }
-                }) {
-                    Text("Add Quote")
-                }
-            }
-        }
-        Box(modifier = Modifier.weight(0.2f).padding(16.dp)) {
+        Box(modifier = Modifier.weight(0.6f).padding(16.dp)) {
             if (quotes.isEmpty()) {
                 Text("No quotes for this book", fontSize = 18.sp)
             } else {
@@ -197,7 +165,115 @@ fun QuotesScreen(bookViewModel: BookViewModel, quoteViewModel: QuoteViewModel) {
             }
         }
     }
+
+    var fabExpanded by remember { mutableStateOf(false) }
+    var fabFullyCollapsed by remember { mutableStateOf(true) }
+    var fabVisibleAfterDelay by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.BottomEnd
+    ) {
+        if (fabExpanded) {
+            // Tap anywhere to collapse
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .pointerInput(fabExpanded) {
+                        awaitPointerEventScope {
+                            while (fabExpanded) {
+                                fabExpanded = false
+                                fabFullyCollapsed = false
+                                fabVisibleAfterDelay = false
+                            }
+                        }
+                    }
+            )
+        }
+
+        Column(
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(8.dp)
+        ) {
+            // FABs with delay before showing
+            AnimatedVisibility(
+                visible = fabVisibleAfterDelay,
+                enter = slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(durationMillis = 200)
+                ) + fadeIn(animationSpec = tween(durationMillis = 200)),
+                exit = slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(durationMillis = 150)
+                ) + fadeOut(animationSpec = tween(durationMillis = 150))
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    ExtendedFabItem(
+                        text = "Write",
+                        icon = Icons.Default.FormatQuote,
+                        onClick = { /* Handle Add Quote */ }
+                    )
+                    ExtendedFabItem(
+                        text = "Scan",
+                        icon = Icons.Default.Create,
+                        onClick = { /* Handle another action */ }
+                    )
+                }
+            }
+
+            // Fade in + FAB after collapse
+            AnimatedVisibility(
+                visible = !fabExpanded && fabFullyCollapsed,
+                enter = fadeIn(animationSpec = tween(durationMillis = 150)),
+                exit = fadeOut(animationSpec = tween(durationMillis = 100))
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    FloatingActionButton(
+                        onClick = {
+                            fabExpanded = true
+                            fabFullyCollapsed = false
+                            fabVisibleAfterDelay = false
+                        },
+                        containerColor = FloatingActionButtonDefaults.containerColor
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = "Expand Actions")
+                    }
+                }
+            }
+        }
+
+        // Delay before showing extended FABs
+        LaunchedEffect(fabExpanded) {
+            if (fabExpanded) {
+                delay(50)
+                fabVisibleAfterDelay = true
+            } else {
+                delay(200) // Wait for closing animation
+                fabFullyCollapsed = true
+            }
+        }
+    }
+
 }
+
+@Composable
+fun ExtendedFabItem(text: String, icon: ImageVector, onClick: () -> Unit) {
+    ExtendedFloatingActionButton(
+        text = { Text(text) },
+        icon = { Icon(icon, contentDescription = text) },
+        onClick = onClick
+    )
+}
+
 
 data class DisplayBook(
     val imageBitmap: ImageBitmap,
@@ -219,27 +295,4 @@ fun createPlaceholderBitmap(): ImageBitmap {
     val bitmap = createBitmap(width, height)
     bitmap.eraseColor(android.graphics.Color.LTGRAY)
     return bitmap.asImageBitmap()
-}
-
-@Composable
-fun DropdownMenuBox(books: List<DisplayBook>, selectedIndex: Int, onSelectedChange: (Int) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    val selectedBookTitle = books.getOrNull(selectedIndex)?.book?.title ?: "Select a Book"
-
-    Box {
-        Button(onClick = { expanded = true }) {
-            Text(selectedBookTitle)
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            books.forEachIndexed { index, item ->
-                DropdownMenuItem(
-                    text = { Text(item.book.title) },
-                    onClick = {
-                        onSelectedChange(index)
-                        expanded = false
-                    }
-                )
-            }
-        }
-    }
 }
