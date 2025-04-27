@@ -5,39 +5,48 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.createBitmap
 import com.luke.pager.data.entities.BookEntity
+import com.luke.pager.data.entities.QuoteEntity
 import com.luke.pager.data.viewmodel.BookViewModel
+import com.luke.pager.data.viewmodel.QuoteViewModel
 import kotlinx.coroutines.launch
 
 
 @Composable
-fun QuotesScreen(viewModel: BookViewModel) {
-    val bookList by viewModel.books.collectAsState()
+fun QuotesScreen(bookViewModel: BookViewModel, quoteViewModel: QuoteViewModel) {
+    val bookList by bookViewModel.books.collectAsState()
+    val quotes by quoteViewModel.quotes.collectAsState()
 
     val placeholderBitmap = remember { createPlaceholderBitmap() }
-
-    // Data class for holding book info along with dummy flag
-    data class DisplayBook(val imageBitmap: ImageBitmap, val book: BookEntity, val isDummy: Boolean)
 
     val booksWithConvertedCovers = remember(bookList) {
         val converted = bookList.mapNotNull { book ->
@@ -70,6 +79,8 @@ fun QuotesScreen(viewModel: BookViewModel) {
         converted
     }
 
+    var selectedBookId by remember { mutableStateOf<Long?>(null) }
+
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
@@ -81,6 +92,13 @@ fun QuotesScreen(viewModel: BookViewModel) {
                     if (listState.firstVisibleItemScrollOffset > 150) 1 else 0
             coroutineScope.launch {
                 listState.animateScrollToItem(nearestItemIndex)
+            }
+
+            // Load quotes for the nearest book (if not dummy)
+            val nearestBook = booksWithConvertedCovers.getOrNull(nearestItemIndex)
+            nearestBook?.takeIf { !it.isDummy }?.let {
+                selectedBookId = it.book.id
+                quoteViewModel.loadQuotesForBook(it.book.id)
             }
         }
     }
@@ -122,12 +140,70 @@ fun QuotesScreen(viewModel: BookViewModel) {
                 }
             }
         }
-        Box(modifier = Modifier.weight(0.6f)) {
-            Text("Placeholder", fontSize = 24.sp)
+        Box(modifier = Modifier.weight(0.4f).padding(16.dp)) {
+            val coroutineScope = rememberCoroutineScope()
+
+            var selectedBookIndex by remember { mutableIntStateOf(0) }
+            val selectableBooks = booksWithConvertedCovers.filter { !it.isDummy }
+
+            var quoteText by remember { mutableStateOf(TextFieldValue("")) }
+            var pageNumberText by remember { mutableStateOf(TextFieldValue("")) }
+
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (selectableBooks.isNotEmpty()) {
+                    DropdownMenuBox(selectableBooks, selectedBookIndex) {
+                        selectedBookIndex = it
+                    }
+                }
+
+                OutlinedTextField(
+                    value = quoteText,
+                    onValueChange = { quoteText = it },
+                    label = { Text("Quote Text") },
+                    singleLine = false,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Button(onClick = {
+                    val bookId = selectableBooks.getOrNull(selectedBookIndex)?.book?.id
+                    if (!quoteText.text.isBlank() && bookId != null) {
+                        val pageNum = pageNumberText.text.toIntOrNull()
+                        coroutineScope.launch {
+                            quoteViewModel.addQuote(
+                                QuoteEntity(bookId = bookId, quoteText = quoteText.text, pageNumber = pageNum)
+                            )
+                            quoteViewModel.loadQuotesForBook(bookId)
+                            quoteText = TextFieldValue("")
+                            pageNumberText = TextFieldValue("")
+                        }
+                    }
+                }) {
+                    Text("Add Quote")
+                }
+            }
+        }
+        Box(modifier = Modifier.weight(0.2f).padding(16.dp)) {
+            if (quotes.isEmpty()) {
+                Text("No quotes for this book", fontSize = 18.sp)
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    quotes.forEach { quote ->
+                        Text("\"${quote.quoteText}\"", fontSize = 16.sp)
+                        quote.pageNumber?.let {
+                            Text("Page: $it", fontSize = 12.sp)
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
+data class DisplayBook(
+    val imageBitmap: ImageBitmap,
+    val book: BookEntity,
+    val isDummy: Boolean
+)
 
 // Dummy book helper
 data class DummyBook(val id: Long, val title: String) {
@@ -143,4 +219,27 @@ fun createPlaceholderBitmap(): ImageBitmap {
     val bitmap = createBitmap(width, height)
     bitmap.eraseColor(android.graphics.Color.LTGRAY)
     return bitmap.asImageBitmap()
+}
+
+@Composable
+fun DropdownMenuBox(books: List<DisplayBook>, selectedIndex: Int, onSelectedChange: (Int) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    val selectedBookTitle = books.getOrNull(selectedIndex)?.book?.title ?: "Select a Book"
+
+    Box {
+        Button(onClick = { expanded = true }) {
+            Text(selectedBookTitle)
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            books.forEachIndexed { index, item ->
+                DropdownMenuItem(
+                    text = { Text(item.book.title) },
+                    onClick = {
+                        onSelectedChange(index)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
 }
