@@ -1,5 +1,9 @@
 package com.luke.pager.screens.quotescreen
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -23,51 +27,80 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.luke.pager.data.viewmodel.QuoteViewModel
 
+
 @Composable
-fun AddQuoteModal(onDismiss: () -> Unit, quoteViewModel: QuoteViewModel, navController: NavController) {
+fun AddQuoteModal(
+    onDismiss: () -> Unit,
+    quoteViewModel: QuoteViewModel,
+    navController: NavController,
+    overlayAlpha: Float
+) {
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val modalHeight = screenHeight / 1.5f
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .clickable(onClick = onDismiss, indication = null, interactionSource = remember { MutableInteractionSource() })
     ) {
-        Column(
+        // Dark clickable background
+        Box(
             modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .align(Alignment.Center)
-                .padding(top = 36.dp)
-                .height(modalHeight) // <- Fixed height to take exactly 1.5f of screen
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
-                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = overlayAlpha))
+                .clickable(
+                    onClick = onDismiss,
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                )
+        )
+
+        // Modal with fade
+        AnimatedVisibility(
+            visible = overlayAlpha > 0f,
+            enter = fadeIn(animationSpec = tween(durationMillis = 200)),
+            exit = fadeOut(animationSpec = tween(durationMillis = 200)),
+            modifier = Modifier.align(Alignment.Center)
         ) {
-            // Header Placeholder
-            Text("Add Quote", color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.align(Alignment.CenterHorizontally))
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Content Placeholder
-            Box(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .background(Color.LightGray, RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth(0.9f)
+                    .padding(top = 36.dp)
+                    .height(modalHeight)
+                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
+                    .padding(horizontal = 24.dp, vertical = 16.dp)
+                    .clickable(enabled = false) {} // Prevent clicks passing through modal
             ) {
-                Text("Quote Input Area", color = Color.DarkGray)
-            }
+                // Header Placeholder
+                Text(
+                    "Add Quote",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+                // Content Placeholder
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .background(Color.LightGray, RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Quote Input Area", color = Color.DarkGray)
+                }
 
-            // Footer Placeholder
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(40.dp)
-                    .background(Color.Gray, RoundedCornerShape(8.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Save Button", color = Color.White)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Footer Placeholder
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(40.dp)
+                        .background(Color.Gray, RoundedCornerShape(8.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Save Button", color = Color.White)
+                }
             }
         }
     }
