@@ -103,7 +103,7 @@ fun ReviewBook(
             )
             Spacer(Modifier.height(12.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                ScrollingTextField(reviewText, { reviewText = it }, scrollState, containerHeight, 362)
+                ScrollingTextField(reviewText, { reviewText = it }, scrollState, containerHeight, 362, "Review...")
             }
             Spacer(Modifier.height(8.dp))
         }

@@ -7,23 +7,27 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -76,7 +80,6 @@ fun QuotesScreen(bookViewModel: BookViewModel, quoteViewModel: QuoteViewModel) {
             }
         }.toMutableList()
 
-        // Add 3 dummy books
         val dummyBooks = listOf(
             DummyBook(id = -1, title = "Dummy Book 1"),
             DummyBook(id = -2, title = "Dummy Book 2"),
@@ -111,7 +114,6 @@ fun QuotesScreen(bookViewModel: BookViewModel, quoteViewModel: QuoteViewModel) {
                 listState.animateScrollToItem(nearestItemIndex)
             }
 
-            // Load quotes for the nearest book (if not dummy)
             val nearestBook = booksWithConvertedCovers.getOrNull(nearestItemIndex)
             nearestBook?.takeIf { !it.isDummy }?.let {
                 selectedBookId = it.book.id
@@ -119,6 +121,9 @@ fun QuotesScreen(bookViewModel: BookViewModel, quoteViewModel: QuoteViewModel) {
             }
         }
     }
+
+    val selectedBook = booksWithConvertedCovers.find { it.book.id == selectedBookId }
+
     Column() {
         Box(modifier = Modifier.fillMaxSize().weight(0.4f)) {
             if (booksWithConvertedCovers.isEmpty()) {
@@ -162,16 +167,33 @@ fun QuotesScreen(bookViewModel: BookViewModel, quoteViewModel: QuoteViewModel) {
             if (quotes.isEmpty()) {
                 Text("No quotes for this book", fontSize = 18.sp)
             } else {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     quotes.forEach { quote ->
-                        Text("\"${quote.quoteText}\"", fontSize = 16.sp)
-                        quote.pageNumber?.let {
-                            Text("Page: $it", fontSize = 12.sp)
+                        Column {
+                            Text(
+                                text = "\"${quote.quoteText}\"",
+                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.bodyMedium.copy(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
+                            )
+                            val authors = selectedBook?.book?.authors ?: "Unknown Author"
+                            val year = selectedBook?.book?.firstPublishDate?.take(4) ?: "Unknown Year"
+                            Text(
+                                text = "- $authors, $year",
+                                fontSize = 14.sp
+                            )
+                            Box(
+                                Modifier
+                                    .padding(top = 8.dp)
+                                    .fillMaxWidth()
+                                    .height(1.dp)
+                                    .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f))
+                            )
                         }
                     }
                 }
             }
         }
+
     }
 
     var fabExpanded by remember { mutableStateOf(false) }
@@ -185,7 +207,6 @@ fun QuotesScreen(bookViewModel: BookViewModel, quoteViewModel: QuoteViewModel) {
         contentAlignment = Alignment.BottomEnd
     ) {
         if (fabExpanded) {
-            // Tap anywhere to collapse
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -206,7 +227,6 @@ fun QuotesScreen(bookViewModel: BookViewModel, quoteViewModel: QuoteViewModel) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.padding(8.dp)
         ) {
-            // FABs with delay before showing
             AnimatedVisibility(
                 visible = fabVisibleAfterDelay,
                 enter = slideInHorizontally(
@@ -230,13 +250,12 @@ fun QuotesScreen(bookViewModel: BookViewModel, quoteViewModel: QuoteViewModel) {
                     )
                     ExtendedFabItem(
                         text = "Scan",
-                        icon = Icons.Default.Create,
+                        icon = Icons.Default.CameraAlt,
                         onClick = { /* Handle another action */ }
                     )
                 }
             }
 
-            // Fade in + FAB after collapse
             AnimatedVisibility(
                 visible = !fabExpanded && fabFullyCollapsed,
                 enter = fadeIn(animationSpec = tween(durationMillis = 150)),
@@ -259,19 +278,16 @@ fun QuotesScreen(bookViewModel: BookViewModel, quoteViewModel: QuoteViewModel) {
             }
         }
 
-        // Delay before showing extended FABs
         LaunchedEffect(fabExpanded) {
             if (fabExpanded) {
                 delay(50)
                 fabVisibleAfterDelay = true
             } else {
-                delay(200) // Wait for closing animation
+                delay(200)
                 fabFullyCollapsed = true
             }
         }
     }
-
-    val selectedBook = booksWithConvertedCovers.find { it.book.id == selectedBookId }
 
     if (showQuoteModal && selectedBook != null) {
         AddQuoteModal(
@@ -301,14 +317,12 @@ data class DisplayBook(
     val isDummy: Boolean
 )
 
-// Dummy book helper
 data class DummyBook(val id: Long, val title: String) {
     fun toBookEntity(): BookEntity {
         return BookEntity(id = id, title = title, cover = null)
     }
 }
 
-// Placeholder bitmap creator
 fun createPlaceholderBitmap(): ImageBitmap {
     val width = 120
     val height = 180
