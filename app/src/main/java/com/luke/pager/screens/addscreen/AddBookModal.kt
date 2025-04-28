@@ -27,9 +27,9 @@ import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.network.OpenLibraryBook
 import com.luke.pager.screens.addscreen.addcomponents.DatePickerPopup
 import com.luke.pager.screens.addscreen.addcomponents.PrivacyDateSpoilersRow
-import com.luke.pager.screens.addscreen.addcomponents.ReviewTextField
 import com.luke.pager.screens.addscreen.addcomponents.StarRatingBar
 import com.luke.pager.screens.addscreen.addcomponents.SubmitReviewHeader
+import com.luke.pager.screens.components.ScrollingTextField
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -103,7 +103,7 @@ fun ReviewBook(
             )
             Spacer(Modifier.height(12.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                ReviewTextField(reviewText, { reviewText = it }, scrollState, containerHeight)
+                ScrollingTextField(reviewText, { reviewText = it }, scrollState, containerHeight, 362)
             }
             Spacer(Modifier.height(8.dp))
         }

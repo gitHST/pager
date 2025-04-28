@@ -1,10 +1,12 @@
 package com.luke.pager.screens.quotescreen
 
+
+import BookCoverImage
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -16,9 +18,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,12 +34,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.viewmodel.QuoteViewModel
-
+import com.luke.pager.screens.components.ScrollingTextField
 
 @Composable
 fun AddQuoteModal(
@@ -42,7 +48,7 @@ fun AddQuoteModal(
     quoteViewModel: QuoteViewModel,
     overlayAlpha: Float,
     book: BookEntity,
-    bookCover: ImageBitmap
+    textGiven: String = "",
 ) {
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val modalHeight = screenHeight / 1.5f
@@ -50,10 +56,10 @@ fun AddQuoteModal(
 
     var quoteText by remember { mutableStateOf("") }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
+    val density = LocalDensity.current
+    val containerHeightPx = with(density) { modalHeight.toPx().toInt() }
+
+    Box(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -79,6 +85,8 @@ fun AddQuoteModal(
                     .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
                     .padding(horizontal = 24.dp, vertical = 16.dp)
                     .clickable(enabled = false) {}
+                    .verticalScroll(scrollState)
+                    .animateContentSize()
             ) {
                 SubmitQuoteHeader(
                     onDismiss = onDismiss,
@@ -93,31 +101,32 @@ fun AddQuoteModal(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
                         .padding(bottom = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Image(
-                        bitmap = bookCover,
-                        contentDescription = "Book Cover",
+                    Box(
                         modifier = Modifier
-                            .weight(1f)
-                            .height(180.dp)
-                            .padding(end = 16.dp)
-                            .background(Color.LightGray, RoundedCornerShape(8.dp))
-                    )
-
+                            .width(100.dp)
+                            .heightIn(max = 150.dp),
+                    ) {
+                        BookCoverImage(
+                            coverData = book.cover,
+                            cornerRadius = 12,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .padding(end = 16.dp)
+                        )
+                    }
                     Column(
                         modifier = Modifier
-                            .weight(2f)
+                            .fillMaxWidth()
                             .padding(end = 8.dp),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.Start
                     ) {
                         Text(
                             text = book.title,
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            style = MaterialTheme.typography.titleLarge
                         )
 
                         book.authors?.let {
@@ -126,23 +135,29 @@ fun AddQuoteModal(
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
+                        book.firstPublishDate?.let {
+                            Text(
+                                text = book.firstPublishDate,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                        }
                     }
                 }
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                ) {
-                    androidx.compose.material3.TextField(
-                        value = quoteText,
-                        onValueChange = { quoteText = it },
-                        label = { Text("Enter your quote") },
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Transparent)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    ScrollingTextField(
+                        text = quoteText,
+                        onTextChange = { quoteText = it },
+                        scrollState = scrollState,
+                        containerHeight = containerHeightPx,
+                        existingSpaceTaken = 245
                     )
                 }
+
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }

@@ -278,8 +278,7 @@ fun QuotesScreen(bookViewModel: BookViewModel, quoteViewModel: QuoteViewModel) {
             onDismiss = { showQuoteModal = false },
             quoteViewModel = quoteViewModel,
             overlayAlpha = overlayAlpha,
-            book = selectedBook.book,
-            bookCover = selectedBook.imageBitmap
+            book = selectedBook.book
         )
     }
 
