@@ -43,6 +43,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.createBitmap
+import androidx.navigation.compose.rememberNavController
 import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
@@ -56,6 +57,7 @@ fun QuotesScreen(bookViewModel: BookViewModel, quoteViewModel: QuoteViewModel) {
     val quotes by quoteViewModel.quotes.collectAsState()
 
     val placeholderBitmap = remember { createPlaceholderBitmap() }
+    var showQuoteModal by remember { mutableStateOf(false) }
 
     val booksWithConvertedCovers = remember(bookList) {
         val converted = bookList.mapNotNull { book ->
@@ -218,7 +220,7 @@ fun QuotesScreen(bookViewModel: BookViewModel, quoteViewModel: QuoteViewModel) {
                     ExtendedFabItem(
                         text = "Write",
                         icon = Icons.Default.FormatQuote,
-                        onClick = { /* Handle Add Quote */ }
+                        onClick = { showQuoteModal = true }
                     )
                     ExtendedFabItem(
                         text = "Scan",
@@ -262,7 +264,13 @@ fun QuotesScreen(bookViewModel: BookViewModel, quoteViewModel: QuoteViewModel) {
             }
         }
     }
-
+    if (showQuoteModal) {
+        AddQuoteModal(
+            onDismiss = { showQuoteModal = false },
+            quoteViewModel = quoteViewModel,
+            navController = rememberNavController()
+        )
+    }
 }
 
 @Composable
