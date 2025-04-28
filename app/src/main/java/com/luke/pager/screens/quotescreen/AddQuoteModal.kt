@@ -48,7 +48,6 @@ fun AddQuoteModal(
     quoteViewModel: QuoteViewModel,
     overlayAlpha: Float,
     book: BookEntity,
-    textGiven: String = "",
 ) {
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val modalHeight = screenHeight / 1.5f
