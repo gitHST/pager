@@ -276,12 +276,16 @@ fun BookRowUIClickable(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Use the unified BookCoverImage here
-            BookCoverImage(
-                coverUrl = book.coverIndex?.let { "https://covers.openlibrary.org/b/id/$it-M.jpg" },
-                cornerRadius = 14,
-                maxWidth = 80.dp,
-                maxHeight = 120.dp
-            )
+            Box(
+                modifier = Modifier
+                    .width(80.dp)
+                    .heightIn(max = 120.dp),
+            ) {
+                BookCoverImage(
+                    coverUrl = book.coverIndex?.let { "https://covers.openlibrary.org/b/id/$it-M.jpg" },
+                    cornerRadius = 14,
+                )
+            }
 
             Spacer(modifier = Modifier.width(12.dp))
 

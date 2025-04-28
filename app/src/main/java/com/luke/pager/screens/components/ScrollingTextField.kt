@@ -1,5 +1,6 @@
-package com.luke.pager.screens.addscreen.addcomponents
+package com.luke.pager.screens.components
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,11 +29,12 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 @Composable
-fun ReviewTextField(
+fun ScrollingTextField(
     text: String,
     onTextChange: (String) -> Unit,
-    scrollState: androidx.compose.foundation.ScrollState,
-    containerHeight: Int
+    scrollState: ScrollState,
+    containerHeight: Int,
+    existingSpaceTaken: Int
 ) {
     val coroutineScope = rememberCoroutineScope()
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
@@ -53,7 +55,7 @@ fun ReviewTextField(
         modifier =
         Modifier
             .fillMaxWidth()
-            .heightIn(min = minHeightDp - 362.dp)
+            .heightIn(min = minHeightDp - existingSpaceTaken.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(MaterialTheme.colorScheme.surface)
             .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
