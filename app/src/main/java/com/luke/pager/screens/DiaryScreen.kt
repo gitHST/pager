@@ -1,8 +1,7 @@
 package com.luke.pager.screens
 
+import BookCoverImage
 import Privacy
-import android.graphics.BitmapFactory
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,7 +21,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.StarHalf
-import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Public
@@ -30,7 +28,6 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,15 +35,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -153,69 +143,14 @@ fun BookItem(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier =
-                Modifier
+            BookCoverImage(
+                coverData = book.cover,
+                cornerRadius = 12,
+                modifier = Modifier
                     .fillMaxWidth(0.2f)
                     .aspectRatio(0.66f)
-                    .clip(RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                var imageBitmap by remember(book.id) { mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
-                var loading by remember(book.id) { mutableStateOf(true) }
+            )
 
-                LaunchedEffect(book.cover, book.id) {
-                    if (book.cover != null) {
-                        loading = true
-                        val bitmap = BitmapFactory.decodeByteArray(book.cover, 0, book.cover.size)
-                        imageBitmap = bitmap.asImageBitmap()
-                        loading = false
-                    } else {
-                        imageBitmap = null
-                        loading = false
-                    }
-                }
-
-                if (loading && book.cover != null) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                } else if (imageBitmap != null) {
-                    Image(
-                        bitmap = imageBitmap!!,
-                        contentDescription = null,
-                        modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp)),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Book,
-                                contentDescription = "No Cover Icon",
-                                tint = Color.LightGray,
-                                modifier =
-                                Modifier
-                                    .fillMaxWidth(0.5f)
-                                    .aspectRatio(1f)
-                                    .clip(RoundedCornerShape(12.dp))
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "No cover",
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                                fontSize = 12.sp
-                            )
-                        }
-                    }
-                }
-            }
 
             Spacer(modifier = Modifier.width(12.dp))
 
