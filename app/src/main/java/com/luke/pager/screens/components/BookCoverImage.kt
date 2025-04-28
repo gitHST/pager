@@ -36,7 +36,6 @@ fun BookCoverImage(
     val shape = RoundedCornerShape(cornerRadius.dp)
     var aspectRatio by remember { mutableFloatStateOf(2f / 3f) }
 
-    // Dynamic outer container that adapts to the image's aspect ratio
     Box(
         modifier = modifier
             .aspectRatio(aspectRatio)
@@ -53,7 +52,6 @@ fun BookCoverImage(
                     val bitmap = BitmapFactory.decodeByteArray(coverData, 0, coverData.size)
                     imageBitmap = bitmap?.asImageBitmap()
                     loading = false
-                    // Set aspect ratio based on decoded bitmap
                     bitmap?.let {
                         if (it.width > 0 && it.height > 0) {
                             aspectRatio = it.width.toFloat() / it.height.toFloat()

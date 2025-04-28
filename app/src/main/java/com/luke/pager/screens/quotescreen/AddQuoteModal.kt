@@ -152,7 +152,8 @@ fun AddQuoteModal(
                         onTextChange = { quoteText = it },
                         scrollState = scrollState,
                         containerHeight = containerHeightPx,
-                        existingSpaceTaken = 245
+                        existingSpaceTaken = 245,
+                        insideText = "Quote..."
                     )
                 }
 

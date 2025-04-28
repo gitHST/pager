@@ -34,7 +34,8 @@ fun ScrollingTextField(
     onTextChange: (String) -> Unit,
     scrollState: ScrollState,
     containerHeight: Int,
-    existingSpaceTaken: Int
+    existingSpaceTaken: Int,
+    insideText: String
 ) {
     val coroutineScope = rememberCoroutineScope()
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
@@ -72,7 +73,7 @@ fun ScrollingTextField(
         ),
         decorationBox = { innerTextField ->
             if (text.isEmpty()) {
-                Text("Review...", style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
+                Text(insideText, style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
             }
             innerTextField()
         }

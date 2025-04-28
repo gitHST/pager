@@ -275,7 +275,6 @@ fun BookRowUIClickable(
                 .padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Use the unified BookCoverImage here
             Box(
                 modifier = Modifier
                     .width(80.dp)
