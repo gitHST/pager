@@ -44,7 +44,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.createBitmap
-import androidx.navigation.compose.rememberNavController
 import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
@@ -159,7 +158,7 @@ fun QuotesScreen(bookViewModel: BookViewModel, quoteViewModel: QuoteViewModel) {
             }
         }
 
-        Box(modifier = Modifier.weight(0.6f).padding(16.dp)) {
+        Box(modifier = Modifier.weight(0.6f).padding(40.dp)) {
             if (quotes.isEmpty()) {
                 Text("No quotes for this book", fontSize = 18.sp)
             } else {
@@ -271,14 +270,20 @@ fun QuotesScreen(bookViewModel: BookViewModel, quoteViewModel: QuoteViewModel) {
             }
         }
     }
-    if (showQuoteModal) {
+
+    val selectedBook = booksWithConvertedCovers.find { it.book.id == selectedBookId }
+
+    if (showQuoteModal && selectedBook != null) {
         AddQuoteModal(
             onDismiss = { showQuoteModal = false },
             quoteViewModel = quoteViewModel,
-            navController = rememberNavController(),
-            overlayAlpha = overlayAlpha // NEW
+            overlayAlpha = overlayAlpha,
+            book = selectedBook.book,
+            bookCover = selectedBook.imageBitmap
         )
     }
+
+
 }
 
 @Composable
