@@ -1,5 +1,6 @@
 package com.luke.pager.screens.addscreen
 
+import BookCoverImage
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateDpAsState
@@ -55,7 +56,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.luke.pager.data.viewmodel.BookViewModel
-import com.luke.pager.network.BookCover
 import com.luke.pager.network.OpenLibraryBook
 import com.luke.pager.network.SearchResult
 import com.luke.pager.network.searchBooksSmart
@@ -269,15 +269,22 @@ fun BookRowUIClickable(
 ) {
     Column {
         Row(
-            modifier =
-            Modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .clickable { onClick() }
                 .padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            BookCover(book.coverIndex)
+            // Use the unified BookCoverImage here
+            BookCoverImage(
+                coverUrl = book.coverIndex?.let { "https://covers.openlibrary.org/b/id/$it-M.jpg" },
+                cornerRadius = 14,
+                maxWidth = 80.dp,
+                maxHeight = 120.dp
+            )
+
             Spacer(modifier = Modifier.width(12.dp))
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(book.title, style = MaterialTheme.typography.bodyLarge)
                 book.authorName?.let {
