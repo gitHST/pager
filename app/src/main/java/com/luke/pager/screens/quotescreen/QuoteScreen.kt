@@ -1,6 +1,7 @@
 package com.luke.pager.screens.quotescreen
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -58,6 +59,12 @@ fun QuotesScreen(bookViewModel: BookViewModel, quoteViewModel: QuoteViewModel) {
 
     val placeholderBitmap = remember { createPlaceholderBitmap() }
     var showQuoteModal by remember { mutableStateOf(false) }
+
+    val overlayAlpha by animateFloatAsState(
+        targetValue = if (showQuoteModal) 0.5f else 0f,
+        animationSpec = tween(durationMillis = 400) // Try 500ms or slower like 700ms
+    )
+
 
     val booksWithConvertedCovers = remember(bookList) {
         val converted = bookList.mapNotNull { book ->
@@ -268,7 +275,8 @@ fun QuotesScreen(bookViewModel: BookViewModel, quoteViewModel: QuoteViewModel) {
         AddQuoteModal(
             onDismiss = { showQuoteModal = false },
             quoteViewModel = quoteViewModel,
-            navController = rememberNavController()
+            navController = rememberNavController(),
+            overlayAlpha = overlayAlpha // NEW
         )
     }
 }
