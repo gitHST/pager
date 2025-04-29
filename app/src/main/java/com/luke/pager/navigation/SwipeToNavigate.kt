@@ -12,14 +12,13 @@ fun SwipeToNavigate(
     navController: NavHostController,
     currentRoute: String,
     navItems: List<NavItem>,
-    content: @Composable () -> Unit
+    content: @Composable (currentRoute: String, navItems: List<NavItem>) -> Unit
 ) {
     val currentIndex = navItems.indexOfFirst { it.route == currentRoute }
     val setDragAmount = 50
 
     Box(
-        modifier =
-        Modifier.pointerInput(Unit) {
+        modifier = Modifier.pointerInput(Unit) {
             detectHorizontalDragGestures { change, dragAmount ->
                 if (dragAmount > setDragAmount) {
                     val previousIndex = (currentIndex - 1).coerceAtLeast(0)
@@ -31,6 +30,6 @@ fun SwipeToNavigate(
             }
         }
     ) {
-        content()
+        content(currentRoute, navItems) // 👈 Pass down currentRoute and navItems automatically
     }
 }
