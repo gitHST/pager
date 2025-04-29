@@ -26,14 +26,11 @@ fun PagerNavHost(
     reviewViewModel: ReviewViewModel,
     quoteViewModel: QuoteViewModel
 ) {
-    val navItems =
-        listOf(
-            // NavItem("activity", "Activity"),
-            NavItem("diary", "Diary"),
-            NavItem("plus", "+"),
-            // NavItem("search", "Search"),
-            NavItem("quotes", "Quotes")
-        )
+    val navItems = listOf(
+        NavItem("diary", "Diary"),
+        NavItem("plus", "+"),
+        NavItem("quotes", "Quotes")
+    )
 
     val currentRoute by navController.currentBackStackEntryAsState()
 
@@ -42,30 +39,65 @@ fun PagerNavHost(
         startDestination = "diary"
     ) {
         composable("activity") {
-            SwipeToNavigate(navController, currentRoute?.destination?.route.orEmpty(), navItems) {
+            SwipeToNavigate(
+                navController = navController,
+                currentRoute = currentRoute?.destination?.route.orEmpty(),
+                navItems = navItems
+            ) { _, _ -> // Not using nav context here
                 ActivityScreen(bookViewModel)
             }
         }
+
         composable("diary") {
-            SwipeToNavigate(navController, currentRoute?.destination?.route.orEmpty(), navItems) {
+            SwipeToNavigate(
+                navController = navController,
+                currentRoute = currentRoute?.destination?.route.orEmpty(),
+                navItems = navItems
+            ) { _, _ ->
                 DiaryScreen(navController, bookViewModel)
             }
         }
+
         composable("plus") {
-            SwipeToNavigate(navController, currentRoute?.destination?.route.orEmpty(), navItems) {
-                SearchAndResultsModal(onDismiss = {}, bookViewModel = bookViewModel, navController)
+            SwipeToNavigate(
+                navController = navController,
+                currentRoute = currentRoute?.destination?.route.orEmpty(),
+                navItems = navItems
+            ) { _, _ ->
+                SearchAndResultsModal(
+                    onDismiss = {},
+                    bookViewModel = bookViewModel,
+                    navController = navController
+                )
             }
         }
+
         composable("explore") {
-            SwipeToNavigate(navController, currentRoute?.destination?.route.orEmpty(), navItems) {
+            SwipeToNavigate(
+                navController = navController,
+                currentRoute = currentRoute?.destination?.route.orEmpty(),
+                navItems = navItems
+            ) { _, _ ->
                 ExploreScreen(bookViewModel)
             }
         }
+
         composable("quotes") {
-            SwipeToNavigate(navController, currentRoute?.destination?.route.orEmpty(), navItems) {
-                QuotesScreen(bookViewModel, quoteViewModel)
+            SwipeToNavigate(
+                navController = navController,
+                currentRoute = currentRoute?.destination?.route.orEmpty(),
+                navItems = navItems
+            ) { currentRoute, navItems ->
+                QuotesScreen(
+                    bookViewModel = bookViewModel,
+                    quoteViewModel = quoteViewModel,
+                    navController = navController,
+                    currentRoute = currentRoute,
+                    navItems = navItems
+                )
             }
         }
+
         composable("review_screen/{reviewId}") { backStackEntry ->
             val reviewId = backStackEntry.arguments?.getString("reviewId")?.toLongOrNull() ?: 0L
             val reviews by bookViewModel.allReviews.collectAsState()
