@@ -43,7 +43,6 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import androidx.core.view.WindowCompat
 
 class MainActivity : ComponentActivity() {
     @OptIn(DelicateCoroutinesApi::class)
@@ -79,10 +78,6 @@ class MainActivity : ComponentActivity() {
         val bookViewModel = BookViewModel(bookRepo, reviewRepo)
         val reviewViewModel = ReviewViewModel(reviewRepo)
         val quoteViewModel = QuoteViewModel(quoteRepo)
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-            WindowCompat.setDecorFitsSystemWindows(window, false)
-        }
 
         setContent {
             PagerAppUI(bookViewModel, reviewViewModel, quoteViewModel)
