@@ -19,6 +19,7 @@ import java.util.Locale
 fun SubmitQuoteHeader(
     onDismiss: () -> Unit,
     quoteText: String,
+    pageNum: String,
     bookId: Long,
     quoteViewModel: QuoteViewModel,
     scrollState: androidx.compose.foundation.ScrollState,
@@ -43,6 +44,7 @@ fun SubmitQuoteHeader(
                 id = 0,
                 bookId = bookId,
                 quoteText = quoteText,
+                pageNumber = pageNum.toIntOrNull(),
                 dateAdded = dateAdded
             )
 

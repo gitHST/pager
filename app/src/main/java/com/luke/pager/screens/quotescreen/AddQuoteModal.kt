@@ -26,6 +26,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +56,7 @@ fun AddQuoteModal(
     val scrollState = rememberScrollState()
 
     var quoteText by remember { mutableStateOf("") }
+    var pageNumber by remember { mutableStateOf("") }
 
     val density = LocalDensity.current
     val containerHeightPx = with(density) { modalHeight.toPx().toInt() }
@@ -90,6 +93,7 @@ fun AddQuoteModal(
                 SubmitQuoteHeader(
                     onDismiss = onDismiss,
                     quoteText = quoteText,
+                    pageNum = pageNumber,
                     bookId = book.id,
                     quoteViewModel = quoteViewModel,
                     scrollState = scrollState
@@ -152,12 +156,43 @@ fun AddQuoteModal(
                         onTextChange = { quoteText = it },
                         scrollState = scrollState,
                         containerHeight = containerHeightPx,
-                        existingSpaceTaken = 245,
+                        existingSpaceTaken = 300,
                         insideText = "Quote..."
                     )
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
+
+                TextField(
+                    value = pageNumber,
+                    onValueChange = { newValue ->
+                        if (newValue.all { it.isDigit() }) {
+                            pageNumber = newValue
+                        }
+                    },
+                    modifier = Modifier
+                        .width(120.dp)
+                        .height(48.dp),
+                    textStyle = MaterialTheme.typography.bodyMedium,
+                    singleLine = true,
+                    placeholder = { Text("__") },
+                    leadingIcon = {
+                        Text(
+                            text = "Page:",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+                    },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent
+                    )
+                )
+
             }
         }
     }
