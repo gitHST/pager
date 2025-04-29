@@ -12,4 +12,7 @@ interface QuoteDao {
 
     @Insert
     suspend fun insertQuote(quote: QuoteEntity)
+
+    @Query("SELECT * FROM quotes ORDER BY date_added DESC")
+    suspend fun getAllQuotes(): List<QuoteEntity>
 }

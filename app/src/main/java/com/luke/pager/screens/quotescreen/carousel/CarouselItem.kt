@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen
+package com.luke.pager.screens.quotescreen.carousel
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import kotlin.math.abs
 
 @Composable
 fun CarouselItemContinuous(imageBitmap: ImageBitmap, continuousDistance: Float, isDummy: Boolean) {
@@ -29,7 +30,7 @@ fun CarouselItemContinuous(imageBitmap: ImageBitmap, continuousDistance: Float, 
     var translationX = 0f
 
     if (continuousDistance >= 0) {
-        scale = 1.2f - (0.2f * kotlin.math.abs(continuousDistance).coerceAtMost(1f))
+        scale = 1.2f - (0.2f * abs(continuousDistance).coerceAtMost(1f))
         rotationY = continuousDistance.coerceIn(-2f, 2f) * -20f
     } else {
         alpha = 1f + (1f * continuousDistance.coerceAtMost(1f))
