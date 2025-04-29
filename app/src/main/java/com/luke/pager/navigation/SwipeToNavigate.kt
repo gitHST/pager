@@ -30,6 +30,6 @@ fun SwipeToNavigate(
             }
         }
     ) {
-        content(currentRoute, navItems) // 👈 Pass down currentRoute and navItems automatically
+        content(currentRoute, navItems)
     }
 }
