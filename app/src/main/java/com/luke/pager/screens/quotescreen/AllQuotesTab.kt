@@ -55,10 +55,11 @@ fun AllQuotesTab(quotes: List<QuoteEntity>, bookList: List<BookEntity>) {
 
                     Column {
                         Text(
-                            text = "\"${quote.quoteText}\"",
+                            text = quote.quoteText,
                             fontSize = 16.sp,
                             style = MaterialTheme.typography.bodyMedium.copy(fontStyle = FontStyle.Italic)
                         )
+                        Spacer(modifier = Modifier.height(10.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically
@@ -71,7 +72,7 @@ fun AllQuotesTab(quotes: List<QuoteEntity>, bookList: List<BookEntity>) {
                             Spacer(modifier = Modifier.weight(1f))
                             quote.pageNumber?.let { page ->
                                 Text(
-                                    text = "pg$page",
+                                    text = "p$page",
                                     fontSize = 14.sp,
                                     style = MaterialTheme.typography.bodySmall
                                 )
