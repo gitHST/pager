@@ -154,6 +154,7 @@ dependencies {
     implementation(libs.retrofit.gson)
     implementation(libs.coil.compose)
     implementation(libs.material.symbols.extended)
+    implementation(libs.androidx.material3)
 
     ksp(libs.androidx.room.compiler)
 
