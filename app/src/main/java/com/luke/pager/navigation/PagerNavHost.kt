@@ -43,7 +43,7 @@ fun PagerNavHost(
                 navController = navController,
                 currentRoute = currentRoute?.destination?.route.orEmpty(),
                 navItems = navItems
-            ) { _, _ -> // Not using nav context here
+            ) { _, _ ->
                 ActivityScreen(bookViewModel)
             }
         }

@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen
+package com.luke.pager.screens.quotescreen.carousel
 
 import android.graphics.BitmapFactory
 import androidx.compose.ui.graphics.ImageBitmap
