@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalDensity
@@ -105,20 +108,47 @@ fun CarouselTab(
                 )
             }
 
-            Box(modifier = Modifier.weight(0.6f).padding(40.dp)) {
+            Box(
+                modifier = Modifier
+                    .weight(0.6f)
+                    .padding(40.dp)
+            ) {
                 if (quotes.isEmpty()) {
-                    Text("No quotes for this book", fontSize = 18.sp)
+                    Text(
+                        "No quotes for this book",
+                        fontSize = 18.sp
+                    )
                 } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        quotes.forEach { quote ->
+                    androidx.compose.foundation.lazy.LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(quotes.size) { index ->
+                            val quote = quotes[index]
                             Column {
-                                Text(
-                                    text = "\"${quote.quoteText}\"",
-                                    fontSize = 16.sp,
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontStyle = FontStyle.Italic
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = quote.quoteText,
+                                        fontSize = 16.sp,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontStyle = FontStyle.Italic
+                                        ),
+                                        modifier = Modifier.weight(1f)
                                     )
-                                )
+
+                                    if (quote.pageNumber != null && quote.pageNumber != 0) {
+                                        Text(
+                                            text = "pg${quote.pageNumber}",
+                                            fontSize = 14.sp,
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(10.dp))
+
                                 Box(
                                     Modifier
                                         .padding(top = 8.dp)

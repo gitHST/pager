@@ -23,6 +23,7 @@ class QuoteViewModel(private val quoteRepository: QuoteRepository) : ViewModel()
         viewModelScope.launch {
             quoteRepository.insertQuote(quote)
             loadQuotesForBook(quote.bookId)
+            loadAllQuotes()
         }
     }
     fun loadAllQuotes() {
