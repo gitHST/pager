@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.viewmodel.QuoteViewModel
+import com.luke.pager.screens.components.CenteredModalScaffold
 import com.luke.pager.screens.components.ScrollingTextField
 
 @Composable

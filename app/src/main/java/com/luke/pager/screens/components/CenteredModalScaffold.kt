@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen
+package com.luke.pager.screens.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -34,7 +34,6 @@ fun CenteredModalScaffold(
                 )
         )
 
-        // Fade in/out modal
         AnimatedVisibility(
             visible = overlayAlpha > 0f,
             enter = fadeIn(animationSpec = tween(durationMillis = 200)),

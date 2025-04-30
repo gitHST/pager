@@ -13,10 +13,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import com.luke.pager.data.entities.BookEntity
+import com.luke.pager.screens.components.CameraPermissionDeniedDialogue
+import com.luke.pager.screens.components.CenteredModalScaffold
+import com.luke.pager.screens.components.PermissionResult
+import com.luke.pager.screens.components.RequestCameraPermissionResult
 
 @Composable
 fun ScanModal(
@@ -24,35 +32,54 @@ fun ScanModal(
     overlayAlpha: Float,
     book: BookEntity
 ) {
-    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-    val modalHeight = screenHeight / 1.5f
-    val scrollState = rememberScrollState()
+    var permissionResult by rememberSaveable { mutableStateOf<PermissionResult?>(null) }
 
     CenteredModalScaffold(
         overlayAlpha = overlayAlpha,
         onDismiss = onDismiss
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .padding(top = 36.dp)
-                .height(modalHeight)
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
-                .padding(horizontal = 24.dp, vertical = 16.dp)
-                .clickable(enabled = false) {}
-                .verticalScroll(scrollState)
-                .animateContentSize()
-        ) {
-            Text(
-                text = "Scan quote from book: ${book.title}",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-            // TODO: Add actual scan UI here (camera preview, OCR trigger, etc.)
-            Text(
-                text = "Camera preview goes here...",
-                style = MaterialTheme.typography.bodyMedium
-            )
+        when (permissionResult) {
+            PermissionResult.Granted -> {
+                val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+                val modalHeight = screenHeight / 1.5f
+                val scrollState = rememberScrollState()
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .padding(top = 36.dp)
+                        .height(modalHeight)
+                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
+                        .padding(horizontal = 24.dp, vertical = 16.dp)
+                        .clickable(enabled = false) {}
+                        .verticalScroll(scrollState)
+                        .animateContentSize()
+                ) {
+                    Text(
+                        text = "Scan quote from book: ${book.title}",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    Text(
+                        text = "Camera preview goes here...",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+            PermissionResult.DeniedPermanently -> {
+                CameraPermissionDeniedDialogue()
+            }
+
+            PermissionResult.DeniedTemporarily -> {
+                onDismiss()
+            }
+
+            null -> {
+                RequestCameraPermissionResult { result ->
+                    permissionResult = result
+                }
+            }
         }
     }
 }

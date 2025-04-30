@@ -155,6 +155,7 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.material.symbols.extended)
     implementation(libs.androidx.material3)
+    implementation(libs.mlkit.text.recognition)
 
     ksp(libs.androidx.room.compiler)
 
