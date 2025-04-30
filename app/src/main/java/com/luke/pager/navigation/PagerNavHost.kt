@@ -93,7 +93,7 @@ fun PagerNavHost(
                     quoteViewModel = quoteViewModel,
                     navController = navController,
                     currentRoute = currentRoute,
-                    navItems = navItems
+                    navItems = navItems,
                 )
             }
         }

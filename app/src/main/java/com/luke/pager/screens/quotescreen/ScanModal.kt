@@ -27,29 +27,29 @@ import com.luke.pager.screens.components.CenteredModalScaffold
 import com.luke.pager.screens.components.PermissionResult
 import com.luke.pager.screens.components.RequestCameraPermissionResult
 
-
 @Composable
 fun ScanModal(
-    onDismiss: () -> Unit,
+    book: BookEntity,
+    visible: Boolean,
     overlayAlpha: Float,
-    book: BookEntity
+    onDismiss: () -> Unit,
 ) {
-    var permissionResult by remember { mutableStateOf<PermissionResult?>(null) }
+    var permission by remember { mutableStateOf<PermissionResult?>(null) }
 
-
-    BackHandler {
-        onDismiss()
+    if (visible) {
+        BackHandler(onBack = onDismiss)
     }
 
     CenteredModalScaffold(
+        visible = visible,
         overlayAlpha = overlayAlpha,
         onDismiss = onDismiss
     ) {
-        when (permissionResult) {
+        when (permission) {
             PermissionResult.Granted -> {
                 val screenHeight = LocalConfiguration.current.screenHeightDp.dp
                 val modalHeight = screenHeight / 1.5f
-                val scrollState = rememberScrollState()
+                val scroll = rememberScrollState()
 
                 Column(
                     modifier = Modifier
@@ -58,9 +58,9 @@ fun ScanModal(
                         .height(modalHeight)
                         .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
                         .padding(horizontal = 24.dp, vertical = 16.dp)
-                        .clickable(enabled = false) {}
-                        .verticalScroll(scrollState)
+                        .verticalScroll(scroll)
                         .animateContentSize()
+                        .clickable(enabled = false) {}
                 ) {
                     Text(
                         text = "Scan quote from book: ${book.title}",
@@ -74,19 +74,11 @@ fun ScanModal(
                 }
             }
 
-            PermissionResult.DeniedPermanently -> {
-                CameraPermissionDeniedDialogue()
-            }
+            PermissionResult.DeniedPermanently -> CameraPermissionDeniedDialogue()
 
-            PermissionResult.DeniedTemporarily -> {
-                onDismiss()
-            }
+            PermissionResult.DeniedTemporarily -> onDismiss()
 
-            null -> {
-                RequestCameraPermissionResult { result ->
-                    permissionResult = result
-                }
-            }
+            null -> RequestCameraPermissionResult { permission = it }
         }
     }
 }
