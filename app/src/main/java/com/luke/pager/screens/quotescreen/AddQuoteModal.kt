@@ -2,6 +2,7 @@ package com.luke.pager.screens.quotescreen
 
 
 import BookCoverImage
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -39,6 +40,7 @@ import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.screens.components.CenteredModalScaffold
 import com.luke.pager.screens.components.ScrollingTextField
 
+
 @Composable
 fun AddQuoteModal(
     onDismiss: () -> Unit,
@@ -55,6 +57,10 @@ fun AddQuoteModal(
 
     val density = LocalDensity.current
     val containerHeightPx = with(density) { modalHeight.toPx().toInt() }
+
+    BackHandler {
+        onDismiss()
+    }
 
     CenteredModalScaffold(
         overlayAlpha = overlayAlpha,

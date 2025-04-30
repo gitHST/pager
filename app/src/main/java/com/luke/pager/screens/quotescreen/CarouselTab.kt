@@ -103,11 +103,16 @@ fun CarouselTab(
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.fillMaxSize().weight(0.4f)) {
-                Carousel(
-                    books = booksWithConvertedCovers,
-                    listState = listState,
-                    itemWidthPx = itemWidthPx
-                )
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(760.dp) // or `.weight(0.5f)` if you want responsive scaling
+                ) {
+                    Carousel(
+                        books = booksWithConvertedCovers,
+                        listState = listState,
+                        itemWidthPx = itemWidthPx
+                    )
+                }
             }
 
             Box(
