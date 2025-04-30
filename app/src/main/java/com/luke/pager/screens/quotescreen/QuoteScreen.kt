@@ -57,9 +57,10 @@ fun QuotesScreen(
 
     val placeholderBitmap = remember { createPlaceholderBitmap() }
     var showQuoteModal by remember { mutableStateOf(false) }
+    var showScanModal by remember { mutableStateOf(false) }
 
     val overlayAlpha by animateFloatAsState(
-        targetValue = if (showQuoteModal) 0.5f else 0f,
+        targetValue = if (showQuoteModal || showScanModal) 0.5f else 0f,
         animationSpec = tween(durationMillis = 400)
     )
 
@@ -137,7 +138,9 @@ fun QuotesScreen(
                         placeholderBitmap = placeholderBitmap,
                         showQuoteModal = showQuoteModal,
                         setShowQuoteModal = { showQuoteModal = it },
-                        overlayAlpha = overlayAlpha
+                        overlayAlpha = overlayAlpha,
+                        showScanModal = showScanModal,
+                        setShowScanModal = { showScanModal = it }
                     )
                     1 -> AllQuotesTab(quotes = allQuotes, bookList = bookList)
                 }
@@ -145,8 +148,9 @@ fun QuotesScreen(
 
             if (selectedTabIndex == 0) {
                 FabOverlay(
-                    showQuoteModal = showQuoteModal,
-                    setShowQuoteModal = { showQuoteModal = it }
+                    showQuoteModal = showQuoteModal || showScanModal,
+                    setShowQuoteModal = { showQuoteModal = it },
+                    setShowScanModal = { showScanModal = it }
                 )
             }
         }

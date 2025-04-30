@@ -33,7 +33,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun FabOverlay(
     showQuoteModal: Boolean,
-    setShowQuoteModal: (Boolean) -> Unit
+    setShowQuoteModal: (Boolean) -> Unit,
+    setShowScanModal: (Boolean) -> Unit
 ) {
     var fabExpanded by remember { mutableStateOf(false) }
     var fabFullyCollapsed by remember { mutableStateOf(true) }
@@ -94,8 +95,8 @@ fun FabOverlay(
                         text = "Scan",
                         icon = Icons.Default.CameraAlt,
                         onClick = {
-                            /* TODO: Handle Scan action */
-                            fabExpanded = false
+                            setShowQuoteModal(false)
+                            setShowScanModal(true)
                         }
                     )
                 }
