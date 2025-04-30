@@ -42,7 +42,9 @@ fun CarouselTab(
     placeholderBitmap: ImageBitmap,
     showQuoteModal: Boolean,
     setShowQuoteModal: (Boolean) -> Unit,
-    overlayAlpha: Float
+    overlayAlpha: Float,
+    showScanModal: Boolean,
+    setShowScanModal: (Boolean) -> Unit
 ) {
     val booksWithConvertedCovers = remember(bookList) {
         val converted = bookList.mapNotNull { book ->
@@ -126,29 +128,30 @@ fun CarouselTab(
                         items(quotes.size) { index ->
                             val quote = quotes[index]
                             Column {
+                                Text(
+                                    text = quote.quoteText,
+                                    fontSize = 16.sp,
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontStyle = FontStyle.Italic
+                                    )
+                                )
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(
-                                        text = quote.quoteText,
-                                        fontSize = 16.sp,
-                                        style = MaterialTheme.typography.bodyMedium.copy(
-                                            fontStyle = FontStyle.Italic
-                                        ),
-                                        modifier = Modifier.weight(1f)
-                                    )
-
-                                    if (quote.pageNumber != null && quote.pageNumber != 0) {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                    quote.pageNumber?.let { page ->
                                         Text(
-                                            text = "pg${quote.pageNumber}",
+                                            text = "p.$page",
                                             fontSize = 14.sp,
-                                            style = MaterialTheme.typography.bodySmall
+                                            style = MaterialTheme.typography.bodySmall.copy(
+                                                color = MaterialTheme.colorScheme.onBackground.copy(
+                                                    alpha = 0.6f
+                                                )
+                                            )
                                         )
                                     }
                                 }
-                                Spacer(modifier = Modifier.height(10.dp))
-
                                 Box(
                                     Modifier
                                         .padding(top = 8.dp)
@@ -171,5 +174,13 @@ fun CarouselTab(
                 book = selectedBook.book
             )
         }
+        if (showScanModal && selectedBook != null) {
+            ScanModal(
+                onDismiss = { setShowScanModal(false) },
+                overlayAlpha = overlayAlpha,
+                book = selectedBook.book
+            )
+        }
+
     }
 }
