@@ -20,6 +20,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,19 +33,30 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun FabOverlay(
-    showQuoteModal: Boolean,
-    setShowQuoteModal: (Boolean) -> Unit,
-    setShowScanModal: (Boolean) -> Unit
+    uiStateViewModel: QuoteUiStateViewModel
 ) {
-    var fabExpanded by remember { mutableStateOf(false) }
-    var fabFullyCollapsed by remember { mutableStateOf(true) }
-    var fabVisibleAfterDelay by remember { mutableStateOf(false) }
+    var isExpanded by remember { mutableStateOf(false) }
+    var fullyCollapsed by remember { mutableStateOf(true) }
+    var showActions by remember { mutableStateOf(false) }
 
-    LaunchedEffect(showQuoteModal) {
-        if (showQuoteModal) {
-            fabExpanded = false
-            fabFullyCollapsed = false
-            fabVisibleAfterDelay = false
+    val showQuoteModal by uiStateViewModel.showQuoteModal.collectAsState()
+    val showScanModal by uiStateViewModel.showScanModal.collectAsState()
+
+    LaunchedEffect(showQuoteModal || showScanModal) {
+        if (showQuoteModal || showScanModal) {
+            isExpanded = false
+            fullyCollapsed = false
+            showActions = false
+        }
+    }
+
+    LaunchedEffect(isExpanded) {
+        if (isExpanded) {
+            delay(50)
+            showActions = true
+        } else {
+            delay(200)
+            fullyCollapsed = true
         }
     }
 
@@ -54,15 +66,14 @@ fun FabOverlay(
             .padding(16.dp),
         contentAlignment = Alignment.BottomEnd
     ) {
-        if (fabExpanded && !showQuoteModal) {
+        if (isExpanded && !showQuoteModal && !showScanModal) {
             Box(
-                modifier = Modifier
+                Modifier
                     .fillMaxSize()
                     .pointerInput(Unit) {
                         detectTapGestures {
-                            fabExpanded = false
-                            fabFullyCollapsed = false
-                            fabVisibleAfterDelay = false
+                            isExpanded = false
+                            showActions = false
                         }
                     }
             )
@@ -74,7 +85,7 @@ fun FabOverlay(
             modifier = Modifier.padding(8.dp)
         ) {
             AnimatedVisibility(
-                visible = fabVisibleAfterDelay && !showQuoteModal,
+                visible = showActions && !showQuoteModal && !showScanModal,
                 enter = slideInHorizontally { it } + fadeIn(),
                 exit = slideOutHorizontally { it } + fadeOut()
             ) {
@@ -85,50 +96,37 @@ fun FabOverlay(
                 ) {
                     ExtendedFabItem(
                         text = "Write",
-                        icon = Icons.Default.FormatQuote,
-                        onClick = {
-                            setShowQuoteModal(true)
-                            fabExpanded = false
-                        }
-                    )
+                        icon = Icons.Default.FormatQuote
+                    ) {
+                        uiStateViewModel.setShowQuoteModal(true)
+                        isExpanded = false
+                    }
+
                     ExtendedFabItem(
                         text = "Scan",
-                        icon = Icons.Default.CameraAlt,
-                        onClick = {
-                            setShowQuoteModal(false)
-                            setShowScanModal(true)
-                        }
-                    )
+                        icon = Icons.Default.CameraAlt
+                    ) {
+                        uiStateViewModel.setShowScanModal(true)
+                        isExpanded = false
+                    }
                 }
             }
 
             AnimatedVisibility(
-                visible = !fabExpanded && fabFullyCollapsed && !showQuoteModal,
-                enter = fadeIn(animationSpec = tween(durationMillis = 150)),
-                exit = fadeOut(animationSpec = tween(durationMillis = 100))
+                visible = !isExpanded && fullyCollapsed && !showQuoteModal && !showScanModal,
+                enter = fadeIn(tween(150)),
+                exit = fadeOut(tween(100))
             ) {
                 Box(Modifier.padding(16.dp)) {
-                    FloatingActionButton(
-                        onClick = {
-                            fabExpanded = true
-                            fabFullyCollapsed = false
-                            fabVisibleAfterDelay = false
-                        }
-                    ) {
+                    FloatingActionButton(onClick = {
+                        isExpanded = true
+                        fullyCollapsed = false
+                        showActions = false
+                    }) {
                         Icon(Icons.Default.Add, contentDescription = "Expand Actions")
                     }
                 }
             }
-        }
-    }
-
-    LaunchedEffect(fabExpanded) {
-        if (fabExpanded) {
-            delay(50)
-            fabVisibleAfterDelay = true
-        } else {
-            delay(200)
-            fabFullyCollapsed = true
         }
     }
 }

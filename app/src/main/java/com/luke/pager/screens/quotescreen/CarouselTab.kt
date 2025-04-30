@@ -15,11 +15,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
@@ -40,79 +39,63 @@ fun CarouselTab(
     quotes: List<QuoteEntity>,
     quoteViewModel: QuoteViewModel,
     placeholderBitmap: ImageBitmap,
-    showQuoteModal: Boolean,
-    setShowQuoteModal: (Boolean) -> Unit,
-    overlayAlpha: Float,
-    showScanModal: Boolean,
-    setShowScanModal: (Boolean) -> Unit
+    uiStateViewModel: QuoteUiStateViewModel
 ) {
-    val booksWithConvertedCovers = remember(bookList) {
-        val converted = bookList.mapNotNull { book ->
-            book.cover?.let { coverBytes ->
-                DisplayBook(
-                    imageBitmap = byteArrayToImageBitmap(coverBytes),
-                    book = book,
-                    isDummy = false
-                )
+    val booksWithCovers = remember(bookList) {
+        val realBooks = bookList.mapNotNull { book ->
+            book.cover?.let { cover ->
+                DisplayBook(byteArrayToImageBitmap(cover), book, isDummy = false)
             }
         }.toMutableList()
 
-        val dummyBooks = listOf(
-            DummyBook(id = -1, title = "Dummy Book 1"),
-            DummyBook(id = -2, title = "Dummy Book 2"),
-            DummyBook(id = -3, title = "Dummy Book 3")
+        val dummies = listOf(
+            DummyBook(-1, "Dummy Book 1"),
+            DummyBook(-2, "Dummy Book 2"),
+            DummyBook(-3, "Dummy Book 3")
         )
 
-        dummyBooks.forEach { dummy ->
-            converted.add(
-                DisplayBook(
-                    imageBitmap = placeholderBitmap,
-                    book = dummy.toBookEntity(),
-                    isDummy = true
-                )
-            )
+        dummies.forEach {
+            realBooks.add(DisplayBook(placeholderBitmap, it.toBookEntity(), isDummy = true))
         }
 
-        converted
+        realBooks
     }
 
-    var selectedBookId by remember { mutableStateOf<Long?>(null) }
+    val selectedBookId by uiStateViewModel.selectedBookId.collectAsState()
+    val selectedBook = booksWithCovers.find { it.book.id == selectedBookId }
+
+    val showQuoteModal by uiStateViewModel.showQuoteModal.collectAsState()
+    val showScanModal by uiStateViewModel.showScanModal.collectAsState()
+    val overlayAlpha by uiStateViewModel.overlayAlpha.collectAsState()
 
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val itemWidthPx = with(LocalDensity.current) { 120.dp.toPx() }
 
-    val selectedBook = booksWithConvertedCovers.find { it.book.id == selectedBookId }
-
     LaunchedEffect(listState.isScrollInProgress) {
         if (!listState.isScrollInProgress) {
-            val nearestItemIndex = listState.firstVisibleItemIndex +
+            val nearestIndex = listState.firstVisibleItemIndex +
                     if (listState.firstVisibleItemScrollOffset > 150) 1 else 0
+
             coroutineScope.launch {
-                listState.animateScrollToItem(nearestItemIndex)
+                listState.animateScrollToItem(nearestIndex)
             }
 
-            val nearestBook = booksWithConvertedCovers.getOrNull(nearestItemIndex)
-            nearestBook?.takeIf { !it.isDummy }?.let {
-                selectedBookId = it.book.id
+            booksWithCovers.getOrNull(nearestIndex)?.takeIf { !it.isDummy }?.let {
+                uiStateViewModel.setSelectedBookId(it.book.id)
                 quoteViewModel.loadQuotesForBook(it.book.id)
             }
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Box(modifier = Modifier.fillMaxSize().weight(0.4f)) {
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .height(760.dp) // or `.weight(0.5f)` if you want responsive scaling
-                ) {
-                    Carousel(
-                        books = booksWithConvertedCovers,
-                        listState = listState,
-                        itemWidthPx = itemWidthPx
-                    )
-                }
+    Box(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize()) {
+            Box(Modifier.weight(0.4f)) {
+                Carousel(
+                    books = booksWithCovers,
+                    listState = listState,
+                    itemWidthPx = itemWidthPx
+                )
             }
 
             Box(
@@ -121,10 +104,7 @@ fun CarouselTab(
                     .padding(40.dp)
             ) {
                 if (quotes.isEmpty()) {
-                    Text(
-                        "No quotes for this book",
-                        fontSize = 18.sp
-                    )
+                    Text("No quotes for this book", fontSize = 18.sp)
                 } else {
                     androidx.compose.foundation.lazy.LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -140,19 +120,17 @@ fun CarouselTab(
                                         fontStyle = FontStyle.Italic
                                     )
                                 )
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Spacer(modifier = Modifier.weight(1f))
-                                    quote.pageNumber?.let { page ->
+                                quote.pageNumber?.let { page ->
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Spacer(modifier = Modifier.weight(1f))
                                         Text(
                                             text = "p.$page",
                                             fontSize = 14.sp,
                                             style = MaterialTheme.typography.bodySmall.copy(
-                                                color = MaterialTheme.colorScheme.onBackground.copy(
-                                                    alpha = 0.6f
-                                                )
+                                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                                             )
                                         )
                                     }
@@ -171,21 +149,24 @@ fun CarouselTab(
             }
         }
 
-        if (showQuoteModal && selectedBook != null) {
-            AddQuoteModal(
-                onDismiss = { setShowQuoteModal(false) },
-                quoteViewModel = quoteViewModel,
-                overlayAlpha = overlayAlpha,
-                book = selectedBook.book
-            )
-        }
-        if (showScanModal && selectedBook != null) {
-            ScanModal(
-                onDismiss = { setShowScanModal(false) },
-                overlayAlpha = overlayAlpha,
-                book = selectedBook.book
-            )
-        }
+        selectedBook?.let { book ->
+            if (showQuoteModal) {
+                AddQuoteModal(
+                    onDismiss = { uiStateViewModel.setShowQuoteModal(false) },
+                    quoteViewModel = quoteViewModel,
+                    overlayAlpha = overlayAlpha,
+                    book = book.book
+                )
+            }
 
+            if (showScanModal) {
+                ScanModal(
+                    book = selectedBook.book,
+                    visible = showScanModal,
+                    overlayAlpha = overlayAlpha,
+                    onDismiss = { uiStateViewModel.setShowScanModal(false) }
+                )
+            }
+        }
     }
 }

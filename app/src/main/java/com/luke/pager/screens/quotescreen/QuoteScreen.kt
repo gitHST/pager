@@ -2,8 +2,6 @@ package com.luke.pager.screens.quotescreen
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -24,10 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -35,6 +30,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.core.graphics.createBitmap
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.viewmodel.BookViewModel
@@ -54,19 +50,9 @@ fun QuotesScreen(
     val bookList by bookViewModel.books.collectAsState()
     val quotes by quoteViewModel.quotes.collectAsState()
     val allQuotes by quoteViewModel.allQuotes.collectAsState()
-
     val placeholderBitmap = remember { createPlaceholderBitmap() }
-    var showQuoteModal by remember { mutableStateOf(false) }
-    var showScanModal by remember { mutableStateOf(false) }
-
-    val overlayAlpha by animateFloatAsState(
-        targetValue = if (showQuoteModal || showScanModal) 0.5f else 0f,
-        animationSpec = tween(durationMillis = 400)
-    )
-
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
-    val tabCount = 2
-
+    val uiStateViewModel: QuoteUiStateViewModel = viewModel()
+    val selectedTabIndex by uiStateViewModel.selectedTabIndex.collectAsState()
     val currentPageIndex = navItems.indexOfFirst { it.route == currentRoute }
 
     LaunchedEffect(Unit) {
@@ -76,20 +62,11 @@ fun QuotesScreen(
     Column(
         modifier = Modifier.pointerInput(selectedTabIndex) {
             detectHorizontalDragGestures { _, dragAmount ->
-                if (dragAmount > 50) {
-                    if (selectedTabIndex > 0) {
-                        selectedTabIndex--
-                    } else {
-                        val previousPage = (currentPageIndex - 1).coerceAtLeast(0)
-                        navController.navigate(navItems[previousPage].route)
-                    }
-                } else if (dragAmount < -50) {
-                    if (selectedTabIndex < tabCount - 1) {
-                        selectedTabIndex++
-                    } else {
-                        val nextPage = (currentPageIndex + 1).coerceAtMost(navItems.lastIndex)
-                        navController.navigate(navItems[nextPage].route)
-                    }
+                when {
+                    dragAmount > 50 && selectedTabIndex > 0 -> uiStateViewModel.setSelectedTabIndex(selectedTabIndex - 1)
+                    dragAmount < -50 && selectedTabIndex < 1 -> uiStateViewModel.setSelectedTabIndex(selectedTabIndex + 1)
+                    dragAmount > 50 -> navController.navigate(navItems[(currentPageIndex - 1).coerceAtLeast(0)].route)
+                    dragAmount < -50 -> navController.navigate(navItems[(currentPageIndex + 1).coerceAtMost(navItems.lastIndex)].route)
                 }
             }
         }
@@ -100,12 +77,12 @@ fun QuotesScreen(
         ) {
             Tab(
                 selected = selectedTabIndex == 0,
-                onClick = { selectedTabIndex = 0 },
+                onClick = { uiStateViewModel.setSelectedTabIndex(0) },
                 text = { Text("Carousel", style = MaterialTheme.typography.bodyMedium) }
             )
             Tab(
                 selected = selectedTabIndex == 1,
-                onClick = { selectedTabIndex = 1 },
+                onClick = { uiStateViewModel.setSelectedTabIndex(1) },
                 text = { Text("All", style = MaterialTheme.typography.bodyLarge) }
             )
         }
@@ -115,47 +92,38 @@ fun QuotesScreen(
                 .fillMaxWidth()
                 .weight(1f)
         ) {
+            if (selectedTabIndex == 0) {
+                Box(modifier = Modifier.matchParentSize()) {
+                    FabOverlay(uiStateViewModel = uiStateViewModel)
+                }
+            }
+
             AnimatedContent(
                 targetState = selectedTabIndex,
                 transitionSpec = {
                     if (targetState > initialState) {
-                        (slideInHorizontally { width -> width } + fadeIn()).togetherWith(
-                            slideOutHorizontally { width -> -width } + fadeOut()
-                        )
+                        (slideInHorizontally { it } + fadeIn()).togetherWith(slideOutHorizontally { -it } + fadeOut())
                     } else {
-                        (slideInHorizontally { width -> -width } + fadeIn()).togetherWith(
-                            slideOutHorizontally { width -> width } + fadeOut()
-                        )
+                        (slideInHorizontally { -it } + fadeIn()).togetherWith(slideOutHorizontally { it } + fadeOut())
                     }
                 },
                 label = "TabContentAnimation"
-            ) { targetTab ->
-                when (targetTab) {
+            ) { index ->
+                when (index) {
                     0 -> CarouselTab(
                         bookList = bookList,
                         quotes = quotes,
                         quoteViewModel = quoteViewModel,
                         placeholderBitmap = placeholderBitmap,
-                        showQuoteModal = showQuoteModal,
-                        setShowQuoteModal = { showQuoteModal = it },
-                        overlayAlpha = overlayAlpha,
-                        showScanModal = showScanModal,
-                        setShowScanModal = { showScanModal = it }
+                        uiStateViewModel = uiStateViewModel
                     )
                     1 -> AllQuotesTab(quotes = allQuotes, bookList = bookList)
                 }
             }
-
-            if (selectedTabIndex == 0) {
-                FabOverlay(
-                    showQuoteModal = showQuoteModal || showScanModal,
-                    setShowQuoteModal = { showQuoteModal = it },
-                    setShowScanModal = { showScanModal = it }
-                )
-            }
         }
     }
 }
+
 
 @Composable
 fun ExtendedFabItem(text: String, icon: ImageVector, onClick: () -> Unit) {
@@ -166,16 +134,10 @@ fun ExtendedFabItem(text: String, icon: ImageVector, onClick: () -> Unit) {
     )
 }
 
-data class DisplayBook(
-    val imageBitmap: ImageBitmap,
-    val book: BookEntity,
-    val isDummy: Boolean
-)
+data class DisplayBook(val imageBitmap: ImageBitmap, val book: BookEntity, val isDummy: Boolean)
 
 data class DummyBook(val id: Long, val title: String) {
-    fun toBookEntity(): BookEntity {
-        return BookEntity(id = id, title = title, cover = null)
-    }
+    fun toBookEntity(): BookEntity = BookEntity(id = id, title = title, cover = null)
 }
 
 fun createPlaceholderBitmap(): ImageBitmap {
