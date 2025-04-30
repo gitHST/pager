@@ -64,6 +64,7 @@ fun AddQuoteModal(
 
     CenteredModalScaffold(
         overlayAlpha = overlayAlpha,
+        visible = true,
         onDismiss = onDismiss
     ) {
         Column(

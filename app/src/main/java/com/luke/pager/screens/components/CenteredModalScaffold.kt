@@ -17,32 +17,35 @@ import androidx.compose.ui.graphics.Color
 
 @Composable
 fun CenteredModalScaffold(
+    visible: Boolean,
     overlayAlpha: Float,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = overlayAlpha))
-                .clickable(
-                    onClick = onDismiss,
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                )
-        )
-
-        AnimatedVisibility(
-            visible = overlayAlpha > 0f,
-            enter = fadeIn(animationSpec = tween(durationMillis = 200)),
-            exit = fadeOut(animationSpec = tween(durationMillis = 200)),
-            modifier = Modifier
-                .align(Alignment.Center)
-                .then(modifier)
-        ) {
-            content()
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(animationSpec = tween(200)),
+        exit = fadeOut(animationSpec = tween(200))
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = overlayAlpha))
+                    .clickable(
+                        onClick = onDismiss,
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    )
+            )
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .then(modifier)
+            ) {
+                content()
+            }
         }
     }
 }
