@@ -47,6 +47,7 @@ import com.luke.pager.screens.quotescreen.tab.AllQuotesTab
 import com.luke.pager.screens.quotescreen.tab.CarouselTab
 import com.luke.pager.screens.quotescreen.uicomponent.FabOverlay
 import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -68,6 +69,14 @@ fun QuotesScreen(
 
     LaunchedEffect(Unit) {
         quoteViewModel.loadAllQuotes()
+    }
+
+    LaunchedEffect(selectedTabIndex) {
+        if (selectedTabIndex == 1) {
+            delay(500)
+            uiStateViewModel.setShowQuoteModal(false)
+            uiStateViewModel.setShowScanModal(false)
+        }
     }
 
     Column(
@@ -112,7 +121,9 @@ fun QuotesScreen(
                 )
                 Tab(
                     selected = selectedTabIndex == 1,
-                    onClick = { uiStateViewModel.setSelectedTabIndex(1) },
+                    onClick = {
+                        uiStateViewModel.setSelectedTabIndex(1)
+                    },
                     icon = {
                         Box(
                             contentAlignment = androidx.compose.ui.Alignment.Center,

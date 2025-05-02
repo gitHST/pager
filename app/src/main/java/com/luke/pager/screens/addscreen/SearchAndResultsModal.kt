@@ -61,6 +61,7 @@ import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.network.OpenLibraryBook
 import com.luke.pager.network.SearchResult
 import com.luke.pager.network.searchBooksSmart
+import com.luke.pager.screens.components.Title
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -142,6 +143,7 @@ fun SearchAndResultsModal(
             }
     }
 
+    Title("Review")
     Scaffold(
         containerColor = Color.Transparent,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
