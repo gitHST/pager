@@ -6,6 +6,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -17,7 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -49,7 +49,7 @@ fun CenteredModalScaffold(
     enterFade: Int = 300,
     exitFade: Int = 200,
     visible: Boolean,
-    content: @Composable () -> Unit,
+    content: @Composable (ScrollState) -> Unit,
 ) {
     val scrollState = rememberScrollState()
     AnimatedVisibility(
@@ -84,10 +84,9 @@ fun CenteredModalScaffold(
                         )
                         .padding(horizontal = sidesPadding, vertical = verticalPadding)
                         .clickable(enabled = false) {}
-                        .verticalScroll(scrollState)
                         .animateContentSize()
                 ) {
-                    content()
+                    content(scrollState)
                 }
             }
         }
