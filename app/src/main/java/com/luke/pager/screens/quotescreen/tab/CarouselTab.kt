@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.entities.QuoteEntity
 import com.luke.pager.data.viewmodel.QuoteViewModel
@@ -94,7 +95,7 @@ fun CarouselTab(
         }
     }
 
-    Box(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize().zIndex(100f)) {
         Column(Modifier.fillMaxSize()) {
             Box(Modifier.weight(0.4f)) {
                 Carousel(
