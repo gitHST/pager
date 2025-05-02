@@ -19,13 +19,23 @@ fun SwipeToNavigate(
 
     Box(
         modifier = Modifier.pointerInput(Unit) {
-            detectHorizontalDragGestures { change, dragAmount ->
+            detectHorizontalDragGestures { _, dragAmount ->
                 if (dragAmount > setDragAmount) {
-                    val previousIndex = (currentIndex - 1).coerceAtLeast(0)
-                    navController.navigate(navItems[previousIndex].route)
+                    val previousIndex = currentIndex - 1
+                    if (previousIndex >= 0) {
+                        val targetRoute = navItems[previousIndex].route
+                        if (targetRoute != currentRoute) {
+                            navController.navigate(targetRoute)
+                        }
+                    }
                 } else if (dragAmount < -setDragAmount) {
-                    val nextIndex = (currentIndex + 1).coerceAtMost(navItems.lastIndex)
-                    navController.navigate(navItems[nextIndex].route)
+                    val nextIndex = currentIndex + 1
+                    if (nextIndex <= navItems.lastIndex) {
+                        val targetRoute = navItems[nextIndex].route
+                        if (targetRoute != currentRoute) {
+                            navController.navigate(targetRoute)
+                        }
+                    }
                 }
             }
         }
