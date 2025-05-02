@@ -8,21 +8,33 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import kotlin.math.abs
 
 @Composable
-fun CarouselItemContinuous(imageBitmap: ImageBitmap, continuousDistance: Float, isDummy: Boolean) {
-
+fun CarouselItemContinuous(
+    imageBitmap: ImageBitmap,
+    continuousDistance: Float,
+    isDummy: Boolean,
+    cornerRadius: Int = 8,
+    width: Dp = 110.dp,
+    contentScale: ContentScale = ContentScale.Crop,
+) {
     val translateDensity = LocalDensity.current
-
 
     var scale = 1.2f
     var rotationY = 0f
@@ -36,15 +48,23 @@ fun CarouselItemContinuous(imageBitmap: ImageBitmap, continuousDistance: Float, 
         alpha = 1f + (1f * continuousDistance.coerceAtMost(1f))
         translationX = with(translateDensity) { (60 * continuousDistance).dp.toPx() }
     }
+
     val animatedScale by animateFloatAsState(scale)
     val animatedRotationY by animateFloatAsState(rotationY)
     val animatedAlpha by animateFloatAsState(alpha)
     val animatedTranslationX by animateFloatAsState(translationX)
 
+    var aspectRatio by remember { mutableFloatStateOf(2f / 3f) }
+    LaunchedEffect(imageBitmap) {
+        if (imageBitmap.width > 0 && imageBitmap.height > 0) {
+            aspectRatio = imageBitmap.width.toFloat() / imageBitmap.height.toFloat()
+        }
+    }
+
     Box(
         modifier = Modifier
-            .width(110.dp)
-            .aspectRatio(2f / 3f)
+            .width(width)
+            .aspectRatio(aspectRatio)
             .graphicsLayer {
                 scaleX = animatedScale
                 scaleY = animatedScale
@@ -54,12 +74,14 @@ fun CarouselItemContinuous(imageBitmap: ImageBitmap, continuousDistance: Float, 
                 cameraDistance = 8 * density
             }
             .zIndex(-continuousDistance)
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(cornerRadius.dp)),
+        contentAlignment = Alignment.Center
     ) {
         Image(
             bitmap = imageBitmap,
             contentDescription = null,
-            modifier = Modifier.fillMaxSize()
+            contentScale = contentScale,
+            modifier = Modifier.fillMaxSize(),
         )
     }
 }
