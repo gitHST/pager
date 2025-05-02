@@ -10,17 +10,36 @@ import com.luke.pager.data.repo.ReviewRepository
 import com.luke.pager.network.OpenLibraryBook
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.URL
 
-class BookViewModel(private val bookRepository: BookRepository, private val reviewRepository: ReviewRepository) : ViewModel() {
+class BookViewModel(
+    private val bookRepository: BookRepository,
+    private val reviewRepository: ReviewRepository
+) : ViewModel() {
+
     private val _books = MutableStateFlow<List<BookEntity>>(emptyList())
     val books: StateFlow<List<BookEntity>> get() = _books
 
     private val _allReviews = MutableStateFlow<Map<Long, ReviewEntity?>>(emptyMap())
     val allReviews: StateFlow<Map<Long, ReviewEntity?>> get() = _allReviews
+
+    // NEW: Books sorted by dateReviewed descending
+    val booksSortedByReviewDate: StateFlow<List<BookEntity>> =
+        combine(_books, _allReviews) { books, reviews ->
+            books.sortedByDescending { book ->
+                reviews[book.id]?.dateReviewed
+            }
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            emptyList()
+        )
 
     suspend fun insertAndReturnId(book: BookEntity): Long {
         return bookRepository.insertAndReturnId(book)
