@@ -49,6 +49,7 @@ fun CenteredModalScaffold(
     enterFade: Int = 300,
     exitFade: Int = 200,
     visible: Boolean,
+    zIndex: Float = 2f,
     content: @Composable (ScrollState) -> Unit,
 ) {
     val scrollState = rememberScrollState()
