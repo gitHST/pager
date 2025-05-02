@@ -36,11 +36,15 @@ fun AllQuotesTab(quotes: List<QuoteEntity>, bookList: List<BookEntity>) {
             .padding(30.dp),
     ) {
         if (sortedQuotes.isEmpty()) {
-            Text(
-                "No quotes available.",
-                fontSize = 18.sp,
-                modifier = Modifier.align(Alignment.Center)
-            )
+            // centered box
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                Text(
+                    "No quotes yet",
+                    fontSize = 18.sp,
+                    fontStyle = FontStyle.Italic,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                )
+            }
         } else {
             Column(
                 modifier = Modifier

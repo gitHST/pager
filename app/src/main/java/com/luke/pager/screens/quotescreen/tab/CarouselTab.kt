@@ -95,7 +95,7 @@ fun CarouselTab(
         }
     }
 
-    Box(Modifier.fillMaxSize().zIndex(100f)) {
+    Box(Modifier.fillMaxSize().zIndex(2f)) {
         Column(Modifier.fillMaxSize()) {
             Box(Modifier.weight(0.4f)) {
                 Carousel(
@@ -111,7 +111,7 @@ fun CarouselTab(
                     .padding(start = 40.dp, end = 40.dp, top = 16.dp, bottom = 16.dp)
             ) {
                 if (quotes.isEmpty()) {
-                    Text("No quotes for this book", fontSize = 18.sp)
+                    Text("No quotes for this book", fontSize = 18.sp, fontStyle = FontStyle.Italic, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f))
                 } else {
                     HorizontalDivider()
                     Column(
