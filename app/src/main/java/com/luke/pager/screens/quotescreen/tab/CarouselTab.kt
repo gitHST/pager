@@ -1,6 +1,5 @@
 package com.luke.pager.screens.quotescreen.tab
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -107,54 +107,61 @@ fun CarouselTab(
             Box(
                 modifier = Modifier
                     .weight(0.6f)
-                    .padding(40.dp)
+                    .padding(start = 40.dp, end = 40.dp, top = 16.dp, bottom = 16.dp)
             ) {
                 if (quotes.isEmpty()) {
                     Text("No quotes for this book", fontSize = 18.sp)
                 } else {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    HorizontalDivider()
+                    Column(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        items(quotes.size) { index ->
-                            val quote = quotes[index]
-                            Column {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = quote.quoteText,
-                                    fontSize = 16.sp,
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontStyle = FontStyle.Italic
-                                    )
-                                )
-                                if (quote.pageNumber != null) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Spacer(modifier = Modifier.weight(1f))
-                                        Text(
-                                            text = "p.${quote.pageNumber}",
-                                            fontSize = 14.sp,
-                                            style = MaterialTheme.typography.bodySmall.copy(
-                                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-                                            )
-                                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            items(quotes.size) { index ->
+                                val quote = quotes[index]
+                                Column {
+                                    if (index != 0) {
+                                        HorizontalDivider()
                                     }
-                                } else {
                                     Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = quote.quoteText,
+                                        fontSize = 16.sp,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontStyle = FontStyle.Italic
+                                        )
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    if (quote.pageNumber != null) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Spacer(modifier = Modifier.weight(1f))
+                                            Text(
+                                                text = "p.${quote.pageNumber}",
+                                                fontSize = 14.sp,
+                                                style = MaterialTheme.typography.bodySmall.copy(
+                                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                                                )
+                                            )
+                                        }
+                                    } else {
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                    }
                                 }
-                                Box(
-                                    Modifier
-                                        .padding(top = 8.dp)
-                                        .fillMaxWidth()
-                                        .height(1.dp)
-                                        .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f))
-                                )
                             }
                         }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        HorizontalDivider()
                     }
+
                 }
+
             }
         }
 
