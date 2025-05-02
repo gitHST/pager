@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.offset
@@ -272,9 +273,16 @@ fun BookRowUIClickable(
                 .padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            BookCoverImage(
-                coverUrl = book.coverIndex?.let { "https://covers.openlibrary.org/b/id/$it-M.jpg" }
-            )
+            Box(
+                modifier = Modifier
+                    .width(80.dp)
+                    .height(120.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                BookCoverImage(
+                    coverUrl = book.coverIndex?.let { "https://covers.openlibrary.org/b/id/$it-M.jpg" }
+                )
+            }
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
