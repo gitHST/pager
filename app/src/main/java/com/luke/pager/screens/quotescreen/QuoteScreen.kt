@@ -121,12 +121,11 @@ fun QuotesScreen(
                 }
             }
 
-            // Move FabOverlay *below* AnimatedContent but with zIndex
             if (selectedTabIndex == 0) {
                 Box(
                     modifier = Modifier
                         .matchParentSize()
-                        .zIndex(1f) // This ensures it sits above everything else
+                        .zIndex(1f)
                 ) {
                     FabOverlay(
                         uiStateViewModel = uiStateViewModel,
