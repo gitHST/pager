@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen
+package com.luke.pager.screens.quotescreen.modal
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility

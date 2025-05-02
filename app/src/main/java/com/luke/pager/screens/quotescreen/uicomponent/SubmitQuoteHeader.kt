@@ -1,5 +1,6 @@
-package com.luke.pager.screens.quotescreen
+package com.luke.pager.screens.quotescreen.uicomponent
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,7 +23,7 @@ fun SubmitQuoteHeader(
     pageNum: String,
     bookId: Long,
     quoteViewModel: QuoteViewModel,
-    scrollState: androidx.compose.foundation.ScrollState,
+    scrollState: ScrollState,
     modifier: Modifier = Modifier
 ) {
     var isSubmitting by remember { mutableStateOf(false) }
