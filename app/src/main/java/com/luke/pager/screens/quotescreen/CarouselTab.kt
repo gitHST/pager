@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -106,13 +107,14 @@ fun CarouselTab(
                 if (quotes.isEmpty()) {
                     Text("No quotes for this book", fontSize = 18.sp)
                 } else {
-                    androidx.compose.foundation.lazy.LazyColumn(
+                    LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(quotes.size) { index ->
                             val quote = quotes[index]
                             Column {
+                                Spacer(modifier = Modifier.height(8.dp))
                                 Text(
                                     text = quote.quoteText,
                                     fontSize = 16.sp,
@@ -120,20 +122,22 @@ fun CarouselTab(
                                         fontStyle = FontStyle.Italic
                                     )
                                 )
-                                quote.pageNumber?.let { page ->
+                                if (quote.pageNumber != null) {
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Spacer(modifier = Modifier.weight(1f))
                                         Text(
-                                            text = "p.$page",
+                                            text = "p.${quote.pageNumber}",
                                             fontSize = 14.sp,
                                             style = MaterialTheme.typography.bodySmall.copy(
                                                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                                             )
                                         )
                                     }
+                                } else {
+                                    Spacer(modifier = Modifier.height(16.dp))
                                 }
                                 Box(
                                     Modifier
