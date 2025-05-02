@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.zIndex
 import androidx.core.graphics.createBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -36,7 +37,6 @@ import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.navigation.NavItem
-
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -92,12 +92,6 @@ fun QuotesScreen(
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            if (selectedTabIndex == 0) {
-                Box(modifier = Modifier.matchParentSize()) {
-                    FabOverlay(uiStateViewModel = uiStateViewModel)
-                }
-            }
-
             AnimatedContent(
                 targetState = selectedTabIndex,
                 transitionSpec = {
@@ -120,10 +114,21 @@ fun QuotesScreen(
                     1 -> AllQuotesTab(quotes = allQuotes, bookList = bookList)
                 }
             }
+
+            // Move FabOverlay *below* AnimatedContent but with zIndex
+            if (selectedTabIndex == 0) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .zIndex(1f) // This ensures it sits above everything else
+                ) {
+                    FabOverlay(uiStateViewModel = uiStateViewModel)
+                }
+            }
         }
+
     }
 }
-
 
 @Composable
 fun ExtendedFabItem(text: String, icon: ImageVector, onClick: () -> Unit) {

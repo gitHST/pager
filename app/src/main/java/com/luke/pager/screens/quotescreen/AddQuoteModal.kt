@@ -59,8 +59,8 @@ fun AddQuoteModal(
     val modalHeight = screenHeight / 1.5f
     val scrollState = rememberScrollState()
 
-    var quoteText by remember { mutableStateOf("") }
-    var pageNumber by remember { mutableStateOf("") }
+    var quoteText by remember(visible) { mutableStateOf("") }
+    var pageNumber by remember(visible) { mutableStateOf("") }
 
     val containerHeightPx = with(density) { modalHeight.toPx().toInt() }
 
