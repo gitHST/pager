@@ -53,7 +53,7 @@ fun QuotesScreen(
     snackbarHostState: SnackbarHostState,
     uiStateViewModel: QuoteUiStateViewModel
 ) {
-    val bookList by bookViewModel.books.collectAsState()
+    val bookList by bookViewModel.booksSortedByReviewDate.collectAsState()
     val quotes by quoteViewModel.quotes.collectAsState()
     val allQuotes by quoteViewModel.allQuotes.collectAsState()
     val placeholderBitmap = remember { createPlaceholderBitmap() }
