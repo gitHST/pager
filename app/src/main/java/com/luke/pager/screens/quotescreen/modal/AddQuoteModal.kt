@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen
+package com.luke.pager.screens.quotescreen.modal
 
 
 import BookCoverImage
@@ -43,6 +43,7 @@ import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.screens.components.CenteredModalScaffold
 import com.luke.pager.screens.components.ScrollingTextField
+import com.luke.pager.screens.quotescreen.uicomponent.SubmitQuoteHeader
 
 
 @Composable

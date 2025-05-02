@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen
+package com.luke.pager.screens.quotescreen.tab
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -30,8 +30,13 @@ import androidx.compose.ui.unit.sp
 import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.entities.QuoteEntity
 import com.luke.pager.data.viewmodel.QuoteViewModel
+import com.luke.pager.screens.quotescreen.DisplayBook
+import com.luke.pager.screens.quotescreen.DummyBook
 import com.luke.pager.screens.quotescreen.carousel.Carousel
 import com.luke.pager.screens.quotescreen.carousel.byteArrayToImageBitmap
+import com.luke.pager.screens.quotescreen.modal.AddQuoteModal
+import com.luke.pager.screens.quotescreen.modal.ScanModal
+import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
 import kotlinx.coroutines.launch
 
 @Composable

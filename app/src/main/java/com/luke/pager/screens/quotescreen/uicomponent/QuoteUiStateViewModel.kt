@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen
+package com.luke.pager.screens.quotescreen.uicomponent
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
