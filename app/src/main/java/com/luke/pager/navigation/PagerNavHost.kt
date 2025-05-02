@@ -1,6 +1,10 @@
 package com.luke.pager.navigation
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -29,9 +33,11 @@ fun PagerNavHost(
     snackbarHostState: SnackbarHostState
 ) {
     val navItems = listOf(
-        NavItem("diary", "Diary"),
-        NavItem("plus", "+"),
-        NavItem("quotes", "Quotes")
+        // NavItem("activity", "Activity"),
+        NavItem("diary", "Diary", Icons.Filled.Book),
+        NavItem("plus", "Add", Icons.Filled.Add),
+        // NavItem("explore", "Explore"),
+        NavItem("quotes", "Quotes", Icons.Filled.FormatQuote)
     )
 
     val currentRoute by navController.currentBackStackEntryAsState()
