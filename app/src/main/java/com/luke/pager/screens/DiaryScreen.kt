@@ -44,6 +44,8 @@ import androidx.navigation.NavController
 import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.entities.ReviewEntity
 import com.luke.pager.data.viewmodel.BookViewModel
+import com.luke.pager.screens.components.NoBooksYetMessage
+import com.luke.pager.screens.components.Title
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -74,23 +76,9 @@ fun DiaryScreen(
     val groupedBooks = sortedBooks.groupBy { (_, review) -> getDateWithoutTime(review.dateReviewed) }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        Box(
-            modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            contentAlignment = Alignment.TopCenter
-        ) {
-            Text(text = "Diary", fontSize = 24.sp)
-        }
-
+        Title("Diary")
         if (books.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "No books yet", fontSize = 20.sp)
-            }
+            NoBooksYetMessage()
         } else {
             LazyColumn(
                 modifier =

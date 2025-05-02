@@ -8,13 +8,17 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.ViewCarousel
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
@@ -37,6 +41,8 @@ import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.navigation.NavItem
+import com.luke.pager.screens.components.NoBooksYetMessage
+import com.luke.pager.screens.components.Title
 import com.luke.pager.screens.quotescreen.tab.AllQuotesTab
 import com.luke.pager.screens.quotescreen.tab.CarouselTab
 import com.luke.pager.screens.quotescreen.uicomponent.FabOverlay
@@ -76,64 +82,101 @@ fun QuotesScreen(
             }
         }
     ) {
-        PrimaryTabRow(
-            selectedTabIndex = selectedTabIndex,
-            containerColor = Color.Transparent,
-        ) {
-            Tab(
-                selected = selectedTabIndex == 0,
-                onClick = { uiStateViewModel.setSelectedTabIndex(0) },
-                text = { Text("Carousel", style = MaterialTheme.typography.bodyMedium) }
-            )
-            Tab(
-                selected = selectedTabIndex == 1,
-                onClick = { uiStateViewModel.setSelectedTabIndex(1) },
-                text = { Text("All", style = MaterialTheme.typography.bodyLarge) }
-            )
-        }
+        Title("Quotes")
+        if (bookList.isEmpty()) {
+            NoBooksYetMessage()
+        } else {
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        ) {
-            AnimatedContent(
-                targetState = selectedTabIndex,
-                transitionSpec = {
-                    if (targetState > initialState) {
-                        (slideInHorizontally { it } + fadeIn()).togetherWith(slideOutHorizontally { -it } + fadeOut())
-                    } else {
-                        (slideInHorizontally { -it } + fadeIn()).togetherWith(slideOutHorizontally { it } + fadeOut())
+            PrimaryTabRow(
+                selectedTabIndex = selectedTabIndex,
+                containerColor = Color.Transparent,
+            ) {
+                Tab(
+                    selected = selectedTabIndex == 0,
+                    onClick = { uiStateViewModel.setSelectedTabIndex(0) },
+                    icon = {
+                        Box(
+                            contentAlignment = androidx.compose.ui.Alignment.Center,
+                            modifier = Modifier
+                                .indication(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ViewCarousel,
+                                contentDescription = "Carousel"
+                            )
+                        }
                     }
-                },
-                label = "TabContentAnimation"
-            ) { index ->
-                when (index) {
-                    0 -> CarouselTab(
-                        bookList = bookList,
-                        quotes = quotes,
-                        quoteViewModel = quoteViewModel,
-                        placeholderBitmap = placeholderBitmap,
-                        uiStateViewModel = uiStateViewModel
-                    )
-                    1 -> AllQuotesTab(quotes = allQuotes, bookList = bookList)
-                }
+                )
+                Tab(
+                    selected = selectedTabIndex == 1,
+                    onClick = { uiStateViewModel.setSelectedTabIndex(1) },
+                    icon = {
+                        Box(
+                            contentAlignment = androidx.compose.ui.Alignment.Center,
+                            modifier = Modifier
+                                .indication(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                )
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.List,
+                                contentDescription = "All"
+                            )
+                        }
+                    }
+                )
             }
 
-            if (selectedTabIndex == 0) {
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .zIndex(1f)
-                ) {
-                    FabOverlay(
-                        uiStateViewModel = uiStateViewModel,
-                        snackbarHostState = snackbarHostState
-                    )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                AnimatedContent(
+                    targetState = selectedTabIndex,
+                    transitionSpec = {
+                        if (targetState > initialState) {
+                            (slideInHorizontally { it } + fadeIn()).togetherWith(
+                                slideOutHorizontally { -it } + fadeOut())
+                        } else {
+                            (slideInHorizontally { -it } + fadeIn()).togetherWith(
+                                slideOutHorizontally { it } + fadeOut())
+                        }
+                    },
+                    label = "TabContentAnimation"
+                ) { index ->
+                    when (index) {
+                        0 -> CarouselTab(
+                            bookList = bookList,
+                            quotes = quotes,
+                            quoteViewModel = quoteViewModel,
+                            placeholderBitmap = placeholderBitmap,
+                            uiStateViewModel = uiStateViewModel
+                        )
+
+                        1 -> AllQuotesTab(quotes = allQuotes, bookList = bookList)
+                    }
+                }
+
+                if (selectedTabIndex == 0) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .zIndex(1f)
+                    ) {
+                        FabOverlay(
+                            uiStateViewModel = uiStateViewModel,
+                            snackbarHostState = snackbarHostState
+                        )
+                    }
                 }
             }
         }
-
     }
 }
 

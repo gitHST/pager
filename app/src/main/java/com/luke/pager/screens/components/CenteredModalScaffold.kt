@@ -36,7 +36,7 @@ fun CenteredModalScaffold(
     overlayAlpha: Float,
     modifier: Modifier = Modifier,
     maxWidth: Float = 0.9f,
-    topPadding: Dp = 8.dp,
+    topPadding: Dp = 0.dp,
     height: Dp = with(LocalDensity.current) {
         LocalWindowInfo.current.containerSize.height.toDp() / 1.5f
     },
