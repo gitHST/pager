@@ -51,8 +51,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.luke.pager.data.viewmodel.BookViewModel
@@ -83,7 +84,9 @@ fun SearchAndResultsModal(
     var containerHeight by remember { mutableIntStateOf(0) }
     val keyboardController = LocalSoftwareKeyboardController.current
     var hasActivatedOnce by remember { mutableStateOf(false) }
-    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val windowInfo = LocalWindowInfo.current
+    val density = LocalDensity.current
+    val screenHeight = with(density) { windowInfo.containerSize.height.toDp() }
     val imePadding = WindowInsets.ime.asPaddingValues()
     val imeVisible by remember {
         derivedStateOf { imePadding.calculateBottomPadding() > 0.dp }
@@ -143,8 +146,7 @@ fun SearchAndResultsModal(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
         Box(
-            modifier =
-            Modifier
+            modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
                 .clickable(
@@ -154,8 +156,7 @@ fun SearchAndResultsModal(
                 )
         ) {
             Box(
-                modifier =
-                Modifier
+                modifier = Modifier
                     .fillMaxSize()
                     .clickable(
                         indication = null,
@@ -163,8 +164,7 @@ fun SearchAndResultsModal(
                     ) { onDismiss() }
             ) {
                 Column(
-                    modifier =
-                    Modifier
+                    modifier = Modifier
                         .fillMaxWidth(0.9f)
                         .align(Alignment.TopCenter)
                         .padding(top = animatedTopPadding)
@@ -207,8 +207,7 @@ fun SearchAndResultsModal(
                                     }
                                 },
                                 placeholder = { Text("Search books...") },
-                                modifier =
-                                Modifier
+                                modifier = Modifier
                                     .fillMaxWidth()
                                     .offset(y = (-4).dp),
                                 windowInsets = WindowInsets(0.dp),
@@ -220,8 +219,7 @@ fun SearchAndResultsModal(
                             ) {
                                 if (isLoading) {
                                     Box(
-                                        modifier =
-                                        Modifier
+                                        modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(16.dp),
                                         contentAlignment = Alignment.Center
@@ -233,8 +231,7 @@ fun SearchAndResultsModal(
                                         if (books.isEmpty() && !isLoading && searchQuery.isNotBlank()) {
                                             item {
                                                 Box(
-                                                    modifier =
-                                                    Modifier
+                                                    modifier = Modifier
                                                         .fillMaxWidth()
                                                         .padding(24.dp),
                                                     contentAlignment = Alignment.Center
