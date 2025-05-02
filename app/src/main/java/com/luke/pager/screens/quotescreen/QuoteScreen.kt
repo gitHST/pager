@@ -37,6 +37,10 @@ import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.navigation.NavItem
+import com.luke.pager.screens.quotescreen.tab.AllQuotesTab
+import com.luke.pager.screens.quotescreen.tab.CarouselTab
+import com.luke.pager.screens.quotescreen.uicomponent.FabOverlay
+import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable

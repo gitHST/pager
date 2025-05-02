@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen
+package com.luke.pager.screens.quotescreen.tab
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
