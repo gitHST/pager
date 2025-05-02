@@ -1,9 +1,5 @@
 package com.luke.pager.screens.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -17,35 +13,28 @@ import androidx.compose.ui.graphics.Color
 
 @Composable
 fun CenteredModalScaffold(
-    visible: Boolean,
-    overlayAlpha: Float,
     onDismiss: () -> Unit,
+    overlayAlpha: Float,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = fadeIn(animationSpec = tween(200)),
-        exit = fadeOut(animationSpec = tween(200))
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = overlayAlpha))
-                    .clickable(
-                        onClick = onDismiss,
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    )
-            )
-            Box(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .then(modifier)
-            ) {
-                content()
-            }
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = overlayAlpha))
+                .clickable(
+                    onClick = onDismiss,
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                )
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .then(modifier)
+        ) {
+            content()
         }
     }
 }
