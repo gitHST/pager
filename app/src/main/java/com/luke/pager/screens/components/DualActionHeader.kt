@@ -41,6 +41,14 @@ fun DualActionHeader(
         targetValue = targetBorderColor,
         animationSpec = tween(durationMillis = 300)
     )
+//
+//    LaunchedEffect(scrollState.value) {
+//        println("SCROLL VALUE: ${scrollState.value}")
+//    }
+//    LaunchedEffect(scrollState.value, scrollState.maxValue) {
+//        println("SCROLL VALUE: ${scrollState.value}, MAX: ${scrollState.maxValue}")
+//    }
+
 
     Row(
         modifier = modifier.zIndex(2f).fillMaxWidth(),

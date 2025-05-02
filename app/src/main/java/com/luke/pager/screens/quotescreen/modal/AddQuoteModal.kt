@@ -3,17 +3,19 @@ package com.luke.pager.screens.quotescreen.modal
 
 import BookCoverImage
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -48,7 +50,6 @@ fun AddQuoteModal(
     val density = LocalDensity.current
     val screenHeight = with(density) { windowInfo.containerSize.height.toDp() }
     val modalHeight = screenHeight / 1.5f
-    val scrollState = rememberScrollState()
 
     var quoteText by remember(visible) { mutableStateOf("") }
     var pageNumber by remember(visible) { mutableStateOf("") }
@@ -61,8 +62,7 @@ fun AddQuoteModal(
         overlayAlpha = overlayAlpha,
         onDismiss = onDismiss,
         visible = visible
-    ) {
-
+    ) { scrollState ->
         SubmitQuoteHeader(
             onDismiss = onDismiss,
             quoteText = quoteText,
@@ -73,93 +73,100 @@ fun AddQuoteModal(
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .animateContentSize()
         ) {
-            Box(
-                modifier = Modifier
-                    .width(100.dp)
-                    .heightIn(max = 150.dp),
-            ) {
-                BookCoverImage(
-                    coverData = book.cover,
-                )
-            }
-            Column(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(end = 8.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.Start
+                    .padding(bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = book.title,
-                    style = MaterialTheme.typography.titleLarge
-                )
-
-                book.authors?.let {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodyMedium
+                Box(
+                    modifier = Modifier
+                        .width(100.dp)
+                        .heightIn(max = 150.dp),
+                ) {
+                    BookCoverImage(
+                        coverData = book.cover,
                     )
                 }
-                book.firstPublishDate?.let {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 8.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.Start
+                ) {
                     Text(
-                        text = book.firstPublishDate,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(bottom = 8.dp)
+                        text = book.title,
+                        style = MaterialTheme.typography.titleLarge
                     )
+
+                    book.authors?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                    book.firstPublishDate?.let {
+                        Text(
+                            text = book.firstPublishDate,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            ScrollingTextField(
-                text = quoteText,
-                onTextChange = { quoteText = it },
-                scrollState = scrollState,
-                containerHeight = containerHeightPx,
-                existingSpaceTaken = 290,
-                insideText = "Quote..."
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        TextField(
-            value = pageNumber,
-            onValueChange = { newValue ->
-                if (newValue.all { it.isDigit() }) {
-                    pageNumber = newValue
-                }
-            },
-            modifier = Modifier
-                .width(120.dp)
-                .height(48.dp),
-            textStyle = MaterialTheme.typography.bodyMedium,
-            singleLine = true,
-            placeholder = { Text("__") },
-            leadingIcon = {
-                Text(
-                    text = "Page:",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 4.dp)
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                ScrollingTextField(
+                    text = quoteText,
+                    onTextChange = { quoteText = it },
+                    scrollState = scrollState,
+                    containerHeight = containerHeightPx,
+                    existingSpaceTaken = 290,
+                    insideText = "Quote..."
                 )
-            },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                disabledContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            TextField(
+                value = pageNumber,
+                onValueChange = { newValue ->
+                    if (newValue.all { it.isDigit() }) {
+                        pageNumber = newValue
+                    }
+                },
+                modifier = Modifier
+                    .width(120.dp)
+                    .height(48.dp),
+                textStyle = MaterialTheme.typography.bodyMedium,
+                singleLine = true,
+                placeholder = { Text("__") },
+                leadingIcon = {
+                    Text(
+                        text = "Page:",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+                },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent
+                )
             )
-        )
+        }
     }
 }
