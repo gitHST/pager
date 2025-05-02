@@ -1,5 +1,6 @@
 package com.luke.pager.navigation
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -7,8 +8,13 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -22,6 +28,8 @@ import com.luke.pager.screens.ExploreScreen
 import com.luke.pager.screens.ReviewScreen
 import com.luke.pager.screens.addscreen.SearchAndResultsModal
 import com.luke.pager.screens.quotescreen.QuotesScreen
+import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -41,6 +49,21 @@ fun PagerNavHost(
     )
 
     val currentRoute by navController.currentBackStackEntryAsState()
+
+    val uiStateViewModel: QuoteUiStateViewModel = viewModel(
+        viewModelStoreOwner = LocalActivity.current as ViewModelStoreOwner
+    )
+
+    val previousRoute = remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(currentRoute) {
+        if (previousRoute.value == "quotes" && currentRoute?.destination?.route != "quotes") {
+            delay(500)
+            uiStateViewModel.reset()
+        }
+        previousRoute.value = currentRoute?.destination?.route
+    }
+
 
     NavHost(
         navController = navController,
@@ -102,7 +125,8 @@ fun PagerNavHost(
                     navController = navController,
                     currentRoute = currentRoute,
                     navItems = navItems,
-                    snackbarHostState = snackbarHostState
+                    snackbarHostState = snackbarHostState,
+                    uiStateViewModel = uiStateViewModel
                 )
             }
         }
