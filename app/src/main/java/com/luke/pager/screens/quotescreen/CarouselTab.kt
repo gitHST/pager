@@ -150,23 +150,20 @@ fun CarouselTab(
         }
 
         selectedBook?.let { book ->
-            if (showQuoteModal) {
-                AddQuoteModal(
-                    onDismiss = { uiStateViewModel.setShowQuoteModal(false) },
-                    quoteViewModel = quoteViewModel,
-                    overlayAlpha = overlayAlpha,
-                    book = book.book
-                )
-            }
+            AddQuoteModal(
+                onDismiss = { uiStateViewModel.setShowQuoteModal(false) },
+                quoteViewModel = quoteViewModel,
+                overlayAlpha = overlayAlpha,
+                book = book.book,
+                visible = showQuoteModal
+            )
 
-            if (showScanModal) {
-                ScanModal(
-                    book = selectedBook.book,
-                    visible = showScanModal,
-                    overlayAlpha = overlayAlpha,
-                    onDismiss = { uiStateViewModel.setShowScanModal(false) }
-                )
-            }
+            ScanModal(
+                book = selectedBook.book,
+                visible = showScanModal,
+                overlayAlpha = overlayAlpha,
+                onDismiss = { uiStateViewModel.setShowScanModal(false) }
+            )
         }
     }
 }

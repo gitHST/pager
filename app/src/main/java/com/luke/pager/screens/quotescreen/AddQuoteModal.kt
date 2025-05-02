@@ -3,7 +3,11 @@ package com.luke.pager.screens.quotescreen
 
 import BookCoverImage
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -47,6 +51,7 @@ fun AddQuoteModal(
     quoteViewModel: QuoteViewModel,
     overlayAlpha: Float,
     book: BookEntity,
+    visible: Boolean,
 ) {
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val modalHeight = screenHeight / 1.5f
@@ -58,129 +63,132 @@ fun AddQuoteModal(
     val density = LocalDensity.current
     val containerHeightPx = with(density) { modalHeight.toPx().toInt() }
 
-    BackHandler {
-        onDismiss()
-    }
+    BackHandler(enabled = visible) { onDismiss() }
 
-    CenteredModalScaffold(
-        overlayAlpha = overlayAlpha,
-        visible = true,
-        onDismiss = onDismiss
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(animationSpec = tween(300)),
+        exit = fadeOut(animationSpec = tween(200))
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .padding(top = 36.dp)
-                .height(modalHeight)
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
-                .padding(horizontal = 24.dp, vertical = 16.dp)
-                .clickable(enabled = false) {}
-                .verticalScroll(scrollState)
-                .animateContentSize()
+        CenteredModalScaffold(
+            overlayAlpha = overlayAlpha,
+            onDismiss = onDismiss
         ) {
-            SubmitQuoteHeader(
-                onDismiss = onDismiss,
-                quoteText = quoteText,
-                pageNum = pageNumber,
-                bookId = book.id,
-                quoteViewModel = quoteViewModel,
-                scrollState = scrollState
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxWidth(0.9f)
+                    .padding(top = 36.dp)
+                    .height(modalHeight)
+                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
+                    .padding(horizontal = 24.dp, vertical = 16.dp)
+                    .clickable(enabled = false) {}
+                    .verticalScroll(scrollState)
+                    .animateContentSize()
             ) {
-                Box(
-                    modifier = Modifier
-                        .width(100.dp)
-                        .heightIn(max = 150.dp),
-                ) {
-                    BookCoverImage(
-                        coverData = book.cover,
-                        cornerRadius = 12,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                    )
-                }
-                Column(
+                SubmitQuoteHeader(
+                    onDismiss = onDismiss,
+                    quoteText = quoteText,
+                    pageNum = pageNumber,
+                    bookId = book.id,
+                    quoteViewModel = quoteViewModel,
+                    scrollState = scrollState
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(end = 8.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.Start
+                        .padding(bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = book.title,
-                        style = MaterialTheme.typography.titleLarge
-                    )
-
-                    book.authors?.let {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.bodyMedium
+                    Box(
+                        modifier = Modifier
+                            .width(100.dp)
+                            .heightIn(max = 150.dp),
+                    ) {
+                        BookCoverImage(
+                            coverData = book.cover,
+                            cornerRadius = 12,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .padding(end = 16.dp)
                         )
                     }
-                    book.firstPublishDate?.let {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 8.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.Start
+                    ) {
                         Text(
-                            text = book.firstPublishDate,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            text = book.title,
+                            style = MaterialTheme.typography.titleLarge
                         )
+
+                        book.authors?.let {
+                            Text(
+                                text = it,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                        book.firstPublishDate?.let {
+                            Text(
+                                text = book.firstPublishDate,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                        }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                ScrollingTextField(
-                    text = quoteText,
-                    onTextChange = { quoteText = it },
-                    scrollState = scrollState,
-                    containerHeight = containerHeightPx,
-                    existingSpaceTaken = 290,
-                    insideText = "Quote..."
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            TextField(
-                value = pageNumber,
-                onValueChange = { newValue ->
-                    if (newValue.all { it.isDigit() }) {
-                        pageNumber = newValue
-                    }
-                },
-                modifier = Modifier
-                    .width(120.dp)
-                    .height(48.dp),
-                textStyle = MaterialTheme.typography.bodyMedium,
-                singleLine = true,
-                placeholder = { Text("__") },
-                leadingIcon = {
-                    Text(
-                        text = "Page:",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(start = 4.dp)
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    ScrollingTextField(
+                        text = quoteText,
+                        onTextChange = { quoteText = it },
+                        scrollState = scrollState,
+                        containerHeight = containerHeightPx,
+                        existingSpaceTaken = 290,
+                        insideText = "Quote..."
                     )
-                },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    disabledContainerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
-                )
-            )
+                }
 
+                Spacer(modifier = Modifier.height(8.dp))
+
+                TextField(
+                    value = pageNumber,
+                    onValueChange = { newValue ->
+                        if (newValue.all { it.isDigit() }) {
+                            pageNumber = newValue
+                        }
+                    },
+                    modifier = Modifier
+                        .width(120.dp)
+                        .height(48.dp),
+                    textStyle = MaterialTheme.typography.bodyMedium,
+                    singleLine = true,
+                    placeholder = { Text("__") },
+                    leadingIcon = {
+                        Text(
+                            text = "Page:",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+                    },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent
+                    )
+                )
+
+            }
         }
     }
 }
