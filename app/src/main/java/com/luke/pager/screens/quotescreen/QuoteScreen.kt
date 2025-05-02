@@ -16,6 +16,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,6 +51,7 @@ fun QuotesScreen(
     navController: NavHostController,
     currentRoute: String,
     navItems: List<NavItem>,
+    snackbarHostState: SnackbarHostState,
 ) {
     val bookList by bookViewModel.books.collectAsState()
     val quotes by quoteViewModel.quotes.collectAsState()
@@ -126,7 +128,10 @@ fun QuotesScreen(
                         .matchParentSize()
                         .zIndex(1f) // This ensures it sits above everything else
                 ) {
-                    FabOverlay(uiStateViewModel = uiStateViewModel)
+                    FabOverlay(
+                        uiStateViewModel = uiStateViewModel,
+                        snackbarHostState = snackbarHostState
+                    )
                 }
             }
         }
