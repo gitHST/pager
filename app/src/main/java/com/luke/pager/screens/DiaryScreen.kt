@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -144,14 +143,8 @@ fun BookItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             BookCoverImage(
-                coverData = book.cover,
-                cornerRadius = 12,
-                modifier = Modifier
-                    .fillMaxWidth(0.2f)
-                    .aspectRatio(0.66f)
+                coverData = book.cover
             )
-
-
             Spacer(modifier = Modifier.width(12.dp))
 
             Column {
