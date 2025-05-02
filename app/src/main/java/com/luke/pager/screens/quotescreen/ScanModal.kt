@@ -1,7 +1,11 @@
 package com.luke.pager.screens.quotescreen
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -27,6 +31,7 @@ import com.luke.pager.screens.components.CenteredModalScaffold
 import com.luke.pager.screens.components.PermissionResult
 import com.luke.pager.screens.components.RequestCameraPermissionResult
 
+
 @Composable
 fun ScanModal(
     book: BookEntity,
@@ -36,49 +41,53 @@ fun ScanModal(
 ) {
     var permission by remember { mutableStateOf<PermissionResult?>(null) }
 
-    if (visible) {
-        BackHandler(onBack = onDismiss)
-    }
+    BackHandler(enabled = visible, onBack = onDismiss)
 
-    CenteredModalScaffold(
+    AnimatedVisibility(
         visible = visible,
-        overlayAlpha = overlayAlpha,
-        onDismiss = onDismiss
+        enter = fadeIn(animationSpec = tween(300)),
+        exit = fadeOut(animationSpec = tween(200))
     ) {
-        when (permission) {
-            PermissionResult.Granted -> {
-                val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-                val modalHeight = screenHeight / 1.5f
-                val scroll = rememberScrollState()
+        CenteredModalScaffold(
+            overlayAlpha = overlayAlpha,
+            onDismiss = onDismiss
+        ) {
+            when (permission) {
+                PermissionResult.Granted -> {
+                    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+                    val modalHeight = screenHeight / 1.5f
+                    val scroll = rememberScrollState()
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth(0.9f)
-                        .padding(top = 36.dp)
-                        .height(modalHeight)
-                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
-                        .padding(horizontal = 24.dp, vertical = 16.dp)
-                        .verticalScroll(scroll)
-                        .animateContentSize()
-                        .clickable(enabled = false) {}
-                ) {
-                    Text(
-                        text = "Scan quote from book: ${book.title}",
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                    Text(
-                        text = "Camera preview goes here...",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(0.9f)
+                            .padding(top = 36.dp)
+                            .height(modalHeight)
+                            .background(
+                                MaterialTheme.colorScheme.surface,
+                                RoundedCornerShape(24.dp)
+                            )
+                            .padding(horizontal = 24.dp, vertical = 16.dp)
+                            .verticalScroll(scroll)
+                            .animateContentSize()
+                            .clickable(enabled = false) {}
+                    ) {
+                        Text(
+                            text = "Scan quote from book: ${book.title}",
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        Text(
+                            text = "Camera preview goes here...",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
+
+                PermissionResult.DeniedPermanently -> CameraPermissionDeniedDialogue()
+                PermissionResult.DeniedTemporarily -> onDismiss()
+                null -> RequestCameraPermissionResult { permission = it }
             }
-
-            PermissionResult.DeniedPermanently -> CameraPermissionDeniedDialogue()
-
-            PermissionResult.DeniedTemporarily -> onDismiss()
-
-            null -> RequestCameraPermissionResult { permission = it }
         }
     }
 }
