@@ -7,8 +7,10 @@ import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -28,8 +30,18 @@ fun BottomNavBar(navController: NavHostController) {
         items.forEach { item ->
             NavigationBarItem(
                 selected = currentRoute?.destination?.route == item.route,
-                onClick = { navController.navigate(item.route) },
-                icon = { Icon(item.icon, contentDescription = item.label) }
+                onClick = {
+                    val currentDestination = navController.currentBackStackEntry?.destination?.route
+                    if (currentDestination != item.route) {
+                        navController.navigate(item.route)
+                    }
+                },
+                icon = { Icon(item.icon, contentDescription = item.label) },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = Color.Black,
+                    unselectedIconColor = Color.Gray,
+                    indicatorColor = Color(0xFFE1E1E1)
+                )
             )
         }
     }
