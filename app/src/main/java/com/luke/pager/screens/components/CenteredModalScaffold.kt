@@ -36,7 +36,7 @@ fun CenteredModalScaffold(
     overlayAlpha: Float,
     modifier: Modifier = Modifier,
     maxWidth: Float = 0.9f,
-    topPadding: Dp = 36.dp,
+    topPadding: Dp = 8.dp,
     height: Dp = with(LocalDensity.current) {
         LocalWindowInfo.current.containerSize.height.toDp() / 1.5f
     },
@@ -47,9 +47,8 @@ fun CenteredModalScaffold(
     sidesPadding: Dp = 24.dp,
     verticalPadding: Dp = 16.dp,
     enterFade: Int = 300,
-    exitFade: Int = 200,
+    exitFade: Int = 300,
     visible: Boolean,
-    zIndex: Float = 2f,
     content: @Composable (ScrollState) -> Unit,
 ) {
     val scrollState = rememberScrollState()
