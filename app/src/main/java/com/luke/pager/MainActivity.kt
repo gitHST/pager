@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -100,6 +102,7 @@ fun PagerAppUI(
         val navController = rememberNavController()
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
+        val snackbarHostState = remember { SnackbarHostState() }
 
         var animatedTargetColor by remember { mutableStateOf<Color?>(null) }
 
@@ -137,6 +140,7 @@ fun PagerAppUI(
 
             Scaffold(
                 containerColor = Color.Transparent,
+                snackbarHost = { SnackbarHost(snackbarHostState) },
                 bottomBar = { BottomNavBar(navController) }
             ) { paddingValues ->
                 Box(
@@ -145,7 +149,13 @@ fun PagerAppUI(
                         .fillMaxSize()
                         .padding(paddingValues)
                 ) {
-                    PagerNavHost(navController, bookViewModel, reviewViewModel, quoteViewModel)
+                    PagerNavHost(
+                        navController,
+                        bookViewModel,
+                        reviewViewModel,
+                        quoteViewModel,
+                        snackbarHostState
+                    )
                 }
             }
         }
