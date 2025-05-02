@@ -26,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
@@ -88,10 +87,6 @@ fun AddQuoteModal(
             ) {
                 BookCoverImage(
                     coverData = book.cover,
-                    cornerRadius = 12,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .padding(end = 16.dp)
                 )
             }
             Column(

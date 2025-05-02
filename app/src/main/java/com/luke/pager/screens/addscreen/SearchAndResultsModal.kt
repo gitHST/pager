@@ -272,17 +272,9 @@ fun BookRowUIClickable(
                 .padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .width(80.dp)
-                    .heightIn(max = 120.dp),
-            ) {
-                BookCoverImage(
-                    coverUrl = book.coverIndex?.let { "https://covers.openlibrary.org/b/id/$it-M.jpg" },
-                    cornerRadius = 14,
-                )
-            }
-
+            BookCoverImage(
+                coverUrl = book.coverIndex?.let { "https://covers.openlibrary.org/b/id/$it-M.jpg" }
+            )
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
