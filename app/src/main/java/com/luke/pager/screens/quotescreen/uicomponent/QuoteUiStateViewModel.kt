@@ -41,4 +41,10 @@ class QuoteUiStateViewModel : ViewModel() {
     private fun updateOverlayAlpha() {
         overlayAlpha.value = if (_showQuoteModal.value || _showScanModal.value) 0.5f else 0f
     }
+
+    fun reset() {
+        _showQuoteModal.value = false
+        _showScanModal.value = false
+        _selectedTabIndex.value = 0
+    }
 }

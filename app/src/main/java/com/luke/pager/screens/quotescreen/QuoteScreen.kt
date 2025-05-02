@@ -1,6 +1,5 @@
 package com.luke.pager.screens.quotescreen
 
-import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
@@ -33,8 +32,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.zIndex
 import androidx.core.graphics.createBitmap
-import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.viewmodel.BookViewModel
@@ -54,12 +51,12 @@ fun QuotesScreen(
     currentRoute: String,
     navItems: List<NavItem>,
     snackbarHostState: SnackbarHostState,
+    uiStateViewModel: QuoteUiStateViewModel
 ) {
     val bookList by bookViewModel.books.collectAsState()
     val quotes by quoteViewModel.quotes.collectAsState()
     val allQuotes by quoteViewModel.allQuotes.collectAsState()
     val placeholderBitmap = remember { createPlaceholderBitmap() }
-    val uiStateViewModel: QuoteUiStateViewModel = viewModel(viewModelStoreOwner = LocalActivity.current as ViewModelStoreOwner)
     val selectedTabIndex by uiStateViewModel.selectedTabIndex.collectAsState()
     val currentPageIndex = navItems.indexOfFirst { it.route == currentRoute }
 
