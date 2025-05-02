@@ -36,8 +36,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.viewmodel.QuoteViewModel
@@ -53,14 +53,15 @@ fun AddQuoteModal(
     book: BookEntity,
     visible: Boolean,
 ) {
-    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val windowInfo = LocalWindowInfo.current
+    val density = LocalDensity.current
+    val screenHeight = with(density) { windowInfo.containerSize.height.toDp() }
     val modalHeight = screenHeight / 1.5f
     val scrollState = rememberScrollState()
 
     var quoteText by remember { mutableStateOf("") }
     var pageNumber by remember { mutableStateOf("") }
 
-    val density = LocalDensity.current
     val containerHeightPx = with(density) { modalHeight.toPx().toInt() }
 
     BackHandler(enabled = visible) { onDismiss() }
