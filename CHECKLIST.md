@@ -7,6 +7,7 @@ Use this checklist before releasing a version of the app on GitHub.
 ## 📦 Code & Project
 
 - [ ] Code compiles with no errors or warnings
+- [ ] Comment out the restorefromdb lines in MainActivity
 - [ ] Removed unused screens from nav bar and nav host
 - [ ] All lint and static analysis issues resolved
 - [ ] Logs removed or wrapped with debug flags
