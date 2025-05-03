@@ -3,6 +3,7 @@ package com.luke.pager.screens.quotescreen.carousel
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -98,7 +99,12 @@ fun CarouselItemContinuous(
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(RoundedCornerShape(cornerRadius.dp))
-                    .background(Color(0xFFE0E0E0))
+                    .background(Color(0xFFE0E0E0).copy(alpha = 0.5f))
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(cornerRadius.dp)
+                    )
                     .padding(8.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -108,7 +114,6 @@ fun CarouselItemContinuous(
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
-
         }
 
     }
