@@ -39,17 +39,18 @@ fun CarouselItemContinuous(
     cornerRadius: Int = 8,
     width: Dp = 110.dp,
     contentScale: ContentScale = ContentScale.Crop,
+    scale: Float,
 ) {
     val translateDensity = LocalDensity.current
 
     var offset = with(translateDensity) { 16.dp.toPx() }
-    var scale = 1.2f
+    var animScale = 1.2f
     var rotationY = 0f
     var alpha = if (!isDummy) 1f else 0f
     var translationX = offset
 
     if (continuousDistance >= 0) {
-        scale = 1.2f - (0.2f * abs(continuousDistance).coerceAtMost(1f))
+        animScale = 1.2f - (0.2f * abs(continuousDistance).coerceAtMost(1f))
         rotationY = continuousDistance.coerceIn(-2f, 2f) * -20f
     } else {
         alpha = 1f + (1f * continuousDistance.coerceAtMost(1f))
@@ -57,7 +58,7 @@ fun CarouselItemContinuous(
 
     }
 
-    val animatedScale by animateFloatAsState(scale)
+    val animatedScale by animateFloatAsState(animScale)
     val animatedRotationY by animateFloatAsState(rotationY)
     val animatedAlpha by animateFloatAsState(alpha)
     val animatedTranslationX by animateFloatAsState(translationX)
@@ -71,7 +72,7 @@ fun CarouselItemContinuous(
 
     Box(
         modifier = Modifier
-            .width(width)
+            .width(width * scale)
             .aspectRatio(aspectRatio)
             .graphicsLayer {
                 scaleX = animatedScale

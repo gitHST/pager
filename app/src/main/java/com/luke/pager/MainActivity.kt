@@ -45,6 +45,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.File
 
 class MainActivity : ComponentActivity() {
     @OptIn(DelicateCoroutinesApi::class)
@@ -59,6 +60,9 @@ class MainActivity : ComponentActivity() {
             @Suppress("SourceLockedOrientationActivity")
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
+        // exportDatabase()
+        restoreDatabaseFromBackup()
+
 
         val db =
             Room.databaseBuilder(applicationContext, AppDatabase::class.java, "pager-db")
@@ -90,7 +94,45 @@ class MainActivity : ComponentActivity() {
         val config = resources.configuration
         return config.smallestScreenWidthDp >= 600
     }
+
+    fun exportDatabase() {
+        val dbFile = applicationContext.getDatabasePath("pager-db")
+        val walFile = File(dbFile.parent, "pager-db-wal")
+        val shmFile = File(dbFile.parent, "pager-db-shm")
+
+        val backupDir = applicationContext.filesDir
+        val backupDb = File(backupDir, "pager-db-backup.db")
+        val backupWal = File(backupDir, "pager-db-backup.db-wal")
+        val backupShm = File(backupDir, "pager-db-backup.db-shm")
+
+        dbFile.copyTo(backupDb, overwrite = true)
+        if (walFile.exists()) walFile.copyTo(backupWal, overwrite = true)
+        if (shmFile.exists()) shmFile.copyTo(backupShm, overwrite = true)
+
+        println("✅ Full database export complete: ${backupDb.absolutePath}")
+    }
+
+    fun restoreDatabaseFromBackup() {
+        val dbFile = applicationContext.getDatabasePath("pager-db")
+        val walFile = File(dbFile.parent, "pager-db-wal")
+        val shmFile = File(dbFile.parent, "pager-db-shm")
+
+        val backupDir = applicationContext.filesDir
+        val backupDb = File(backupDir, "pager-db-backup.db")
+        val backupWal = File(backupDir, "pager-db-backup.db-wal")
+        val backupShm = File(backupDir, "pager-db-backup.db-shm")
+
+        if (backupDb.exists()) {
+            backupDb.copyTo(dbFile, overwrite = true)
+            if (backupWal.exists()) backupWal.copyTo(walFile, overwrite = true)
+            if (backupShm.exists()) backupShm.copyTo(shmFile, overwrite = true)
+            println("✅ Full database restore complete: ${backupDb.absolutePath}")
+        } else {
+            println("❌ Backup database file not found.")
+        }
+    }
 }
+
 
 @Composable
 fun PagerAppUI(
