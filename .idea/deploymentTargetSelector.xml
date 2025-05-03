@@ -3,8 +3,8 @@
   <component name="deploymentTargetSelector">
     <selectionStates>
       <SelectionState runConfigName="app">
-        <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-05-03T12:07:47.852961900Z">
+        <option name="selectionMode" value="DIALOG" />
+        <DropdownSelection timestamp="2025-05-03T12:32:53.974871700Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\lcwbr\.android\avd\Small_Phone.avd" />
