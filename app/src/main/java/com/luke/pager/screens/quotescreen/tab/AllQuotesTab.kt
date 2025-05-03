@@ -33,10 +33,9 @@ fun AllQuotesTab(quotes: List<QuoteEntity>, bookList: List<BookEntity>) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(30.dp),
+            .padding(horizontal = 30.dp)
     ) {
         if (sortedQuotes.isEmpty()) {
-            // centered box
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
                     "No quotes yet",
