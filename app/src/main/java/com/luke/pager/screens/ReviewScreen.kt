@@ -80,7 +80,7 @@ fun ReviewScreen(
         var localSpoilers by remember { mutableStateOf(review.hasSpoilers) }
         var currentSpoilerIconIndex by remember { mutableIntStateOf(0) }
         val textStyle =
-            MaterialTheme.typography.bodyLarge.copy(
+            MaterialTheme.typography.bodyMedium.copy(
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Start
             )
@@ -132,7 +132,7 @@ fun ReviewScreen(
                                 shape = RoundedCornerShape(16.dp)
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("Edit") },
+                                    text = { Text("Edit", style = MaterialTheme.typography.labelMedium) },
                                     onClick = {
                                         menuExpanded = false
                                         isEditing = true
@@ -146,7 +146,7 @@ fun ReviewScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("Delete") },
+                                    text = { Text("Delete", style = MaterialTheme.typography.labelMedium) },
                                     onClick = {
                                         menuExpanded = false
                                         showDeleteDialog = true
@@ -292,13 +292,13 @@ fun ReviewScreen(
                         tempDisplayRating = localRating
                         isEditing = false
                     }) {
-                        Text("Save")
+                        Text("Save", style = MaterialTheme.typography.bodyMedium)
                     }
                     Button(onClick = {
                         isEditing = false
                         editedText = TextFieldValue(localReviewText)
                     }) {
-                        Text("Cancel")
+                        Text("Cancel", style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }
@@ -320,16 +320,16 @@ fun ReviewScreen(
                             ),
                             shape = RoundedCornerShape(20.dp)
                         ) {
-                            Text("Delete")
+                            Text("Delete", style = MaterialTheme.typography.bodyMedium)
                         }
                     },
                     dismissButton = {
                         TextButton(onClick = { showDeleteDialog = false }) {
-                            Text("Cancel")
+                            Text("Cancel", style = MaterialTheme.typography.bodyMedium)
                         }
                     },
-                    title = { Text("Delete review") },
-                    text = { Text("Delete this review?") }
+                    title = { Text("Delete review", style = MaterialTheme.typography.titleLarge) },
+                    text = { Text("Delete this review?", style = MaterialTheme.typography.bodyMedium) }
                 )
             }
         }

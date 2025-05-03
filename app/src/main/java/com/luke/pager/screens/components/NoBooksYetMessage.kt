@@ -29,7 +29,7 @@ fun NoBooksYetMessage() {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Add some books to begin! :)",
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
             )
