@@ -51,10 +51,14 @@ fun AllQuotesTab(quotes: List<QuoteEntity>, bookList: List<BookEntity>) {
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                sortedQuotes.forEach { quote ->
+                sortedQuotes.forEachIndexed { index, quote ->
                     val associatedBook = bookList.find { it.id == quote.bookId }
                     val authors = associatedBook?.authors ?: "Unknown Author"
                     val year = associatedBook?.firstPublishDate?.take(4) ?: "Unknown Year"
+
+                    if (index == 0) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
 
                     Column {
                         Text(
@@ -90,6 +94,10 @@ fun AllQuotesTab(quotes: List<QuoteEntity>, bookList: List<BookEntity>) {
                                 .height(1.dp)
                                 .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f))
                         )
+                    }
+
+                    if (index == sortedQuotes.lastIndex) {
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
             }
