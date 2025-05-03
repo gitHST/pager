@@ -194,8 +194,6 @@ fun CarouselTab(
                                                     )
                                                 )
                                             }
-                                        } else {
-                                            Spacer(modifier = Modifier.height(8.dp))
                                         }
                                     }
                                 }
