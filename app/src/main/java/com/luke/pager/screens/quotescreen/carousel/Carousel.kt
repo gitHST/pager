@@ -20,7 +20,8 @@ import com.luke.pager.screens.quotescreen.DisplayBook
 fun Carousel(
     books: List<DisplayBook>,
     listState: androidx.compose.foundation.lazy.LazyListState,
-    itemWidthPx: Float
+    itemWidthPx: Float,
+    scale: Float
 ) {
     if (books.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -31,8 +32,11 @@ fun Carousel(
             state = listState,
             modifier = Modifier
                 .fillMaxSize(),
-            horizontalArrangement = Arrangement.spacedBy((-30).dp),
-            contentPadding = PaddingValues(horizontal = 32.dp, vertical = 64.dp)
+            horizontalArrangement = Arrangement.spacedBy((-30*scale).dp),
+            contentPadding = PaddingValues(
+                horizontal = 32.dp * scale,
+                vertical = 64.dp * scale
+            )
         ) {
             val firstVisibleItemIndex = listState.firstVisibleItemIndex
             val firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset
@@ -45,7 +49,7 @@ fun Carousel(
                 val continuousDistance = rawDistance - (firstVisibleItemScrollOffset / itemWidthPx)
                 Box(
                     modifier = Modifier
-                        .height(160.dp)
+                        .height((160 * scale).dp)
                         .fillParentMaxHeight()
                         .zIndex(-continuousDistance),
                     contentAlignment = Alignment.Center
@@ -54,7 +58,8 @@ fun Carousel(
                         imageBitmap = item.imageBitmap,
                         continuousDistance = continuousDistance,
                         isDummy = item.isDummy,
-                        hasCover = item.hasCover // ✅ pass it through
+                        hasCover = item.hasCover,
+                        scale = scale
                     )
                 }
             }
