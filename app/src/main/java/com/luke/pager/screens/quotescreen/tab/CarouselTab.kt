@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,7 +25,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -62,7 +65,14 @@ fun CarouselTab(
         val dummies = listOf(
             DummyBook(-1, "Dummy Book 1"),
             DummyBook(-2, "Dummy Book 2"),
-            DummyBook(-3, "Dummy Book 3")
+            DummyBook(-3, "Dummy Book 3"),
+            DummyBook(-4, "Dummy Book 4"),
+            DummyBook(-5, "Dummy Book 5"),
+            DummyBook(-6, "Dummy Book 6"),
+            DummyBook(-7, "Dummy Book 7"),
+            DummyBook(-8, "Dummy Book 8"),
+            DummyBook(-9, "Dummy Book 9"),
+            DummyBook(-10, "Dummy Book 10")
         )
 
         dummies.forEach {
@@ -108,21 +118,42 @@ fun CarouselTab(
 
     Box(Modifier.fillMaxSize().zIndex(2f)) {
         Column(Modifier.fillMaxSize()) {
-            Box(Modifier.weight(0.4f)) {
+            val density = LocalDensity.current.density
+            val screenHeightDp = LocalWindowInfo.current.containerSize.height / density
+            val scale = screenHeightDp / 800
+
+            Box(Modifier.height((scale * 250).dp)) {
                 Carousel(
                     books = booksWithCovers,
                     listState = listState,
-                    itemWidthPx = itemWidthPx
+                    itemWidthPx = itemWidthPx,
+                    scale = scale
                 )
             }
-            Text(selectedBook?.book?.title ?: "", fontSize = 20.sp, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(horizontal = 40.dp))
+
+            Text(
+                selectedBook?.book?.title ?: "",
+                fontSize = 20.sp,
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .padding(horizontal = 40.dp)
+                    .height(30.dp)
+            )
+
             Box(
                 modifier = Modifier
-                    .weight(0.6f)
+                    .fillMaxHeight()
                     .padding(start = 40.dp, end = 40.dp, top = 16.dp, bottom = 16.dp)
             ) {
                 if (quotes.isEmpty()) {
-                    Text("No quotes for this book", fontSize = 18.sp, fontStyle = FontStyle.Italic, color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f))
+                    Text(
+                        "No quotes for this book",
+                        fontSize = 18.sp,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                    )
                 } else {
                     HorizontalDivider()
                     Column(
@@ -171,9 +202,7 @@ fun CarouselTab(
                         Spacer(modifier = Modifier.height(4.dp))
                         HorizontalDivider()
                     }
-
                 }
-
             }
         }
 
