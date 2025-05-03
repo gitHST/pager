@@ -200,7 +200,13 @@ fun ExtendedFabItem(text: String, icon: ImageVector, onClick: () -> Unit) {
     )
 }
 
-data class DisplayBook(val imageBitmap: ImageBitmap, val book: BookEntity, val isDummy: Boolean)
+data class DisplayBook(
+    val imageBitmap: ImageBitmap,
+    val book: BookEntity,
+    val isDummy: Boolean,
+    val hasCover: Boolean
+)
+
 
 data class DummyBook(val id: Long, val title: String) {
     fun toBookEntity(): BookEntity = BookEntity(id = id, title = title, cover = null)

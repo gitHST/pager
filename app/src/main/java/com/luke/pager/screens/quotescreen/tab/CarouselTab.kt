@@ -49,10 +49,14 @@ fun CarouselTab(
     uiStateViewModel: QuoteUiStateViewModel
 ) {
     val booksWithCovers = remember(bookList) {
-        val realBooks = bookList.mapNotNull { book ->
-            book.cover?.let { cover ->
-                DisplayBook(byteArrayToImageBitmap(cover), book, isDummy = false)
-            }
+        val realBooks = bookList.map { book ->
+            val coverBitmap = book.cover?.let { byteArrayToImageBitmap(it) }
+            DisplayBook(
+                imageBitmap = coverBitmap ?: placeholderBitmap,
+                book = book,
+                isDummy = false,
+                hasCover = coverBitmap != null
+            )
         }.toMutableList()
 
         val dummies = listOf(
@@ -62,7 +66,14 @@ fun CarouselTab(
         )
 
         dummies.forEach {
-            realBooks.add(DisplayBook(placeholderBitmap, it.toBookEntity(), isDummy = true))
+            realBooks.add(
+                DisplayBook(
+                    imageBitmap = placeholderBitmap,
+                    book = it.toBookEntity(),
+                    isDummy = true,
+                    hasCover = false
+                )
+            )
         }
 
         realBooks
@@ -104,7 +115,7 @@ fun CarouselTab(
                     itemWidthPx = itemWidthPx
                 )
             }
-
+            Text(selectedBook?.book?.title ?: "", fontSize = 20.sp, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(horizontal = 40.dp))
             Box(
                 modifier = Modifier
                     .weight(0.6f)

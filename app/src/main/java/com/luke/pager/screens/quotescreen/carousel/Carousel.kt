@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Text
@@ -31,8 +30,7 @@ fun Carousel(
         LazyRow(
             state = listState,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
+                .fillMaxSize(),
             horizontalArrangement = Arrangement.spacedBy((-30).dp),
             contentPadding = PaddingValues(horizontal = 32.dp, vertical = 64.dp)
         ) {
@@ -54,7 +52,8 @@ fun Carousel(
                     CarouselItemContinuous(
                         imageBitmap = item.imageBitmap,
                         continuousDistance = continuousDistance,
-                        isDummy = item.isDummy
+                        isDummy = item.isDummy,
+                        hasCover = item.hasCover // ✅ pass it through
                     )
                 }
             }
