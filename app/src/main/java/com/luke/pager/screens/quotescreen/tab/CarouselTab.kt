@@ -151,7 +151,8 @@ fun CarouselTab(
                         "No quotes for this book",
                         fontSize = 18.sp,
                         fontStyle = FontStyle.Italic,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                        modifier = Modifier.padding(horizontal = 4.dp)
                     )
                 } else {
 
