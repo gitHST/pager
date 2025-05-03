@@ -34,14 +34,15 @@ fun Carousel(
             horizontalArrangement = Arrangement.spacedBy((-30).dp),
             contentPadding = PaddingValues(horizontal = 32.dp, vertical = 64.dp)
         ) {
+            val firstVisibleItemIndex = listState.firstVisibleItemIndex
+            val firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset
+
             itemsIndexed(
                 books,
                 key = { _, item -> item.book.id }
             ) { index, item ->
-                val rawDistance = index - listState.firstVisibleItemIndex
-                val continuousDistance =
-                    rawDistance - (listState.firstVisibleItemScrollOffset / itemWidthPx)
-
+                val rawDistance = index - firstVisibleItemIndex
+                val continuousDistance = rawDistance - (firstVisibleItemScrollOffset / itemWidthPx)
                 Box(
                     modifier = Modifier
                         .height(160.dp)
