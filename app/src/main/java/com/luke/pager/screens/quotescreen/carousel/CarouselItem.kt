@@ -2,11 +2,15 @@ package com.luke.pager.screens.quotescreen.carousel
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -16,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -30,23 +35,26 @@ fun CarouselItemContinuous(
     imageBitmap: ImageBitmap,
     continuousDistance: Float,
     isDummy: Boolean,
+    hasCover: Boolean,
     cornerRadius: Int = 8,
     width: Dp = 110.dp,
     contentScale: ContentScale = ContentScale.Crop,
 ) {
     val translateDensity = LocalDensity.current
 
+    var offset = with(translateDensity) { 16.dp.toPx() }
     var scale = 1.2f
     var rotationY = 0f
     var alpha = if (!isDummy) 1f else 0f
-    var translationX = 0f
+    var translationX = offset
 
     if (continuousDistance >= 0) {
         scale = 1.2f - (0.2f * abs(continuousDistance).coerceAtMost(1f))
         rotationY = continuousDistance.coerceIn(-2f, 2f) * -20f
     } else {
         alpha = 1f + (1f * continuousDistance.coerceAtMost(1f))
-        translationX = with(translateDensity) { (60 * continuousDistance).dp.toPx() }
+        translationX = with(translateDensity) { (60 * continuousDistance).dp.toPx() } + offset
+
     }
 
     val animatedScale by animateFloatAsState(scale)
@@ -77,11 +85,30 @@ fun CarouselItemContinuous(
             .clip(RoundedCornerShape(cornerRadius.dp)),
         contentAlignment = Alignment.Center
     ) {
-        Image(
-            bitmap = imageBitmap,
-            contentDescription = null,
-            contentScale = contentScale,
-            modifier = Modifier.fillMaxSize(),
-        )
+        if (hasCover) {
+            Image(
+                bitmap = imageBitmap,
+                contentDescription = null,
+                contentScale = contentScale,
+                modifier = Modifier.fillMaxSize(),
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(cornerRadius.dp))
+                    .background(Color(0xFFE0E0E0))
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No cover",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+
+        }
+
     }
 }
