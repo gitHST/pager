@@ -60,9 +60,9 @@ class MainActivity : ComponentActivity() {
             @Suppress("SourceLockedOrientationActivity")
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
-        // exportDatabase()
-        restoreDatabaseFromBackup()
 
+        // exportDatabase()
+        restoreDatabase()
 
         val db =
             Room.databaseBuilder(applicationContext, AppDatabase::class.java, "pager-db")
@@ -112,7 +112,8 @@ class MainActivity : ComponentActivity() {
         println("✅ Full database export complete: ${backupDb.absolutePath}")
     }
 
-    fun restoreDatabaseFromBackup() {
+
+    fun restoreDatabase() {
         val dbFile = applicationContext.getDatabasePath("pager-db")
         val walFile = File(dbFile.parent, "pager-db-wal")
         val shmFile = File(dbFile.parent, "pager-db-shm")
@@ -131,7 +132,13 @@ class MainActivity : ComponentActivity() {
             println("❌ Backup database file not found.")
         }
     }
+
+
+
 }
+
+
+
 
 
 @Composable
