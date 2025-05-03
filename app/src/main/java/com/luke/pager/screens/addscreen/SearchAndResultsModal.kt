@@ -288,7 +288,7 @@ fun BookRowUIClickable(
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(book.title, style = MaterialTheme.typography.bodyLarge)
+                Text(book.title, style = MaterialTheme.typography.bodyMedium)
                 book.authorName?.let {
                     Text(it.joinToString(), style = MaterialTheme.typography.bodySmall)
                 }

@@ -136,7 +136,7 @@ fun BookItem(
             Spacer(modifier = Modifier.width(12.dp))
 
             Column {
-                Text(text = book.title, fontSize = 18.sp)
+                Text(text = book.title, style = MaterialTheme.typography.bodyLarge)
                 if (!book.authors.isNullOrBlank()) {
                     Text(
                         text = "By ${book.authors}",
@@ -180,8 +180,7 @@ fun BookItem(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         style =
-                        MaterialTheme.typography.bodyLarge.copy(
-                            fontSize = 14.sp,
+                        MaterialTheme.typography.bodyMedium.copy(
                             color = MaterialTheme.colorScheme.onSurface,
                             fontStyle = if (isPlaceholder) FontStyle.Italic else FontStyle.Normal
                         )

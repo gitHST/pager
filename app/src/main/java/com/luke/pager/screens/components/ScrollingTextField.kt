@@ -61,7 +61,7 @@ fun ScrollingTextField(
             .background(MaterialTheme.colorScheme.surface)
             .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
             .padding(16.dp),
-        textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+        textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         singleLine = false,
         maxLines = Int.MAX_VALUE,
@@ -73,7 +73,7 @@ fun ScrollingTextField(
         ),
         decorationBox = { innerTextField ->
             if (text.isEmpty()) {
-                Text(insideText, style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
+                Text(insideText, style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
             }
             innerTextField()
         }

@@ -176,9 +176,7 @@ fun CarouselTab(
                                         Text(
                                             text = quote.quoteText,
                                             fontSize = 16.sp,
-                                            style = MaterialTheme.typography.bodyMedium.copy(
-                                                fontStyle = FontStyle.Italic
-                                            )
+                                            style = MaterialTheme.typography.bodyMedium
                                         )
                                         Spacer(modifier = Modifier.height(4.dp))
                                         if (quote.pageNumber != null) {

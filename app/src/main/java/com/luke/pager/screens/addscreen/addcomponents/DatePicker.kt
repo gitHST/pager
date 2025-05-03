@@ -30,7 +30,7 @@ fun DatePickerDisplay(
             Modifier
                 .clickable { onDateClick() }
                 .padding(6.dp),
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.primary
         )
     }
