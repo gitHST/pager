@@ -60,9 +60,7 @@ fun AllQuotesTab(quotes: List<QuoteEntity>, bookList: List<BookEntity>) {
                         Text(
                             text = quote.quoteText,
                             fontSize = 16.sp,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontStyle = FontStyle.Italic
-                            )
+                            style = MaterialTheme.typography.bodyMedium
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                         Row(
