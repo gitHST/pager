@@ -2,12 +2,14 @@ package com.luke.pager.screens.addscreen.addcomponents
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -27,11 +29,13 @@ fun DatePickerDisplay(
         Text(
             text = selectedDate.format(formatter),
             modifier =
-            Modifier
-                .clickable { onDateClick() }
-                .padding(6.dp),
+                Modifier
+                    .clickable { onDateClick() }
+                    .padding(6.dp)
+                    .fillMaxWidth(),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
+            textAlign = TextAlign.Center
         )
     }
 }
