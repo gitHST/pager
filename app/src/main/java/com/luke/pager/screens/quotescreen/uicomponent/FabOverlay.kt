@@ -48,9 +48,9 @@ fun FabOverlay(
     uiStateViewModel: QuoteUiStateViewModel,
     snackbarHostState: SnackbarHostState
 ) {
-    var isExpanded by remember { mutableStateOf(false) }
-    var fullyCollapsed by remember { mutableStateOf(true) }
-    var showActions by remember { mutableStateOf(false) }
+    val isExpanded by uiStateViewModel.isFabExpanded.collectAsState()
+    val fullyCollapsed by uiStateViewModel.fullyCollapsed.collectAsState()
+    val showActions by uiStateViewModel.showFabActions.collectAsState()
 
     val showQuoteModal by uiStateViewModel.showQuoteModal.collectAsState()
     val showScanModal by uiStateViewModel.showScanModal.collectAsState()
@@ -88,21 +88,30 @@ fun FabOverlay(
 
     LaunchedEffect(showQuoteModal || showScanModal) {
         if (showQuoteModal || showScanModal) {
-            isExpanded = false
-            fullyCollapsed = false
-            showActions = false
+            uiStateViewModel.setFabExpanded(false)
+            uiStateViewModel.setFullyCollapsed(false)
+            uiStateViewModel.setShowFabActions(false)
         }
     }
 
     LaunchedEffect(isExpanded) {
         if (isExpanded) {
             delay(50)
-            showActions = true
+            uiStateViewModel.setShowFabActions(true)
         } else {
             delay(200)
-            fullyCollapsed = true
+            uiStateViewModel.setFullyCollapsed(true)
         }
     }
+
+    LaunchedEffect(showQuoteModal, showScanModal) {
+        if (!showQuoteModal && !showScanModal) {
+            uiStateViewModel.setFabExpanded(false)
+            uiStateViewModel.setFullyCollapsed(true)
+            uiStateViewModel.setShowFabActions(false)
+        }
+    }
+
 
     Box(
         modifier = Modifier
@@ -116,8 +125,8 @@ fun FabOverlay(
                     .fillMaxSize()
                     .pointerInput(Unit) {
                         detectTapGestures {
-                            isExpanded = false
-                            showActions = false
+                            uiStateViewModel.setFabExpanded(false)
+                            uiStateViewModel.setShowFabActions(false)
                         }
                     }
             )
@@ -143,14 +152,14 @@ fun FabOverlay(
                         icon = Icons.Default.FormatQuote
                     ) {
                         uiStateViewModel.setShowQuoteModal(true)
-                        isExpanded = false
+                        uiStateViewModel.setFabExpanded(false)
                     }
                     ExtendedFabItem(
                         text = "Scan",
                         icon = Icons.Default.CameraAlt
                     ) {
-                        isExpanded = false
-                        showActions = false
+                        uiStateViewModel.setFabExpanded(false)
+                        uiStateViewModel.setShowFabActions(false)
 
 
                         val permissionCheck = ActivityCompat.checkSelfPermission(
@@ -173,9 +182,9 @@ fun FabOverlay(
             ) {
                 Box(Modifier.padding(16.dp)) {
                     FloatingActionButton(onClick = {
-                        isExpanded = true
-                        fullyCollapsed = false
-                        showActions = false
+                        uiStateViewModel.setFabExpanded(true)
+                        uiStateViewModel.setFullyCollapsed(false)
+                        uiStateViewModel.setShowFabActions(false)
                     }) {
                         Icon(Icons.Default.Add, contentDescription = "Expand Actions")
                     }
