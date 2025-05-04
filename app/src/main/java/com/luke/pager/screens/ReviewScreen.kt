@@ -1,5 +1,6 @@
 package com.luke.pager.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -91,6 +92,11 @@ fun ReviewScreen(
                 focusRequester.requestFocus()
                 keyboardController?.show()
             }
+        }
+
+        BackHandler(enabled = isEditing) {
+            isEditing = false
+            editedText = TextFieldValue(localReviewText)
         }
 
         Box(modifier = Modifier.fillMaxSize()) {
