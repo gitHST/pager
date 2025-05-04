@@ -84,7 +84,7 @@ fun DiaryScreen(
                 modifier =
                 Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
+                    .padding(start = 16.dp, end = 16.dp, top = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 groupedBooks.forEach { (date, bookPairs) ->
@@ -104,6 +104,9 @@ fun DiaryScreen(
                             }
                         )
                     }
+                }
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
