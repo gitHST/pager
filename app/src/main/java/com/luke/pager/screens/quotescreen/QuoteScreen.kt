@@ -13,6 +13,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.ViewCarousel
@@ -34,6 +35,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.graphics.createBitmap
 import androidx.navigation.NavHostController
@@ -196,7 +198,8 @@ fun ExtendedFabItem(text: String, icon: ImageVector, onClick: () -> Unit) {
     ExtendedFloatingActionButton(
         text = { Text(text) },
         icon = { Icon(icon, contentDescription = text) },
-        onClick = onClick
+        onClick = onClick,
+        modifier = Modifier.width(110.dp)
     )
 }
 
