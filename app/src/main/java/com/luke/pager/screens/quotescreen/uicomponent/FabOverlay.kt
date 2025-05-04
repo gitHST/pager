@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraAlt
@@ -185,7 +186,8 @@ fun FabOverlay(
                         uiStateViewModel.setFabExpanded(true)
                         uiStateViewModel.setFullyCollapsed(false)
                         uiStateViewModel.setShowFabActions(false)
-                    }) {
+                    }, modifier = Modifier.sizeIn(minHeight = 50.dp, minWidth = 50.dp)
+                    ) {
                         Icon(Icons.Default.Add, contentDescription = "Expand Actions")
                     }
                 }
