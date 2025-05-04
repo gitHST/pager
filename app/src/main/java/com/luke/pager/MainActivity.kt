@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
         }
 
         // exportDatabase()
-        // restoreDatabase()
+        restoreDatabase()
 
         val db =
             Room.databaseBuilder(applicationContext, AppDatabase::class.java, "pager-db")

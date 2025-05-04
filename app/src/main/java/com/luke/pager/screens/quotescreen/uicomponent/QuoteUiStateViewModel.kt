@@ -20,6 +20,27 @@ class QuoteUiStateViewModel : ViewModel() {
 
     val overlayAlpha = MutableStateFlow(0f)
 
+    private val _isFabExpanded = MutableStateFlow(false)
+    val isFabExpanded = _isFabExpanded.asStateFlow()
+
+    private val _fullyCollapsed = MutableStateFlow(true)
+    val fullyCollapsed = _fullyCollapsed.asStateFlow()
+
+    private val _showFabActions = MutableStateFlow(false)
+    val showFabActions = _showFabActions.asStateFlow()
+
+    fun setFabExpanded(expanded: Boolean) {
+        _isFabExpanded.value = expanded
+    }
+
+    fun setFullyCollapsed(collapsed: Boolean) {
+        _fullyCollapsed.value = collapsed
+    }
+
+    fun setShowFabActions(show: Boolean) {
+        _showFabActions.value = show
+    }
+
     fun setShowQuoteModal(show: Boolean) {
         _showQuoteModal.value = show
         updateOverlayAlpha()
