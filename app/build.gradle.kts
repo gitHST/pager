@@ -156,6 +156,7 @@ dependencies {
     implementation(libs.material.symbols.extended)
     implementation(libs.androidx.material3)
     implementation(libs.mlkit.text.recognition)
+    implementation(libs.kotlinx.coroutines.play.services)
 
     ksp(libs.androidx.room.compiler)
 
