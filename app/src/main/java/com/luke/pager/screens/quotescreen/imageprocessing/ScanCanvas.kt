@@ -9,6 +9,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.nativeCanvas
 import com.google.mlkit.vision.text.Text
 
 @Composable
@@ -40,31 +41,47 @@ fun ScanCanvas(
             val color = clusterColors.getOrElse(index) { Color.Black }
 
             for (block in cluster) {
-                // for (line in block.lines) {
-                val points = block.cornerPoints ?: continue
-                if (points.size < 4) continue
+                for (line in block.lines) {
+                    val points = line.cornerPoints ?: continue
+                    if (points.size < 4) continue
 
-                val scaledPoints = points.map { point ->
-                    Offset(
-                        x = point.x.toFloat() * size.width / imageWidth,
-                        y = point.y.toFloat() * size.height / imageHeight
-                    )
-                }
-
-                val path = Path().apply {
-                    moveTo(scaledPoints[0].x, scaledPoints[0].y)
-                    for (i in 1 until scaledPoints.size) {
-                        lineTo(scaledPoints[i].x, scaledPoints[i].y)
+                    val scaledPoints = points.map { point ->
+                        Offset(
+                            x = point.x.toFloat() * size.width / imageWidth,
+                            y = point.y.toFloat() * size.height / imageHeight
+                        )
                     }
-                    close()
-                }
 
-                drawPath(
-                    path = path,
-                    color = color,
-                    style = Stroke(width = if (index == 0) 3f else 2f)
-                )
-                // }
+                    val path = Path().apply {
+                        moveTo(scaledPoints[0].x, scaledPoints[0].y)
+                        for (i in 1 until scaledPoints.size) {
+                            lineTo(scaledPoints[i].x, scaledPoints[i].y)
+                        }
+                        close()
+                    }
+
+                    drawPath(
+                        path = path,
+                        color = color,
+                        style = Stroke(width = if (index == 0) 3f else 2f)
+                    )
+
+                    // 🆕 Draw cluster number on top-left corner
+                    val labelPosition = scaledPoints.minByOrNull { it.y } ?: scaledPoints[0]
+                    drawContext.canvas.nativeCanvas.apply {
+                        drawText(
+                            index.toString(),
+                            labelPosition.x,
+                            labelPosition.y - 5,  // Slight offset above the box
+                            android.graphics.Paint().apply {
+                                this.color = android.graphics.Color.BLACK
+                                textSize = 30f
+                                isAntiAlias = true
+                                setShadowLayer(4f, 0f, 0f, android.graphics.Color.WHITE)
+                            }
+                        )
+                    }
+                }
             }
         }
     }
