@@ -18,13 +18,20 @@ data class ClusterResult(
     val imageWidth: Int,
     val imageHeight: Int,
     val rotatedBitmap: Bitmap,
-    val allClusters: List<List<Text.TextBlock>>
+    val allClusters: List<List<Text.TextBlock>>,
+    val clusterDistances: List<ClusterDistanceDebug>
+)
+
+data class ClusterDistanceDebug(
+    val clusterA: Int,
+    val clusterB: Int,
+    val distance: Float
 )
 
 suspend fun processImageAndCluster(
     context: Context,
     uri: Uri,
-    eps: Float = 100f,
+    eps: Float = 20f,
     minPts: Int = 1
 ): ClusterResult {
     // 1️⃣ Load bitmap (no EXIF rotation)
@@ -86,23 +93,23 @@ suspend fun processImageAndCluster(
         allBoxes.add(DBSCANBlockBox(block, boundingBox, lineRects))
     }
 
-    // 8️⃣ Run DBSCAN & merge overlaps
+    // 8️⃣ Run DBSCAN
     val (clusters, _) = dbscan2D(allBoxes, eps = eps, minPts = minPts)
-    val mergedClusters = mergeOverlappingClusters(clusters).map { it.toList() }
+    val mergedClusters = mergeOverlappingClusters<DBSCANBlockBox>(clusters.map { it.toList() }).map { it.toList() }
 
-    // 🔍 Log cluster details
-    Log.d("ImageTextProcessor", "DBSCAN produced ${mergedClusters.size} clusters")
-    mergedClusters.forEachIndexed { index, cluster ->
-        Log.d("ImageTextProcessor", "Cluster $index has ${cluster.size} blocks")
-    }
+    val textClusters = mergedClusters.map { it.map { box -> box.block } }
 
-    // 🔍 Log distances between clusters
+    val debugDistances = mutableListOf<ClusterDistanceDebug>()
+
     if (mergedClusters.size > 1) {
         var overallMinDistance = Float.MAX_VALUE
         for (i in mergedClusters.indices) {
             for (j in i + 1 until mergedClusters.size) {
                 val dist = minDistanceBetweenClusters(mergedClusters[i], mergedClusters[j])
                 Log.d("ImageTextProcessor", "Distance between Cluster $i and Cluster $j: $dist")
+
+                debugDistances.add(ClusterDistanceDebug(i, j, dist))
+
                 if (dist < overallMinDistance) {
                     overallMinDistance = dist
                 }
@@ -113,19 +120,16 @@ suspend fun processImageAndCluster(
         Log.d("ImageTextProcessor", "Only one cluster found; no inter-cluster distance to log.")
     }
 
-    // ✅ Return all clusters (no preferred cluster anymore)
-    val textClusters = mergedClusters.map { it.map { box -> box.block } }
-
     return ClusterResult(
         textBlocks = finalTextBlocks,
         imageWidth = imageWidth,
         imageHeight = imageHeight,
         rotatedBitmap = correctedBitmap,
-        allClusters = textClusters
+        allClusters = textClusters,
+        clusterDistances = debugDistances
     )
 }
 
-// 🔄 Bitmap rotation helper
 fun rotateBitmap(bitmap: Bitmap, degrees: Float): Bitmap {
     val matrix = Matrix()
     matrix.postRotate(degrees)
