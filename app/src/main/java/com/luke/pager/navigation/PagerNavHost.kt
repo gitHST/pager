@@ -28,6 +28,7 @@ import com.luke.pager.screens.ExploreScreen
 import com.luke.pager.screens.ReviewScreen
 import com.luke.pager.screens.addscreen.SearchAndResultsModal
 import com.luke.pager.screens.quotescreen.QuotesScreen
+import com.luke.pager.screens.quotescreen.modal.ScanScreen
 import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
 import kotlinx.coroutines.delay
 
@@ -124,7 +125,6 @@ fun PagerNavHost(
                     navController = navController,
                     currentRoute = currentRoute,
                     navItems = navItems,
-                    snackbarHostState = snackbarHostState,
                     uiStateViewModel = uiStateViewModel
                 )
             }
@@ -140,5 +140,12 @@ fun PagerNavHost(
                 onDeleteSuccess = { navController.popBackStack() }
             )
         }
+
+        composable("scan_screen") {
+            ScanScreen(
+                uiStateViewModel = uiStateViewModel
+            )
+        }
+
     }
 }

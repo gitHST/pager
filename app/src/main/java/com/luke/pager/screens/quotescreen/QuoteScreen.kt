@@ -22,7 +22,6 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -50,9 +50,8 @@ import com.luke.pager.screens.quotescreen.tab.AllQuotesTab
 import com.luke.pager.screens.quotescreen.tab.CarouselTab
 import com.luke.pager.screens.quotescreen.uicomponent.FabOverlay
 import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
-import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun QuotesScreen(
     bookViewModel: BookViewModel,
@@ -60,7 +59,6 @@ fun QuotesScreen(
     navController: NavHostController,
     currentRoute: String,
     navItems: List<NavItem>,
-    snackbarHostState: SnackbarHostState,
     uiStateViewModel: QuoteUiStateViewModel
 ) {
     val bookList by bookViewModel.booksSortedByReviewDate.collectAsState()
@@ -76,11 +74,10 @@ fun QuotesScreen(
 
     LaunchedEffect(selectedTabIndex) {
         if (selectedTabIndex == 1) {
-            delay(500)
             uiStateViewModel.setShowQuoteModal(false)
-            uiStateViewModel.setShowScanModal(false)
         }
     }
+
 
     Column(
         modifier = Modifier.pointerInput(selectedTabIndex) {
@@ -107,12 +104,11 @@ fun QuotesScreen(
                     onClick = { uiStateViewModel.setSelectedTabIndex(0) },
                     icon = {
                         Box(
-                            contentAlignment = androidx.compose.ui.Alignment.Center,
-                            modifier = Modifier
-                                .indication(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null
-                                )
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.indication(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            )
                         ) {
                             Icon(
                                 imageVector = Icons.Default.ViewCarousel,
@@ -123,17 +119,14 @@ fun QuotesScreen(
                 )
                 Tab(
                     selected = selectedTabIndex == 1,
-                    onClick = {
-                        uiStateViewModel.setSelectedTabIndex(1)
-                    },
+                    onClick = { uiStateViewModel.setSelectedTabIndex(1) },
                     icon = {
                         Box(
-                            contentAlignment = androidx.compose.ui.Alignment.Center,
-                            modifier = Modifier
-                                .indication(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null
-                                )
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.indication(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            )
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.List,
@@ -173,7 +166,11 @@ fun QuotesScreen(
                             uiStateViewModel = uiStateViewModel
                         )
 
-                        1 -> AllQuotesTab(quotes = allQuotes, bookList = bookList, uiStateViewModel = uiStateViewModel)
+                        1 -> AllQuotesTab(
+                            quotes = allQuotes,
+                            bookList = bookList,
+                            uiStateViewModel = uiStateViewModel
+                        )
                     }
                 }
 
@@ -185,7 +182,7 @@ fun QuotesScreen(
                     ) {
                         FabOverlay(
                             uiStateViewModel = uiStateViewModel,
-                            snackbarHostState = snackbarHostState
+                            navController = navController
                         )
                     }
                 }

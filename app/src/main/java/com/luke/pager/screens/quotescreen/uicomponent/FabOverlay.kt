@@ -1,11 +1,5 @@
 package com.luke.pager.screens.quotescreen.uicomponent
 
-import android.Manifest
-import android.app.Activity
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.contract.ActivityResultContracts.TakePicture
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -20,85 +14,36 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.FormatQuote
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
+import androidx.navigation.NavController
 import com.luke.pager.R
 import com.luke.pager.screens.quotescreen.ExtendedFabItem
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 fun FabOverlay(
     uiStateViewModel: QuoteUiStateViewModel,
-    snackbarHostState: SnackbarHostState
+    navController: NavController
 ) {
     val isExpanded by uiStateViewModel.isFabExpanded.collectAsState()
     val showActions by uiStateViewModel.showFabActions.collectAsState()
-
     val showQuoteModal by uiStateViewModel.showQuoteModal.collectAsState()
-    val showScanModal by uiStateViewModel.showScanModal.collectAsState()
 
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-    var lastPhotoUri: Uri? by remember { mutableStateOf(null) }
-
-    val cameraLauncher = rememberLauncherForActivityResult(TakePicture()) { success ->
-        if (success) {
-            lastPhotoUri?.let {
-                uiStateViewModel.setCapturedImageUri(it.toString())
-                uiStateViewModel.setShowScanModal(true)
-            }
-        }
-    }
 
     var showPermissionDeniedDialog by remember { mutableStateOf(false) }
-
-    val cameraPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted ->
-            if (isGranted) {
-                uiStateViewModel.setShowScanModal(true)
-            } else {
-                val shouldShowRationale = when (context) {
-                    is Activity -> ActivityCompat.shouldShowRequestPermissionRationale(
-                        context,
-                        Manifest.permission.CAMERA
-                    )
-                    else -> false
-                }
-
-                if (!shouldShowRationale) {
-                    showPermissionDeniedDialog = true
-                } else {
-                    coroutineScope.launch {
-                        snackbarHostState.showSnackbar("Camera permission denied")
-                    }
-                }
-            }
-        }
-    )
-
-    LaunchedEffect(showQuoteModal || showScanModal) {
-        if (showQuoteModal || showScanModal) {
-            uiStateViewModel.setFabExpanded(false)
-            uiStateViewModel.setFullyCollapsed(false)
-            uiStateViewModel.setShowFabActions(false)
-        }
-    }
 
     LaunchedEffect(isExpanded) {
         if (isExpanded) {
@@ -110,8 +55,8 @@ fun FabOverlay(
         }
     }
 
-    LaunchedEffect(showQuoteModal, showScanModal) {
-        if (!showQuoteModal && !showScanModal) {
+    LaunchedEffect(showQuoteModal) {
+        if (!showQuoteModal) {
             uiStateViewModel.setFabExpanded(false)
             uiStateViewModel.setFullyCollapsed(true)
             uiStateViewModel.setShowFabActions(false)
@@ -124,7 +69,7 @@ fun FabOverlay(
             .padding(16.dp),
         contentAlignment = Alignment.BottomEnd
     ) {
-        if (isExpanded && !showQuoteModal && !showScanModal) {
+        if (isExpanded && !showQuoteModal) {
             Box(
                 Modifier
                     .fillMaxSize()
@@ -143,7 +88,7 @@ fun FabOverlay(
             modifier = Modifier.padding(8.dp)
         ) {
             AnimatedVisibility(
-                visible = showActions && !showQuoteModal && !showScanModal,
+                visible = showActions && !showQuoteModal,
                 enter = slideInHorizontally { it } + fadeIn(),
                 exit = slideOutHorizontally { it } + fadeOut()
             ) {
@@ -168,33 +113,36 @@ fun FabOverlay(
 
                         val testImageUri = "android.resource://${context.packageName}/${R.drawable.sample_text_image_four}".toUri()
                         uiStateViewModel.setCapturedImageUri(testImageUri.toString())
-                        uiStateViewModel.setShowScanModal(true)
+                        navController.navigate("scan_screen")
 
-//                        val permissionCheck = ActivityCompat.checkSelfPermission(
-//                            context,
-//                            Manifest.permission.CAMERA
-//                        )
-//                        if (permissionCheck == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-//                            val photoFile = File(
-//                                context.cacheDir,
-//                                "${UUID.randomUUID()}.jpg"
-//                            )
-//                            val newPhotoUri = FileProvider.getUriForFile(
-//                                context,
-//                                "${context.packageName}.provider",
-//                                photoFile
-//                            )
-//                            lastPhotoUri = newPhotoUri
-//                            cameraLauncher.launch(newPhotoUri)
-//
-//                        } else {
-//                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-//                        }
+                        /*
+                        val permissionCheck = ActivityCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.CAMERA
+                        )
+                        if (permissionCheck == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                            val photoFile = File(
+                                context.cacheDir,
+                                "${UUID.randomUUID()}.jpg"
+                            )
+                            val newPhotoUri = FileProvider.getUriForFile(
+                                context,
+                                "${context.packageName}.provider",
+                                photoFile
+                            )
+                            lastPhotoUri = newPhotoUri
+                            cameraLauncher.launch(newPhotoUri)
+
+                        } else {
+                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                        }
+                        */
                     }
                 }
             }
         }
     }
+
     if (showPermissionDeniedDialog) {
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { showPermissionDeniedDialog = false },
