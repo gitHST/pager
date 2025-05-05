@@ -160,10 +160,10 @@ fun FabOverlay(
                         uiStateViewModel.setFabExpanded(false)
                         uiStateViewModel.setShowFabActions(false)
 
-                        val testMode = false
+                        val testMode = true
 
                         if(testMode){
-                            val testImageUri = "android.resource://${context.packageName}/${R.drawable.sample_text_image_three}".toUri()
+                            val testImageUri = "android.resource://${context.packageName}/${R.drawable.sample_text_image_two}".toUri()
                             uiStateViewModel.setCapturedImageUri(testImageUri.toString())
                             navController.navigate("scan_screen")
                         } else {
