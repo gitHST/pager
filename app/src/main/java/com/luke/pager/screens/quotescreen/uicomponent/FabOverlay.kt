@@ -35,13 +35,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
-import androidx.core.content.FileProvider
 import androidx.core.net.toUri
+import com.luke.pager.R
 import com.luke.pager.screens.quotescreen.ExtendedFabItem
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.io.File
-import java.util.UUID
 
 
 @Composable
@@ -178,26 +176,33 @@ fun FabOverlay(
                         uiStateViewModel.setFabExpanded(false)
                         uiStateViewModel.setShowFabActions(false)
 
-                        val permissionCheck = ActivityCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.CAMERA
-                        )
-                        if (permissionCheck == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                            val photoFile = File(
-                                context.cacheDir,
-                                "${UUID.randomUUID()}.jpg"
-                            )
-                            val newPhotoUri = FileProvider.getUriForFile(
-                                context,
-                                "${context.packageName}.provider",
-                                photoFile
-                            )
-                            lastPhotoUri = newPhotoUri
-                            cameraLauncher.launch(newPhotoUri)
 
-                        } else {
-                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                        }
+
+                        val testImageUri = "android.resource://${context.packageName}/${R.drawable.sample_text_image_three}".toUri()
+                        uiStateViewModel.setCapturedImageUri(testImageUri.toString())
+                        uiStateViewModel.setShowScanModal(true)
+
+
+//                        val permissionCheck = ActivityCompat.checkSelfPermission(
+//                            context,
+//                            Manifest.permission.CAMERA
+//                        )
+//                        if (permissionCheck == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+//                            val photoFile = File(
+//                                context.cacheDir,
+//                                "${UUID.randomUUID()}.jpg"
+//                            )
+//                            val newPhotoUri = FileProvider.getUriForFile(
+//                                context,
+//                                "${context.packageName}.provider",
+//                                photoFile
+//                            )
+//                            lastPhotoUri = newPhotoUri
+//                            cameraLauncher.launch(newPhotoUri)
+//
+//                        } else {
+//                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+//                        }
                     }
 
                 }
