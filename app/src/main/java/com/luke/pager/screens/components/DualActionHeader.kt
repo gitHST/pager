@@ -48,12 +48,12 @@ fun DualActionHeader(
     ) {
         Box(
             modifier =
-                Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surface)
-                    .border(1.dp, animatedBorderColor, RoundedCornerShape(16.dp))
-                    .clickable(onClick = onLeftClick)
-                    .padding(horizontal = 6.dp, vertical = 6.dp)
+            Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .border(1.dp, animatedBorderColor, RoundedCornerShape(16.dp))
+                .clickable(onClick = onLeftClick)
+                .padding(horizontal = 6.dp, vertical = 6.dp)
         ) {
             Text(
                 text = leftButtonText,
@@ -64,12 +64,12 @@ fun DualActionHeader(
 
         Box(
             modifier =
-                Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surface)
-                    .border(1.dp, animatedBorderColor, RoundedCornerShape(16.dp))
-                    .clickable(enabled = !isRightButtonLoading, onClick = onRightClick)
-                    .padding(horizontal = 6.dp, vertical = 6.dp)
+            Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .border(1.dp, animatedBorderColor, RoundedCornerShape(16.dp))
+                .clickable(enabled = !isRightButtonLoading, onClick = onRightClick)
+                .padding(horizontal = 6.dp, vertical = 6.dp)
         ) {
             if (isRightButtonLoading) {
                 Row(verticalAlignment = Alignment.CenterVertically) {

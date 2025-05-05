@@ -32,7 +32,7 @@ fun Carousel(
             state = listState,
             modifier = Modifier
                 .fillMaxSize(),
-            horizontalArrangement = Arrangement.spacedBy((-30*scale).dp),
+            horizontalArrangement = Arrangement.spacedBy((-30 * scale).dp),
             contentPadding = PaddingValues(
                 horizontal = 32.dp * scale,
                 vertical = 64.dp * scale

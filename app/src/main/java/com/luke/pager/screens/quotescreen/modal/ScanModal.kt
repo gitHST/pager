@@ -15,7 +15,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -26,24 +25,24 @@ import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.luke.pager.screens.components.CenteredModalScaffold
+import com.luke.pager.screens.quotescreen.imageprocessing.BlockBox
 import com.luke.pager.screens.quotescreen.imageprocessing.ScanCanvas
-import com.luke.pager.screens.quotescreen.imageprocessing.kMeans1D
+import com.luke.pager.screens.quotescreen.imageprocessing.dbscan2D
 import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
 import kotlinx.coroutines.tasks.await
-
 
 @Composable
 fun ScanModal(
     uiStateViewModel: QuoteUiStateViewModel,
     visible: Boolean,
     overlayAlpha: Float,
-    onDismiss: () -> Unit,
+    onDismiss: () -> Unit
 ) {
     BackHandler(enabled = visible, onBack = onDismiss)
     CenteredModalScaffold(
         overlayAlpha = overlayAlpha,
         onDismiss = onDismiss,
-        visible = visible,
+        visible = visible
     ) {
         val capturedImageUriState = uiStateViewModel.capturedImageUri.collectAsState()
         val capturedImageUri = capturedImageUriState.value
@@ -63,29 +62,24 @@ fun ScanModal(
                     imageWidth = image.width
                     imageHeight = image.height
 
-                    val allBlocks = mutableMapOf<Text.TextBlock, Offset>()
+
+                    val allBoxes = mutableListOf<BlockBox>()
                     for (block in result.textBlocks) {
                         val boundingBox = block.boundingBox ?: continue
-                        val centerX = boundingBox.centerX().toFloat()
-                        allBlocks[block] = Offset(centerX, boundingBox.centerY().toFloat())
+                        allBoxes.add(BlockBox(block, boundingBox))
                     }
 
-                    val xPositions = allBlocks.values.map { it.x }
+                    val (clusters, noise) = dbscan2D(allBoxes, eps = 100f, minPts = 3)
 
-                    val clusters = kMeans1D(xPositions, k = 2)
+                    val largestCluster = clusters.maxByOrNull { it.size } ?: emptyList()
 
-                    val clusterBlocks = clusters.map { clusterXList ->
-                        allBlocks.filter { (_, center) -> center.x in clusterXList }.keys
-                    }
-
-                    clusteredBlocks = clusterBlocks.maxByOrNull { it.size }?.toList() ?: emptyList()
+                    clusteredBlocks = largestCluster.map { it.block }
 
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
             }
         }
-
 
         if (capturedImageUri != null) {
             if (imageWidth > 0 && imageHeight > 0) {
@@ -118,7 +112,5 @@ fun ScanModal(
         } else {
             Text("No image yet")
         }
-
-
     }
 }

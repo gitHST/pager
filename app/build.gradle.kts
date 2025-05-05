@@ -157,6 +157,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.mlkit.text.recognition)
     implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.smile)
 
     ksp(libs.androidx.room.compiler)
 
