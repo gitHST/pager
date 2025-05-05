@@ -3,7 +3,12 @@ package com.luke.pager.screens.quotescreen.imageprocessing
 import android.graphics.Rect
 import com.google.mlkit.vision.text.Text
 
-data class DBSCANBlockBox(val block: Text.TextBlock, val rect: Rect)
+data class DBSCANBlockBox(
+    val block: Text.TextBlock,
+    val rect: Rect,
+    val lineRects: List<Rect>
+)
+
 
 fun dbscan2D(
     boxes: List<DBSCANBlockBox>,
@@ -19,7 +24,7 @@ fun dbscan2D(
         visited.add(box)
 
         val neighbors = boxes.filter { other ->
-            distanceBetweenRectangles(box.rect, other.rect) <= eps
+            minDistanceBetweenLines(box, other) <= eps
         }
 
         if (neighbors.size < minPts) {
@@ -51,7 +56,7 @@ private fun expandCluster2D(
         if (!visited.contains(current)) {
             visited.add(current)
             val currentNeighbors = boxes.filter { other ->
-                distanceBetweenRectangles(current.rect, other.rect) <= eps
+                minDistanceBetweenLines(box, other) <= eps
             }
             if (currentNeighbors.size >= minPts) {
                 queue.addAll(currentNeighbors)
@@ -66,5 +71,35 @@ private fun expandCluster2D(
 private fun distanceBetweenRectangles(r1: Rect, r2: Rect): Float {
     val dx = maxOf(0, maxOf(r1.left, r2.left) - minOf(r1.right, r2.right))
     val dy = maxOf(0, maxOf(r1.top, r2.top) - minOf(r1.bottom, r2.bottom))
+
     return kotlin.math.sqrt((dx * dx + dy * dy).toFloat())
+}
+
+private fun minDistanceBetweenLines(box1: DBSCANBlockBox, box2: DBSCANBlockBox): Float {
+    var minDistance = Float.MAX_VALUE
+    for (r1 in box1.lineRects) {
+        for (r2 in box2.lineRects) {
+            val d = distanceBetweenRectangles(r1, r2)
+            if (d < minDistance) {
+                minDistance = d
+            }
+        }
+    }
+    return minDistance
+}
+
+fun minDistanceBetweenClusters(
+    cluster1: List<DBSCANBlockBox>,
+    cluster2: List<DBSCANBlockBox>
+): Float {
+    var minDistance = Float.MAX_VALUE
+    for (box1 in cluster1) {
+        for (box2 in cluster2) {
+            val d = minDistanceBetweenLines(box1, box2)
+            if (d < minDistance) {
+                minDistance = d
+            }
+        }
+    }
+    return minDistance
 }

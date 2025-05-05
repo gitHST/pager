@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
-import android.graphics.Rect
 import android.net.Uri
 import android.util.Log
 import com.google.mlkit.vision.common.InputImage
@@ -16,7 +15,6 @@ import kotlin.math.atan2
 
 data class ClusterResult(
     val textBlocks: List<Text.TextBlock>,
-    val clusteredBlocks: List<Text.TextBlock>,
     val imageWidth: Int,
     val imageHeight: Int,
     val rotatedBitmap: Bitmap,
@@ -84,58 +82,42 @@ suspend fun processImageAndCluster(
     val allBoxes = mutableListOf<DBSCANBlockBox>()
     for (block in finalTextBlocks) {
         val boundingBox = block.boundingBox ?: continue
-        allBoxes.add(DBSCANBlockBox(block, boundingBox))
+        val lineRects = block.lines.mapNotNull { it.boundingBox }
+        allBoxes.add(DBSCANBlockBox(block, boundingBox, lineRects))
     }
 
-    // 8️⃣ Run DBSCAN
+    // 8️⃣ Run DBSCAN & merge overlaps
     val (clusters, _) = dbscan2D(allBoxes, eps = eps, minPts = minPts)
+    val mergedClusters = mergeOverlappingClusters(clusters).map { it.toList() }
 
-    // 9️⃣ Pick preferred cluster (center bias)
-    val clusteredBlocks = if (clusters.isNotEmpty()) {
-        val imageCenterX = imageWidth / 2f
-        val centerThreshold = imageWidth * 0.25f // 25% overlap buffer
-
-        fun getClusterBoundingBox(cluster: List<DBSCANBlockBox>): Rect {
-            val first = cluster.first().rect
-            var left = first.left
-            var top = first.top
-            var right = first.right
-            var bottom = first.bottom
-
-            for (box in cluster) {
-                val rect = box.rect
-                if (rect.left < left) left = rect.left
-                if (rect.top < top) top = rect.top
-                if (rect.right > right) right = rect.right
-                if (rect.bottom > bottom) bottom = rect.bottom
-            }
-
-            return Rect(left, top, right, bottom)
-        }
-
-        val overlappingCenter = clusters.filter { cluster ->
-            val bbox = getClusterBoundingBox(cluster)
-            bbox.left < imageCenterX + centerThreshold && bbox.right > imageCenterX - centerThreshold
-        }
-
-        val preferredCluster = overlappingCenter.maxByOrNull { it.size }
-            ?: clusters.maxByOrNull { it.size }
-
-        preferredCluster?.map { it.block } ?: emptyList()
-    } else {
-        emptyList()
-    }
-
-    val textClusters = clusters.map { it.map { box -> box.block } }
-
-    Log.d("ImageTextProcessor", "DBSCAN produced ${clusters.size} clusters")
-    clusters.forEachIndexed { index, cluster ->
+    // 🔍 Log cluster details
+    Log.d("ImageTextProcessor", "DBSCAN produced ${mergedClusters.size} clusters")
+    mergedClusters.forEachIndexed { index, cluster ->
         Log.d("ImageTextProcessor", "Cluster $index has ${cluster.size} blocks")
     }
 
+    // 🔍 Log distances between clusters
+    if (mergedClusters.size > 1) {
+        var overallMinDistance = Float.MAX_VALUE
+        for (i in mergedClusters.indices) {
+            for (j in i + 1 until mergedClusters.size) {
+                val dist = minDistanceBetweenClusters(mergedClusters[i], mergedClusters[j])
+                Log.d("ImageTextProcessor", "Distance between Cluster $i and Cluster $j: $dist")
+                if (dist < overallMinDistance) {
+                    overallMinDistance = dist
+                }
+            }
+        }
+        Log.d("ImageTextProcessor", "Overall shortest distance between any two clusters: $overallMinDistance")
+    } else {
+        Log.d("ImageTextProcessor", "Only one cluster found; no inter-cluster distance to log.")
+    }
+
+    // ✅ Return all clusters (no preferred cluster anymore)
+    val textClusters = mergedClusters.map { it.map { box -> box.block } }
+
     return ClusterResult(
         textBlocks = finalTextBlocks,
-        clusteredBlocks = clusteredBlocks,
         imageWidth = imageWidth,
         imageHeight = imageHeight,
         rotatedBitmap = correctedBitmap,
@@ -148,4 +130,29 @@ fun rotateBitmap(bitmap: Bitmap, degrees: Float): Bitmap {
     val matrix = Matrix()
     matrix.postRotate(degrees)
     return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+}
+
+fun <T> mergeOverlappingClusters(clusters: List<Collection<T>>): List<Set<T>> {
+    val merged = mutableListOf<MutableSet<T>>()
+
+    for (cluster in clusters) {
+        val overlapping = mutableListOf<MutableSet<T>>()
+
+        for (existing in merged) {
+            if (existing.any { it in cluster }) {
+                overlapping.add(existing)
+            }
+        }
+
+        if (overlapping.isEmpty()) {
+            merged.add(cluster.toMutableSet())
+        } else {
+            val newCluster = overlapping.flatMap { it }.toMutableSet()
+            newCluster.addAll(cluster)
+            merged.removeAll(overlapping)
+            merged.add(newCluster)
+        }
+    }
+
+    return merged
 }
