@@ -1,5 +1,8 @@
 package com.luke.pager.screens.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,25 +17,33 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun HorizontalShadowDiv(shadowFacingUp: Boolean = false, hozPadding: Float = 0f, modifier: Modifier = Modifier) {
-    val gradientColors = if (shadowFacingUp) {
-        listOf(Color.Transparent, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
-    } else {
-        listOf(MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), Color.Transparent)
-    }
-
+fun HorizontalShadowDiv(
+    modifier: Modifier = Modifier,
+    shadowFacingUp: Boolean = false,
+    hozPadding: Float = 0f,
+    visible: Boolean = true
+) {
     Column(modifier = modifier.padding(horizontal = hozPadding.dp)) {
         if (shadowFacingUp) {
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = gradientColors
+            AnimatedVisibility(
+                visible = visible,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(6.dp)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                                )
+                            )
                         )
-                    )
-            )
+                )
+            }
             Box(
                 Modifier
                     .fillMaxWidth()
@@ -46,16 +57,25 @@ fun HorizontalShadowDiv(shadowFacingUp: Boolean = false, hozPadding: Float = 0f,
                     .height(1.dp)
                     .background(Color.LightGray)
             )
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = gradientColors
+            AnimatedVisibility(
+                visible = visible,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(6.dp)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                    Color.Transparent
+                                )
+                            )
                         )
-                    )
-            )
+                )
+            }
         }
     }
 }

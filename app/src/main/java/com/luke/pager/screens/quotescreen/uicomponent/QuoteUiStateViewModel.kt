@@ -2,6 +2,7 @@ package com.luke.pager.screens.quotescreen.uicomponent
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class QuoteUiStateViewModel : ViewModel() {
@@ -28,6 +29,13 @@ class QuoteUiStateViewModel : ViewModel() {
 
     private val _showFabActions = MutableStateFlow(false)
     val showFabActions = _showFabActions.asStateFlow()
+
+    private val _isSortAscending = MutableStateFlow(false)
+    val isSortAscending: StateFlow<Boolean> = _isSortAscending
+
+    fun toggleSortOrder() {
+        _isSortAscending.value = !_isSortAscending.value
+    }
 
     fun setFabExpanded(expanded: Boolean) {
         _isFabExpanded.value = expanded
