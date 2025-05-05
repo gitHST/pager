@@ -9,7 +9,6 @@ data class DBSCANBlockBox(
     val lineRects: List<Rect>
 )
 
-
 fun dbscan2D(
     boxes: List<DBSCANBlockBox>,
     eps: Float,
