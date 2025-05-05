@@ -29,7 +29,6 @@ class BookViewModel(
     private val _allReviews = MutableStateFlow<Map<Long, ReviewEntity?>>(emptyMap())
     val allReviews: StateFlow<Map<Long, ReviewEntity?>> get() = _allReviews
 
-    // NEW: Books sorted by dateReviewed descending
     val booksSortedByReviewDate: StateFlow<List<BookEntity>> =
         combine(_books, _allReviews) { books, reviews ->
             books.sortedByDescending { book ->
