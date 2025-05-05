@@ -3,16 +3,16 @@ package com.luke.pager.screens.quotescreen.imageprocessing
 import android.graphics.Rect
 import com.google.mlkit.vision.text.Text
 
-data class BlockBox(val block: Text.TextBlock, val rect: Rect)
+data class DBSCANBlockBox(val block: Text.TextBlock, val rect: Rect)
 
 fun dbscan2D(
-    boxes: List<BlockBox>,
+    boxes: List<DBSCANBlockBox>,
     eps: Float,
     minPts: Int
-): Pair<List<List<BlockBox>>, List<BlockBox>> {
-    val visited = mutableSetOf<BlockBox>()
-    val noise = mutableListOf<BlockBox>()
-    val clusters = mutableListOf<MutableList<BlockBox>>()
+): Pair<List<List<DBSCANBlockBox>>, List<DBSCANBlockBox>> {
+    val visited = mutableSetOf<DBSCANBlockBox>()
+    val noise = mutableListOf<DBSCANBlockBox>()
+    val clusters = mutableListOf<MutableList<DBSCANBlockBox>>()
 
     for (box in boxes) {
         if (visited.contains(box)) continue
@@ -25,7 +25,7 @@ fun dbscan2D(
         if (neighbors.size < minPts) {
             noise.add(box)
         } else {
-            val cluster = mutableListOf<BlockBox>()
+            val cluster = mutableListOf<DBSCANBlockBox>()
             clusters.add(cluster)
             expandCluster2D(box, neighbors, cluster, boxes, visited, eps, minPts)
         }
@@ -35,11 +35,11 @@ fun dbscan2D(
 }
 
 private fun expandCluster2D(
-    box: BlockBox,
-    neighbors: List<BlockBox>,
-    cluster: MutableList<BlockBox>,
-    boxes: List<BlockBox>,
-    visited: MutableSet<BlockBox>,
+    box: DBSCANBlockBox,
+    neighbors: List<DBSCANBlockBox>,
+    cluster: MutableList<DBSCANBlockBox>,
+    boxes: List<DBSCANBlockBox>,
+    visited: MutableSet<DBSCANBlockBox>,
     eps: Float,
     minPts: Int
 ) {
