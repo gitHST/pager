@@ -184,7 +184,7 @@ fun QuotesScreen(
                         FabOverlay(
                             uiStateViewModel = uiStateViewModel,
                             snackbarHostState = snackbarHostState,
-                            navController = navController,
+                            navController = navController
                         )
                     }
                 }

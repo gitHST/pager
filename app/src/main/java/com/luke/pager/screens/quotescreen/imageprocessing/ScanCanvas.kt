@@ -31,7 +31,6 @@ fun ScanCanvas(
         Color.DarkGray
     )
 
-    // 🔥 Log cluster count once when allClusters changes
     LaunchedEffect(allClusters) {
         Log.d("ScanCanvas", "Total clusters detected: ${allClusters.size}")
     }
@@ -66,13 +65,12 @@ fun ScanCanvas(
                         style = Stroke(width = if (index == 0) 3f else 2f)
                     )
 
-                    // 🆕 Draw cluster number on top-left corner
                     val labelPosition = scaledPoints.minByOrNull { it.y } ?: scaledPoints[0]
                     drawContext.canvas.nativeCanvas.apply {
                         drawText(
                             index.toString(),
                             labelPosition.x,
-                            labelPosition.y - 5,  // Slight offset above the box
+                            labelPosition.y - 5,
                             android.graphics.Paint().apply {
                                 this.color = android.graphics.Color.BLACK
                                 textSize = 30f

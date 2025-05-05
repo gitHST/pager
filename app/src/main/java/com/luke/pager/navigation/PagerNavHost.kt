@@ -39,7 +39,7 @@ fun PagerNavHost(
     bookViewModel: BookViewModel,
     reviewViewModel: ReviewViewModel,
     quoteViewModel: QuoteViewModel,
-    snackbarHostState: SnackbarHostState,
+    snackbarHostState: SnackbarHostState
 ) {
     val navItems = listOf(
         // NavItem("activity", "Activity"),

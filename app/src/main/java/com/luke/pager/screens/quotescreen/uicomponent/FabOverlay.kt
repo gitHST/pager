@@ -49,7 +49,7 @@ import java.util.UUID
 fun FabOverlay(
     uiStateViewModel: QuoteUiStateViewModel,
     snackbarHostState: SnackbarHostState,
-    navController: NavHostController,
+    navController: NavHostController
 ) {
     val isExpanded by uiStateViewModel.isFabExpanded.collectAsState()
     val showActions by uiStateViewModel.showFabActions.collectAsState()
@@ -67,7 +67,6 @@ fun FabOverlay(
             }
         }
     }
-
 
     var showPermissionDeniedDialog by remember { mutableStateOf(false) }
 
@@ -162,8 +161,8 @@ fun FabOverlay(
 
                         val testMode = true
 
-                        if(testMode){
-                            val testImageUri = "android.resource://${context.packageName}/${R.drawable.sample_text_image_two}".toUri()
+                        if (testMode) {
+                            val testImageUri = "android.resource://${context.packageName}/${R.drawable.sample_text_image_four}".toUri()
                             uiStateViewModel.setCapturedImageUri(testImageUri.toString())
                             navController.navigate("scan_screen")
                         } else {
