@@ -22,6 +22,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,7 +60,8 @@ fun QuotesScreen(
     navController: NavHostController,
     currentRoute: String,
     navItems: List<NavItem>,
-    uiStateViewModel: QuoteUiStateViewModel
+    uiStateViewModel: QuoteUiStateViewModel,
+    snackbarHostState: SnackbarHostState
 ) {
     val bookList by bookViewModel.booksSortedByReviewDate.collectAsState()
     val quotes by quoteViewModel.quotes.collectAsState()
@@ -181,7 +183,8 @@ fun QuotesScreen(
                     ) {
                         FabOverlay(
                             uiStateViewModel = uiStateViewModel,
-                            navController = navController
+                            snackbarHostState = snackbarHostState,
+                            navController = navController,
                         )
                     }
                 }

@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,7 +38,8 @@ fun PagerNavHost(
     navController: NavHostController,
     bookViewModel: BookViewModel,
     reviewViewModel: ReviewViewModel,
-    quoteViewModel: QuoteViewModel
+    quoteViewModel: QuoteViewModel,
+    snackbarHostState: SnackbarHostState,
 ) {
     val navItems = listOf(
         // NavItem("activity", "Activity"),
@@ -123,7 +125,8 @@ fun PagerNavHost(
                     navController = navController,
                     currentRoute = currentRoute,
                     navItems = navItems,
-                    uiStateViewModel = uiStateViewModel
+                    uiStateViewModel = uiStateViewModel,
+                    snackbarHostState = snackbarHostState
                 )
             }
         }
