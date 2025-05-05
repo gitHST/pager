@@ -54,7 +54,6 @@ import com.luke.pager.screens.quotescreen.DummyBook
 import com.luke.pager.screens.quotescreen.carousel.Carousel
 import com.luke.pager.screens.quotescreen.carousel.byteArrayToImageBitmap
 import com.luke.pager.screens.quotescreen.modal.AddQuoteModal
-import com.luke.pager.screens.quotescreen.modal.ScanModal
 import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
 import kotlinx.coroutines.launch
 
@@ -110,7 +109,6 @@ fun CarouselTab(
     val selectedBook = booksWithCovers.find { it.book.id == selectedBookId }
 
     val showQuoteModal by uiStateViewModel.showQuoteModal.collectAsState()
-    val showScanModal by uiStateViewModel.showScanModal.collectAsState()
     val overlayAlpha by uiStateViewModel.overlayAlpha.collectAsState()
     val isSortAscendingState = uiStateViewModel.isSortAscending.collectAsState()
     val isSortAscending = isSortAscendingState.value
@@ -139,10 +137,10 @@ fun CarouselTab(
             } else {
                 val lastVisibleItem = visibleItems.last()
                 lastVisibleItem.index < totalItemsCount - 1 ||
-                    (
-                        lastVisibleItem.index == totalItemsCount - 1 &&
-                            lastVisibleItem.offset + lastVisibleItem.size > quotesListState.layoutInfo.viewportEndOffset
-                        )
+                        (
+                                lastVisibleItem.index == totalItemsCount - 1 &&
+                                        lastVisibleItem.offset + lastVisibleItem.size > quotesListState.layoutInfo.viewportEndOffset
+                                )
             }
         }
     }
@@ -152,7 +150,7 @@ fun CarouselTab(
     LaunchedEffect(listState.isScrollInProgress) {
         if (!listState.isScrollInProgress) {
             val nearestIndex = listState.firstVisibleItemIndex +
-                if (listState.firstVisibleItemScrollOffset > 150) 1 else 0
+                    if (listState.firstVisibleItemScrollOffset > 150) 1 else 0
 
             coroutineScope.launch {
                 listState.animateScrollToItem(nearestIndex)
@@ -195,8 +193,7 @@ fun CarouselTab(
             ) {
                 if (sortedQuotes.isEmpty()) {
                     Column(
-                        modifier = Modifier
-                            .fillMaxSize(),
+                        modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
@@ -210,7 +207,7 @@ fun CarouselTab(
                         )
 
                         AnimatedVisibility(
-                            visible = !isExpanded && fullyCollapsed && !showQuoteModal && !showScanModal,
+                            visible = !isExpanded && fullyCollapsed && !showQuoteModal,
                             enter = fadeIn(tween(150)),
                             exit = fadeOut(tween(100))
                         ) {
@@ -315,13 +312,6 @@ fun CarouselTab(
                 overlayAlpha = overlayAlpha,
                 book = book.book,
                 visible = showQuoteModal
-            )
-
-            ScanModal(
-                uiStateViewModel = uiStateViewModel,
-                visible = showScanModal,
-                overlayAlpha = overlayAlpha,
-                onDismiss = { uiStateViewModel.setShowScanModal(false) }
             )
         }
     }
