@@ -9,25 +9,32 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.North
+import androidx.compose.material.icons.filled.South
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -96,8 +103,38 @@ fun CarouselTab(
     val showQuoteModal by uiStateViewModel.showQuoteModal.collectAsState()
     val showScanModal by uiStateViewModel.showScanModal.collectAsState()
     val overlayAlpha by uiStateViewModel.overlayAlpha.collectAsState()
+    val isSortAscendingState = uiStateViewModel.isSortAscending.collectAsState()
+    val isSortAscending = isSortAscendingState.value
+
+    val sortedQuotes = remember(quotes, isSortAscending) {
+        if (isSortAscending) {
+            quotes.sortedBy { it.dateAdded }
+        } else {
+            quotes.sortedByDescending { it.dateAdded }
+        }
+    }
 
     val listState = rememberLazyListState()
+    val quotesListState = rememberLazyListState()
+    val hasScrolledQuotes by remember {
+        derivedStateOf {
+            quotesListState.firstVisibleItemIndex > 0 || quotesListState.firstVisibleItemScrollOffset > 0
+        }
+    }
+    val hasNotReachedEndOfQuotes by remember {
+        derivedStateOf {
+            val visibleItems = quotesListState.layoutInfo.visibleItemsInfo
+            val totalItemsCount = quotesListState.layoutInfo.totalItemsCount
+            if (visibleItems.isEmpty()) {
+                false
+            } else {
+                val lastVisibleItem = visibleItems.last()
+                lastVisibleItem.index < totalItemsCount - 1 ||
+                        (lastVisibleItem.index == totalItemsCount - 1 &&
+                                lastVisibleItem.offset + lastVisibleItem.size > quotesListState.layoutInfo.viewportEndOffset)
+            }
+        }
+    }
     val coroutineScope = rememberCoroutineScope()
     val itemWidthPx = with(LocalDensity.current) { 120.dp.toPx() }
 
@@ -136,7 +173,6 @@ fun CarouselTab(
                 fontSize = 20.sp,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .padding(horizontal = 40.dp)
                     .height(30.dp)
@@ -146,7 +182,7 @@ fun CarouselTab(
                     .fillMaxHeight()
                     .padding(start = 36.dp, end = 36.dp, top = 16.dp, bottom = 16.dp)
             ) {
-                if (quotes.isEmpty()) {
+                if (sortedQuotes.isEmpty()) {
                     Text(
                         "No quotes for this book",
                         fontSize = 18.sp,
@@ -155,56 +191,68 @@ fun CarouselTab(
                         modifier = Modifier.padding(horizontal = 4.dp)
                     )
                 } else {
+                    Box(modifier = Modifier.fillMaxSize().padding(end = 5.dp)) {
+                        HorizontalShadowDiv(visible = hasScrolledQuotes)
 
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        HorizontalShadowDiv()
-                        Column(
-                            modifier = Modifier.fillMaxSize()
+                        LazyColumn(
+                            state = quotesListState,
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 4.dp)
                         ) {
-                            LazyColumn(
-                                verticalArrangement = Arrangement.spacedBy(16.dp),
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(horizontal = 4.dp)
-                            ) {
-                                items(quotes.size) { index ->
-                                    val quote = quotes[index]
-                                    Column {
-                                        if (index != 0) {
-                                            HorizontalDivider()
-                                        }
-                                        Spacer(modifier = Modifier.height(16.dp))
-                                        Text(
-                                            text = quote.quoteText,
-                                            fontSize = 16.sp,
-                                            style = MaterialTheme.typography.bodyMedium
-                                        )
-                                        Spacer(modifier = Modifier.height(4.dp))
-                                        if (quote.pageNumber != null) {
-                                            Row(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Spacer(modifier = Modifier.weight(1f))
-                                                Text(
-                                                    text = "p.${quote.pageNumber}",
-                                                    fontSize = 14.sp,
-                                                    style = MaterialTheme.typography.bodySmall.copy(
-                                                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-                                                    )
+                            items(sortedQuotes.size) { index ->
+                                val quote = sortedQuotes[index]
+                                Column {
+                                    if (index != 0) {
+                                        HorizontalDivider()
+                                    }
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        text = quote.quoteText,
+                                        fontSize = 16.sp,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    if (quote.pageNumber != null) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Spacer(modifier = Modifier.weight(1f))
+                                            Text(
+                                                text = "p.${quote.pageNumber}",
+                                                fontSize = 14.sp,
+                                                style = MaterialTheme.typography.bodySmall.copy(
+                                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                                                 )
-                                            }
+                                            )
                                         }
                                     }
                                 }
                             }
                         }
+
                         HorizontalShadowDiv(
                             shadowFacingUp = true,
+                            visible = hasNotReachedEndOfQuotes,
                             modifier = Modifier.align(Alignment.BottomCenter)
                         )
-                    }
 
+                        IconButton(
+                            onClick = { uiStateViewModel.toggleSortOrder() },
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(4.dp)
+                                .offset(x = (47).dp)
+                        ) {
+                            Icon(
+                                imageVector = if (isSortAscending) Icons.Default.North else Icons.Default.South,
+                                contentDescription = "Toggle sort order",
+                                tint = Color.Gray
+                            )
+                        }
+                    }
                 }
             }
         }

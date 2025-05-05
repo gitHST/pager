@@ -172,7 +172,7 @@ fun QuotesScreen(
                             uiStateViewModel = uiStateViewModel
                         )
 
-                        1 -> AllQuotesTab(quotes = allQuotes, bookList = bookList)
+                        1 -> AllQuotesTab(quotes = allQuotes, bookList = bookList, uiStateViewModel = uiStateViewModel)
                     }
                 }
 
