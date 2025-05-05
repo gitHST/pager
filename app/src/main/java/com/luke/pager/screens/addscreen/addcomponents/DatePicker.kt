@@ -29,10 +29,10 @@ fun DatePickerDisplay(
         Text(
             text = selectedDate.format(formatter),
             modifier =
-                Modifier
-                    .clickable { onDateClick() }
-                    .padding(6.dp)
-                    .fillMaxWidth(),
+            Modifier
+                .clickable { onDateClick() }
+                .padding(6.dp)
+                .fillMaxWidth(),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.primary,
             textAlign = TextAlign.Center

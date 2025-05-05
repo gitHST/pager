@@ -40,7 +40,7 @@ fun CarouselItemContinuous(
     cornerRadius: Int = 8,
     width: Dp = 110.dp,
     contentScale: ContentScale = ContentScale.Crop,
-    scale: Float,
+    scale: Float
 ) {
     val translateDensity = LocalDensity.current
 
@@ -56,7 +56,6 @@ fun CarouselItemContinuous(
     } else {
         alpha = 1f + (1f * continuousDistance.coerceAtMost(1f))
         translationX = with(translateDensity) { (60 * continuousDistance).dp.toPx() } + offset
-
     }
 
     val animatedScale by animateFloatAsState(animScale)
@@ -92,7 +91,7 @@ fun CarouselItemContinuous(
                 bitmap = imageBitmap,
                 contentDescription = null,
                 contentScale = contentScale,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize()
             )
         } else {
             Box(
@@ -115,6 +114,5 @@ fun CarouselItemContinuous(
                 )
             }
         }
-
     }
 }

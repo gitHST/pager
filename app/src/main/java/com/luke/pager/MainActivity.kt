@@ -114,7 +114,6 @@ class MainActivity : ComponentActivity() {
         println("✅ Full database export complete: ${backupDb.absolutePath}")
     }
 
-
     @Suppress("unused")
     fun restoreDatabase() {
         val dbFile = applicationContext.getDatabasePath("pager-db")
@@ -136,7 +135,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
 
 @Composable
 fun PagerAppUI(

@@ -14,9 +14,9 @@ import androidx.compose.ui.unit.sp
 fun Title(title: String) {
     Box(
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(top = 12.dp),
+        Modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp),
         contentAlignment = Alignment.TopCenter
     ) {
         Text(text = title, fontSize = 24.sp)

@@ -98,10 +98,9 @@ fun QuotesScreen(
         if (bookList.isEmpty()) {
             NoBooksYetMessage()
         } else {
-
             PrimaryTabRow(
                 selectedTabIndex = selectedTabIndex,
-                containerColor = Color.Transparent,
+                containerColor = Color.Transparent
             ) {
                 Tab(
                     selected = selectedTabIndex == 0,
@@ -145,7 +144,6 @@ fun QuotesScreen(
                 )
             }
 
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -156,10 +154,12 @@ fun QuotesScreen(
                     transitionSpec = {
                         if (targetState > initialState) {
                             (slideInHorizontally { it } + fadeIn()).togetherWith(
-                                slideOutHorizontally { -it } + fadeOut())
+                                slideOutHorizontally { -it } + fadeOut()
+                            )
                         } else {
                             (slideInHorizontally { -it } + fadeIn()).togetherWith(
-                                slideOutHorizontally { it } + fadeOut())
+                                slideOutHorizontally { it } + fadeOut()
+                            )
                         }
                     },
                     label = "TabContentAnimation"
@@ -210,7 +210,6 @@ data class DisplayBook(
     val isDummy: Boolean,
     val hasCover: Boolean
 )
-
 
 data class DummyBook(val id: Long, val title: String) {
     fun toBookEntity(): BookEntity = BookEntity(id = id, title = title, cover = null)

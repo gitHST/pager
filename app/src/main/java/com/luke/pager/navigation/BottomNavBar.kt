@@ -18,12 +18,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 @Composable
 fun BottomNavBar(navController: NavHostController) {
     val items = listOf(
-            // NavItem("activity", "Activity"),
-            NavItem("diary", "Diary", Icons.Filled.Book),
-            NavItem("plus", "Add", Icons.Filled.Add),
-            // NavItem("explore", "Explore"),
-            NavItem("quotes", "Quotes", Icons.Filled.FormatQuote)
-        )
+        // NavItem("activity", "Activity"),
+        NavItem("diary", "Diary", Icons.Filled.Book),
+        NavItem("plus", "Add", Icons.Filled.Add),
+        // NavItem("explore", "Explore"),
+        NavItem("quotes", "Quotes", Icons.Filled.FormatQuote)
+    )
 
     NavigationBar {
         val currentRoute by navController.currentBackStackEntryAsState()
@@ -46,8 +46,6 @@ fun BottomNavBar(navController: NavHostController) {
         }
     }
 }
-
-
 
 data class NavItem(
     val route: String,
