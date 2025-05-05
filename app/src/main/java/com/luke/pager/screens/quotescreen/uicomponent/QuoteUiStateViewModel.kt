@@ -10,9 +10,6 @@ class QuoteUiStateViewModel : ViewModel() {
     private val _showQuoteModal = MutableStateFlow(false)
     val showQuoteModal = _showQuoteModal.asStateFlow()
 
-    private val _showScanModal = MutableStateFlow(false)
-    val showScanModal = _showScanModal.asStateFlow()
-
     private val _selectedBookId = MutableStateFlow<Long?>(null)
     val selectedBookId = _selectedBookId.asStateFlow()
 
@@ -61,11 +58,6 @@ class QuoteUiStateViewModel : ViewModel() {
         updateOverlayAlpha()
     }
 
-    fun setShowScanModal(show: Boolean) {
-        _showScanModal.value = show
-        updateOverlayAlpha()
-    }
-
     fun setSelectedBookId(id: Long?) {
         _selectedBookId.value = id
     }
@@ -75,12 +67,11 @@ class QuoteUiStateViewModel : ViewModel() {
     }
 
     private fun updateOverlayAlpha() {
-        overlayAlpha.value = if (_showQuoteModal.value || _showScanModal.value) 0.5f else 0f
+        overlayAlpha.value = if (_showQuoteModal.value) 0.5f else 0f
     }
 
     fun reset() {
         _showQuoteModal.value = false
-        _showScanModal.value = false
         _selectedTabIndex.value = 0
     }
 }
