@@ -63,6 +63,7 @@ class MainActivity : ComponentActivity() {
 
         // exportDatabase()
         // restoreDatabase()
+        // /data/data/com.luke.pager/files/
 
         val db =
             Room.databaseBuilder(applicationContext, AppDatabase::class.java, "pager-db")
@@ -95,6 +96,7 @@ class MainActivity : ComponentActivity() {
         return config.smallestScreenWidthDp >= 600
     }
 
+    @Suppress("unused")
     fun exportDatabase() {
         val dbFile = applicationContext.getDatabasePath("pager-db")
         val walFile = File(dbFile.parent, "pager-db-wal")
@@ -113,6 +115,7 @@ class MainActivity : ComponentActivity() {
     }
 
 
+    @Suppress("unused")
     fun restoreDatabase() {
         val dbFile = applicationContext.getDatabasePath("pager-db")
         val walFile = File(dbFile.parent, "pager-db-wal")
@@ -132,13 +135,7 @@ class MainActivity : ComponentActivity() {
             println("❌ Backup database file not found.")
         }
     }
-
-
-
 }
-
-
-
 
 
 @Composable

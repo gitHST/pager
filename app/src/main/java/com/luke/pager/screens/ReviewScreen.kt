@@ -138,7 +138,7 @@ fun ReviewScreen(
                                 shape = RoundedCornerShape(16.dp)
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("Edit", style = MaterialTheme.typography.labelMedium) },
+                                    text = { Text("Edit", style = MaterialTheme.typography.labelLarge) },
                                     onClick = {
                                         menuExpanded = false
                                         isEditing = true
@@ -152,7 +152,7 @@ fun ReviewScreen(
                                     }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("Delete", style = MaterialTheme.typography.labelMedium) },
+                                    text = { Text("Delete", style = MaterialTheme.typography.labelLarge) },
                                     onClick = {
                                         menuExpanded = false
                                         showDeleteDialog = true

@@ -33,6 +33,13 @@ class QuoteUiStateViewModel : ViewModel() {
     private val _isSortAscending = MutableStateFlow(false)
     val isSortAscending: StateFlow<Boolean> = _isSortAscending
 
+    private val _capturedImageUri = MutableStateFlow<String?>(null)
+    val capturedImageUri: StateFlow<String?> = _capturedImageUri
+
+    fun setCapturedImageUri(uri: String?) {
+        _capturedImageUri.value = uri
+    }
+
     fun toggleSortOrder() {
         _isSortAscending.value = !_isSortAscending.value
     }
