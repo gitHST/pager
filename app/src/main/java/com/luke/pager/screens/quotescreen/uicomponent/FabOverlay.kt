@@ -41,7 +41,6 @@ import com.luke.pager.screens.quotescreen.ExtendedFabItem
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-
 @Composable
 fun FabOverlay(
     uiStateViewModel: QuoteUiStateViewModel,
@@ -49,8 +48,6 @@ fun FabOverlay(
 ) {
     val isExpanded by uiStateViewModel.isFabExpanded.collectAsState()
     val showActions by uiStateViewModel.showFabActions.collectAsState()
-
-
 
     val showQuoteModal by uiStateViewModel.showQuoteModal.collectAsState()
     val showScanModal by uiStateViewModel.showScanModal.collectAsState()
@@ -67,11 +64,6 @@ fun FabOverlay(
             }
         }
     }
-
-
-
-
-
 
     var showPermissionDeniedDialog by remember { mutableStateOf(false) }
 
@@ -100,7 +92,6 @@ fun FabOverlay(
         }
     )
 
-
     LaunchedEffect(showQuoteModal || showScanModal) {
         if (showQuoteModal || showScanModal) {
             uiStateViewModel.setFabExpanded(false)
@@ -126,7 +117,6 @@ fun FabOverlay(
             uiStateViewModel.setShowFabActions(false)
         }
     }
-
 
     Box(
         modifier = Modifier
@@ -176,12 +166,9 @@ fun FabOverlay(
                         uiStateViewModel.setFabExpanded(false)
                         uiStateViewModel.setShowFabActions(false)
 
-
-
-                        val testImageUri = "android.resource://${context.packageName}/${R.drawable.sample_text_image_three}".toUri()
+                        val testImageUri = "android.resource://${context.packageName}/${R.drawable.sample_text_image_four}".toUri()
                         uiStateViewModel.setCapturedImageUri(testImageUri.toString())
                         uiStateViewModel.setShowScanModal(true)
-
 
 //                        val permissionCheck = ActivityCompat.checkSelfPermission(
 //                            context,
@@ -204,7 +191,6 @@ fun FabOverlay(
 //                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
 //                        }
                     }
-
                 }
             }
         }
@@ -234,5 +220,4 @@ fun FabOverlay(
             }
         )
     }
-
 }

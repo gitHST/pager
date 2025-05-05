@@ -1,6 +1,5 @@
 package com.luke.pager.screens.components
 
-
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
@@ -49,7 +48,7 @@ fun CenteredModalScaffold(
     enterFade: Int = 300,
     exitFade: Int = 300,
     visible: Boolean,
-    content: @Composable (ScrollState) -> Unit,
+    content: @Composable (ScrollState) -> Unit
 ) {
     val scrollState = rememberScrollState()
     AnimatedVisibility(

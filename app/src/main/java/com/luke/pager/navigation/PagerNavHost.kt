@@ -64,7 +64,6 @@ fun PagerNavHost(
         previousRoute.value = currentRoute?.destination?.route
     }
 
-
     NavHost(
         navController = navController,
         startDestination = "diary"

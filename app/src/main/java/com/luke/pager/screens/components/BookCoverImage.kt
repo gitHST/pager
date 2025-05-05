@@ -41,9 +41,10 @@ fun BookCoverImage(
     val shape = RoundedCornerShape(cornerRadius.dp)
     var aspectRatio by remember { mutableFloatStateOf(2f / 3f) }
 
-    Box(modifier = Modifier
-        .width(width)
-        .heightIn(max = heightMax)
+    Box(
+        modifier = Modifier
+            .width(width)
+            .heightIn(max = heightMax)
     ) {
         Box(
             modifier = modifier
