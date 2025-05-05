@@ -2,10 +2,11 @@ package com.luke.pager.screens.quotescreen.uicomponent
 
 import android.Manifest
 import android.app.Activity
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.TakePicture
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -16,13 +17,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.FormatQuote
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,10 +35,13 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
+import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import com.luke.pager.screens.quotescreen.ExtendedFabItem
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.File
+import java.util.UUID
 
 
 @Composable
@@ -50,14 +50,30 @@ fun FabOverlay(
     snackbarHostState: SnackbarHostState
 ) {
     val isExpanded by uiStateViewModel.isFabExpanded.collectAsState()
-    val fullyCollapsed by uiStateViewModel.fullyCollapsed.collectAsState()
     val showActions by uiStateViewModel.showFabActions.collectAsState()
+
+
 
     val showQuoteModal by uiStateViewModel.showQuoteModal.collectAsState()
     val showScanModal by uiStateViewModel.showScanModal.collectAsState()
 
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    var lastPhotoUri: Uri? by remember { mutableStateOf(null) }
+
+    val cameraLauncher = rememberLauncherForActivityResult(TakePicture()) { success ->
+        if (success) {
+            lastPhotoUri?.let {
+                uiStateViewModel.setCapturedImageUri(it.toString())
+                uiStateViewModel.setShowScanModal(true)
+            }
+        }
+    }
+
+
+
+
+
 
     var showPermissionDeniedDialog by remember { mutableStateOf(false) }
 
@@ -162,34 +178,28 @@ fun FabOverlay(
                         uiStateViewModel.setFabExpanded(false)
                         uiStateViewModel.setShowFabActions(false)
 
-
                         val permissionCheck = ActivityCompat.checkSelfPermission(
                             context,
                             Manifest.permission.CAMERA
                         )
                         if (permissionCheck == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                            uiStateViewModel.setShowScanModal(true)
+                            val photoFile = File(
+                                context.cacheDir,
+                                "${UUID.randomUUID()}.jpg"
+                            )
+                            val newPhotoUri = FileProvider.getUriForFile(
+                                context,
+                                "${context.packageName}.provider",
+                                photoFile
+                            )
+                            lastPhotoUri = newPhotoUri
+                            cameraLauncher.launch(newPhotoUri)
+
                         } else {
                             cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                         }
                     }
-                }
-            }
 
-            AnimatedVisibility(
-                visible = !isExpanded && fullyCollapsed && !showQuoteModal && !showScanModal,
-                enter = fadeIn(tween(150)),
-                exit = fadeOut(tween(100))
-            ) {
-                Box(Modifier.padding(16.dp)) {
-                    FloatingActionButton(onClick = {
-                        uiStateViewModel.setFabExpanded(true)
-                        uiStateViewModel.setFullyCollapsed(false)
-                        uiStateViewModel.setShowFabActions(false)
-                    }, modifier = Modifier.sizeIn(minHeight = 50.dp, minWidth = 50.dp)
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = "Expand Actions")
-                    }
                 }
             }
         }

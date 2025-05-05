@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.ViewCarousel
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
@@ -196,10 +197,10 @@ fun QuotesScreen(
 @Composable
 fun ExtendedFabItem(text: String, icon: ImageVector, onClick: () -> Unit) {
     ExtendedFloatingActionButton(
-        text = { Text(text) },
+        text = { Text(text, style = MaterialTheme.typography.labelLarge) },
         icon = { Icon(icon, contentDescription = text) },
         onClick = onClick,
-        modifier = Modifier.width(110.dp)
+        modifier = Modifier.width(120.dp)
     )
 }
 

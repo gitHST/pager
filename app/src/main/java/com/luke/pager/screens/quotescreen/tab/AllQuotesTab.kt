@@ -134,7 +134,7 @@ fun AllQuotesTab(
                         .offset(x = (45).dp, y = (8).dp)
                 ) {
                     Icon(
-                        imageVector = if (isSortAscending) Icons.Default.North else Icons.Default.South,
+                        imageVector = if (isSortAscending) Icons.Default.South else Icons.Default.North,
                         contentDescription = "Toggle sort order",
                         tint = Color.Gray
                     )

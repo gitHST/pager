@@ -1,5 +1,9 @@
 package com.luke.pager.screens.quotescreen.tab
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,11 +15,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.North
 import androidx.compose.material.icons.filled.South
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -97,6 +104,8 @@ fun CarouselTab(
         realBooks
     }
 
+    val isExpanded by uiStateViewModel.isFabExpanded.collectAsState()
+    val fullyCollapsed by uiStateViewModel.fullyCollapsed.collectAsState()
     val selectedBookId by uiStateViewModel.selectedBookId.collectAsState()
     val selectedBook = booksWithCovers.find { it.book.id == selectedBookId }
 
@@ -183,13 +192,40 @@ fun CarouselTab(
                     .padding(start = 36.dp, end = 36.dp, top = 16.dp, bottom = 16.dp)
             ) {
                 if (sortedQuotes.isEmpty()) {
-                    Text(
-                        "No quotes for this book",
-                        fontSize = 18.sp,
-                        fontStyle = FontStyle.Italic,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                        modifier = Modifier.padding(horizontal = 4.dp)
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "No quotes for this book",
+                            fontSize = 18.sp,
+                            fontStyle = FontStyle.Italic,
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                            modifier = Modifier
+                                .padding(horizontal = 4.dp)
+                                .padding(top = 16.dp)
+                        )
+
+                        AnimatedVisibility(
+                            visible = !isExpanded && fullyCollapsed && !showQuoteModal && !showScanModal,
+                            enter = fadeIn(tween(150)),
+                            exit = fadeOut(tween(100))
+                        ) {
+                            ExtendedFloatingActionButton(
+                                text = { Text("Add", style = MaterialTheme.typography.labelLarge) },
+                                icon = { Icon(Icons.Default.Add, contentDescription = "Add quote") },
+                                onClick = {
+                                    uiStateViewModel.setFabExpanded(true)
+                                    uiStateViewModel.setFullyCollapsed(false)
+                                    uiStateViewModel.setShowFabActions(false)
+                                },
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .size(width = 110.dp, height = 40.dp)
+                            )
+                        }
+                    }
                 } else {
                     Box(modifier = Modifier.fillMaxSize().padding(end = 5.dp)) {
                         HorizontalShadowDiv(visible = hasScrolledQuotes)
@@ -247,8 +283,21 @@ fun CarouselTab(
                                 .offset(x = (47).dp)
                         ) {
                             Icon(
-                                imageVector = if (isSortAscending) Icons.Default.North else Icons.Default.South,
+                                imageVector = if (isSortAscending) Icons.Default.South else Icons.Default.North,
                                 contentDescription = "Toggle sort order",
+                                tint = Color.Gray
+                            )
+                        }
+                        IconButton(
+                            onClick = { uiStateViewModel.setFabExpanded(true) },
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(4.dp)
+                                .offset(x = (47).dp, y = (47).dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add",
                                 tint = Color.Gray
                             )
                         }
@@ -267,7 +316,7 @@ fun CarouselTab(
             )
 
             ScanModal(
-                book = selectedBook.book,
+                uiStateViewModel = uiStateViewModel,
                 visible = showScanModal,
                 overlayAlpha = overlayAlpha,
                 onDismiss = { uiStateViewModel.setShowScanModal(false) }
