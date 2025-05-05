@@ -23,7 +23,6 @@ data class ClusterResult(
     val allClusters: List<List<Text.TextBlock>>
 )
 
-
 suspend fun processImageAndCluster(
     context: Context,
     uri: Uri,
@@ -36,7 +35,7 @@ suspend fun processImageAndCluster(
     bitmapStream?.close()
 
     // 2️⃣ First OCR pass: detect text orientation
-    val tempImage = InputImage.fromBitmap(bitmap, 0)  // No rotation
+    val tempImage = InputImage.fromBitmap(bitmap, 0)
     val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
     val result = recognizer.process(tempImage).await()
     val textBlocks = result.textBlocks
@@ -50,7 +49,9 @@ suspend fun processImageAndCluster(
             val dx = (p1.x - p0.x).toFloat()
             val dy = (p1.y - p0.y).toFloat()
             Math.toDegrees(atan2(dy, dx).toDouble())
-        } else null
+        } else {
+            null
+        }
     }
 
     val avgAngle = if (angles.isNotEmpty()) angles.average() else 0.0
@@ -79,12 +80,11 @@ suspend fun processImageAndCluster(
 
     Log.d("ImageTextProcessor", "OCR found ${finalTextBlocks.size} text blocks")
 
-
-    // 7️⃣ Build BlockBox list
-    val allBoxes = mutableListOf<BlockBox>()
+    // 7️⃣ Build DBSCANBlockBox list
+    val allBoxes = mutableListOf<DBSCANBlockBox>()
     for (block in finalTextBlocks) {
         val boundingBox = block.boundingBox ?: continue
-        allBoxes.add(BlockBox(block, boundingBox))
+        allBoxes.add(DBSCANBlockBox(block, boundingBox))
     }
 
     // 8️⃣ Run DBSCAN
@@ -93,9 +93,9 @@ suspend fun processImageAndCluster(
     // 9️⃣ Pick preferred cluster (center bias)
     val clusteredBlocks = if (clusters.isNotEmpty()) {
         val imageCenterX = imageWidth / 2f
-        val centerThreshold = imageWidth * 0.25f  // 25% overlap buffer
+        val centerThreshold = imageWidth * 0.25f // 25% overlap buffer
 
-        fun getClusterBoundingBox(cluster: List<BlockBox>): Rect {
+        fun getClusterBoundingBox(cluster: List<DBSCANBlockBox>): Rect {
             val first = cluster.first().rect
             var left = first.left
             var top = first.top
@@ -127,7 +127,6 @@ suspend fun processImageAndCluster(
     }
 
     val textClusters = clusters.map { it.map { box -> box.block } }
-
 
     Log.d("ImageTextProcessor", "DBSCAN produced ${clusters.size} clusters")
     clusters.forEachIndexed { index, cluster ->

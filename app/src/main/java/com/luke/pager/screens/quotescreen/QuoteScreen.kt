@@ -78,7 +78,6 @@ fun QuotesScreen(
         }
     }
 
-
     Column(
         modifier = Modifier.pointerInput(selectedTabIndex) {
             detectHorizontalDragGestures { _, dragAmount ->

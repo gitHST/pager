@@ -41,29 +41,29 @@ fun ScanCanvas(
 
             for (block in cluster) {
                 // for (line in block.lines) {
-                    val points = block.cornerPoints ?: continue
-                    if (points.size < 4) continue
+                val points = block.cornerPoints ?: continue
+                if (points.size < 4) continue
 
-                    val scaledPoints = points.map { point ->
-                        Offset(
-                            x = point.x.toFloat() * size.width / imageWidth,
-                            y = point.y.toFloat() * size.height / imageHeight
-                        )
-                    }
-
-                    val path = Path().apply {
-                        moveTo(scaledPoints[0].x, scaledPoints[0].y)
-                        for (i in 1 until scaledPoints.size) {
-                            lineTo(scaledPoints[i].x, scaledPoints[i].y)
-                        }
-                        close()
-                    }
-
-                    drawPath(
-                        path = path,
-                        color = color,
-                        style = Stroke(width = if (index == 0) 3f else 2f)
+                val scaledPoints = points.map { point ->
+                    Offset(
+                        x = point.x.toFloat() * size.width / imageWidth,
+                        y = point.y.toFloat() * size.height / imageHeight
                     )
+                }
+
+                val path = Path().apply {
+                    moveTo(scaledPoints[0].x, scaledPoints[0].y)
+                    for (i in 1 until scaledPoints.size) {
+                        lineTo(scaledPoints[i].x, scaledPoints[i].y)
+                    }
+                    close()
+                }
+
+                drawPath(
+                    path = path,
+                    color = color,
+                    style = Stroke(width = if (index == 0) 3f else 2f)
+                )
                 // }
             }
         }
