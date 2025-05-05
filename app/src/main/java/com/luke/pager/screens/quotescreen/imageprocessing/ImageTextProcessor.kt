@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.graphics.Rect
 import android.net.Uri
+import android.util.Log
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
@@ -27,7 +28,7 @@ suspend fun processImageAndCluster(
     context: Context,
     uri: Uri,
     eps: Float = 100f,
-    minPts: Int = 3
+    minPts: Int = 1
 ): ClusterResult {
     // 1️⃣ Load bitmap (no EXIF rotation)
     val bitmapStream = context.contentResolver.openInputStream(uri)
@@ -76,6 +77,9 @@ suspend fun processImageAndCluster(
     val imageWidth = finalImage.width
     val imageHeight = finalImage.height
 
+    Log.d("ImageTextProcessor", "OCR found ${finalTextBlocks.size} text blocks")
+
+
     // 7️⃣ Build BlockBox list
     val allBoxes = mutableListOf<BlockBox>()
     for (block in finalTextBlocks) {
@@ -123,6 +127,12 @@ suspend fun processImageAndCluster(
     }
 
     val textClusters = clusters.map { it.map { box -> box.block } }
+
+
+    Log.d("ImageTextProcessor", "DBSCAN produced ${clusters.size} clusters")
+    clusters.forEachIndexed { index, cluster ->
+        Log.d("ImageTextProcessor", "Cluster $index has ${cluster.size} blocks")
+    }
 
     return ClusterResult(
         textBlocks = finalTextBlocks,
