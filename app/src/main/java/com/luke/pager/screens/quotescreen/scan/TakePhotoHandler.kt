@@ -23,8 +23,9 @@ import java.util.UUID
 @Composable
 fun takePhotoHandler(
     snackbarScope: CoroutineScope,
-    onPhotoCaptured: (Uri) -> Unit
-): (Boolean) -> Unit {
+    onPhotoCaptured: (Uri) -> Unit,
+    testMode: Boolean = false
+): () -> Unit {
     val context = LocalContext.current
     var lastPhotoUri by remember { mutableStateOf<Uri?>(null) }
 
@@ -51,21 +52,13 @@ fun takePhotoHandler(
                 if (!shouldShowRationale) {
                     snackbarScope.launch {
                         snackbarScope.launch {
-                            snackbarScope.coroutineContext.let {
-                                snackbarScope.launch {
-                                    // You can show snackbar or trigger a dialog via state hoisting here.
-                                }
-                            }
+                            // Snackbar fallback
                         }
                     }
                 } else {
                     snackbarScope.launch {
                         snackbarScope.launch {
-                            snackbarScope.coroutineContext.let {
-                                snackbarScope.launch {
-                                    // Snackbar fallback
-                                }
-                            }
+                            // Snackbar fallback
                         }
                     }
                 }
@@ -74,7 +67,7 @@ fun takePhotoHandler(
     )
 
     return remember {
-        { testMode: Boolean ->
+        {
             if (testMode) {
                 val testImageUri = "android.resource://${context.packageName}/${R.drawable.sample_text_image_four}".toUri()
                 onPhotoCaptured(testImageUri)
