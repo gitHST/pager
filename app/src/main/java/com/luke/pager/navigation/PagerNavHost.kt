@@ -29,7 +29,8 @@ import com.luke.pager.screens.ExploreScreen
 import com.luke.pager.screens.ReviewScreen
 import com.luke.pager.screens.addscreen.SearchAndResultsModal
 import com.luke.pager.screens.quotescreen.QuotesScreen
-import com.luke.pager.screens.quotescreen.scan.ScanScreen
+import com.luke.pager.screens.quotescreen.scan.screens.MultiPagePreviewModal
+import com.luke.pager.screens.quotescreen.scan.screens.ScanScreen
 import com.luke.pager.screens.quotescreen.scan.takePhotoHandler
 import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
 import kotlinx.coroutines.delay
@@ -159,7 +160,17 @@ fun PagerNavHost(
         composable("scan_screen") {
             ScanScreen(
                 uiStateViewModel = uiStateViewModel,
-                photoLauncher = photoLauncher
+                photoLauncher = photoLauncher,
+                navController = navController
+            )
+        }
+
+        composable("multi_page_preview") {
+            MultiPagePreviewModal(
+                scannedPages = uiStateViewModel.scannedPages.collectAsState().value,
+                onDismiss = {
+                    uiStateViewModel.clearScannedPages()
+                }
             )
         }
     }
