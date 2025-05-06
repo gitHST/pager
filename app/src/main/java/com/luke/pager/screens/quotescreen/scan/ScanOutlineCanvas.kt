@@ -24,7 +24,7 @@ fun ScanOutlineCanvas(
     imageHeight: Int,
     outlineLevel: OutlineLevel,
     toggledClusters: Set<Int> = emptySet(),
-    onClusterClick: ((Int) -> Unit)? = null,
+    onClusterClick: ((Int) -> Unit)? = null
 ) {
     val clusterColors = listOf(
         Color(0xFFFF2828),
@@ -42,7 +42,7 @@ fun ScanOutlineCanvas(
         Color(0xFFA14FFF),
         Color(0xFFD04FFF),
         Color(0xFFFF4FD3),
-        Color(0xFFFF4F95),
+        Color(0xFFFF4F95)
     )
 
     Canvas(
@@ -115,7 +115,7 @@ fun ScanOutlineCanvas(
             }
 
             val isToggled = toggledClusters.contains(clusterIndex)
-            val fillAlpha = if (isToggled) 0.5f else 0.15f  // 💥 more obvious
+            val fillAlpha = if (isToggled) 0.5f else 0.15f // 💥 more obvious
 
             drawPath(
                 path = path,
