@@ -97,12 +97,14 @@ fun ScanOutlineCanvas(
             val color = clusterColors.getOrElse(index) { Color.Black }
 
             if (outlineLevel == OutlineLevel.CLUSTER) {
-                val blockPoints = mutableListOf<Point>()
+                val linePoints = mutableListOf<Point>()
                 for (block in cluster) {
-                    block.cornerPoints?.let { blockPoints.addAll(it) }
+                    for (line in block.lines) {
+                        line.cornerPoints?.let { linePoints.addAll(it) }
+                    }
                 }
-                if (blockPoints.size >= 3) {
-                    val hull = computeConvexHull(blockPoints)
+                if (linePoints.size >= 3) {
+                    val hull = computeConvexHull(linePoints)
                     drawShape(hull.toTypedArray(), color, index)
                 }
             } else {
