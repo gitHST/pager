@@ -1,7 +1,6 @@
 package com.luke.pager.screens.quotescreen.scan
 
 import android.Manifest
-import android.app.Activity
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,11 +25,10 @@ import java.util.UUID
 fun takePhotoHandler(
     snackbarScope: CoroutineScope,
     onPhotoCaptured: (Uri) -> Unit,
-    testMode: Boolean = false
-): () -> Unit {
+    testMode: Boolean = false): () -> Unit
+{
     val context = LocalContext.current
     var lastPhotoUri by remember { mutableStateOf<Uri?>(null) }
-
     var testImageCounter by rememberSaveable { mutableIntStateOf(2) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
@@ -45,28 +43,33 @@ fun takePhotoHandler(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
             if (!isGranted) {
-                val shouldShowRationale = when (context) {
-                    is Activity -> ActivityCompat.shouldShowRequestPermissionRationale(
-                        context,
-                        Manifest.permission.CAMERA
-                    )
-                    else -> false
-                }
-
-                if (!shouldShowRationale) {
-                    snackbarScope.launch {
-                        snackbarScope.launch {
-                        }
-                    }
-                } else {
-                    snackbarScope.launch {
-                        snackbarScope.launch {
-                        }
-                    }
+                snackbarScope.launch {
                 }
             }
         }
     )
+
+    fun launchRealCamera() {
+        val permissionCheck = ActivityCompat.checkSelfPermission(
+            context,
+            Manifest.permission.CAMERA
+        )
+        if (permissionCheck == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            val photoFile = File(
+                context.cacheDir,
+                "${UUID.randomUUID()}.jpg"
+            )
+            val newPhotoUri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.provider",
+                photoFile
+            )
+            lastPhotoUri = newPhotoUri
+            cameraLauncher.launch(newPhotoUri)
+        } else {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
 
     return remember {
         {
@@ -78,29 +81,21 @@ fun takePhotoHandler(
                     5 -> R.drawable.sample_text_image_five
                     else -> R.drawable.sample_text_image_two
                 }
-                val testImageUri = "android.resource://${context.packageName}/$testImageName".toUri()
-                onPhotoCaptured(testImageUri)
-                testImageCounter = if (testImageCounter >= 5) 2 else testImageCounter + 1
-            } else {
-                val permissionCheck = ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.CAMERA
+                val drawable = androidx.core.content.res.ResourcesCompat.getDrawable(
+                    context.resources,
+                    testImageName,
+                    context.theme
                 )
-                if (permissionCheck == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                    val photoFile = File(
-                        context.cacheDir,
-                        "${UUID.randomUUID()}.jpg"
-                    )
-                    val newPhotoUri = FileProvider.getUriForFile(
-                        context,
-                        "${context.packageName}.provider",
-                        photoFile
-                    )
-                    lastPhotoUri = newPhotoUri
-                    cameraLauncher.launch(newPhotoUri)
+                if (drawable != null) {
+                    val testImageUri =
+                        "android.resource://${context.packageName}/$testImageName".toUri()
+                    onPhotoCaptured(testImageUri)
+                    testImageCounter = if (testImageCounter >= 5) 2 else testImageCounter + 1
                 } else {
-                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                    launchRealCamera()
                 }
+            } else {
+                launchRealCamera()
             }
         }
     }

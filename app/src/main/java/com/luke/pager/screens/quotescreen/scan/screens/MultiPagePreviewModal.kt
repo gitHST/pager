@@ -84,8 +84,11 @@ fun MultiPagePreviewModal(
                     onClusterClick = { clusterIndex ->
                         val currentSet = toggledClusters[currentPage].value
                         toggledClusters[currentPage].value =
-                            if (currentSet.contains(clusterIndex)) currentSet - clusterIndex
-                            else currentSet + clusterIndex
+                            if (currentSet.contains(clusterIndex)) {
+                                currentSet - clusterIndex
+                            } else {
+                                currentSet + clusterIndex
+                            }
                     }
                 )
             }

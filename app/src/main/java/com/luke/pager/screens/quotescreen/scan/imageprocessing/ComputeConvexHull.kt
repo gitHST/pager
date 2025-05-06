@@ -32,4 +32,3 @@ fun computeConvexHull(points: List<Point>): List<Point> {
 
     return lower + upper
 }
-
