@@ -60,8 +60,19 @@ fun ScanOutlineCanvas(
 
             drawPath(
                 path = path,
+                color = color.copy(alpha = 0.2f),
+                style = Stroke(width = 0f)
+            )
+            drawPath(
+                path = path,
+                color = color.copy(alpha = 0.2f),
+                style = androidx.compose.ui.graphics.drawscope.Fill
+            )
+
+            drawPath(
+                path = path,
                 color = color,
-                style = Stroke(width = if (clusterIndex == 0) 3f else 2f)
+                style = Stroke(width = 5f)
             )
 
             val labelPosition = scaledPoints.minByOrNull { it.y } ?: scaledPoints[0]
@@ -79,6 +90,7 @@ fun ScanOutlineCanvas(
                 )
             }
         }
+
 
 
         allClusters.forEachIndexed { index, cluster ->
