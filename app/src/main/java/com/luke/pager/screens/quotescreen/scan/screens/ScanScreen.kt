@@ -112,7 +112,6 @@ fun ScanScreen(
         )
     }
 
-
     LaunchedEffect(capturedImageUri, DEBUGScanSensitivity) {
         if (capturedImageUri != null && DEBUGScanSensitivity != null) {
             try {
