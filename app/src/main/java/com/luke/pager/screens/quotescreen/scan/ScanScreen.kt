@@ -49,7 +49,7 @@ import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
 @Composable
 fun ScanScreen(
     uiStateViewModel: QuoteUiStateViewModel,
-    photoLauncher: (Boolean) -> Unit
+    photoLauncher: () -> Unit
 ) {
     val capturedImageUriState = uiStateViewModel.capturedImageUri.collectAsState()
     val capturedImageUri = capturedImageUriState.value
@@ -144,7 +144,7 @@ fun ScanScreen(
                             .padding(vertical = 12.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        Button(onClick = { photoLauncher(true) }
+                        Button(onClick = { photoLauncher() }
                         ) {
                             Text("Retake")
                         }
