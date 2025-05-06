@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,7 +30,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -135,31 +133,37 @@ fun ScanScreen(
         if (imageWidth > 0 && imageHeight > 0) {
             val aspectRatio = imageWidth.toFloat() / imageHeight.toFloat()
 
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(8.dp)
             ) {
-                if (rotatedBitmap != null) {
-                    Image(
-                        bitmap = rotatedBitmap!!.asImageBitmap(),
-                        contentDescription = "Captured photo",
-                        contentScale = ContentScale.FillBounds,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(aspectRatio)
-                    )
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 12.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        Button(onClick = { photoLauncher() }
-                        ) {
-                            Text("Retake")
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Button(onClick = { photoLauncher() }) {
+                        Text("Retake")
+                    }
+                    Button(onClick = {
+                        if (rotatedBitmap != null) {
+                            val newPage = ScanPage(
+                                imageUri = capturedImageUri.toUri(),
+                                rotatedBitmap = rotatedBitmap!!,
+                                allClusters = allClusters,
+                                imageWidth = imageWidth,
+                                imageHeight = imageHeight
+                            )
+                            uiStateViewModel.addScannedPage(newPage)
                         }
-                        Button(onClick = {
+                        photoLauncher()
+                    }) {
+                        Text("Add Page")
+                    }
+                    Button(
+                        onClick = {
                             if (rotatedBitmap != null) {
                                 val newPage = ScanPage(
                                     imageUri = capturedImageUri.toUri(),
@@ -170,47 +174,41 @@ fun ScanScreen(
                                 )
                                 uiStateViewModel.addScannedPage(newPage)
                             }
-                            photoLauncher()
-                        }) {
-                            Text("Add Page")
+                            navController.navigate("multi_page_preview")
                         }
-                        Button(
-                            onClick = {
-                                if (rotatedBitmap != null) {
-                                    val newPage = ScanPage(
-                                        imageUri = capturedImageUri.toUri(),
-                                        rotatedBitmap = rotatedBitmap!!,
-                                        allClusters = allClusters,
-                                        imageWidth = imageWidth,
-                                        imageHeight = imageHeight
-                                    )
-                                    uiStateViewModel.addScannedPage(newPage)
-                                }
-                                navController.navigate("multi_page_preview")
-                            }
-                        ) {
-                            Text("Done")
-                        }
+                    ) {
+                        Text("Done")
                     }
-                } else {
-                    Text("Loading image...", modifier = Modifier.fillMaxSize())
                 }
 
-                ScanOutlineCanvas(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(aspectRatio),
-                    allClusters = allClusters,
-                    imageWidth = imageWidth,
-                    imageHeight = imageHeight,
-                    outlineLevel = OutlineLevel.CLUSTER
-                )
+                if (rotatedBitmap != null) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(aspectRatio)
+                    ) {
+                        Image(
+                            bitmap = rotatedBitmap!!.asImageBitmap(),
+                            contentDescription = "Captured photo",
+                            contentScale = ContentScale.FillBounds,
+                            modifier = Modifier.matchParentSize()
+                        )
+                        ScanOutlineCanvas(
+                            modifier = Modifier.matchParentSize(),
+                            allClusters = allClusters,
+                            imageWidth = imageWidth,
+                            imageHeight = imageHeight,
+                            outlineLevel = OutlineLevel.CLUSTER
+                        )
+                    }
+                } else {
+                    Text("Loading image...", modifier = Modifier.fillMaxWidth())
+                }
 
                 Column(
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .height(200.dp)
+                        .weight(1f)
                         .padding(top = 8.dp)
                 ) {
                     if (scannedPages.isNotEmpty()) {
