@@ -1,7 +1,8 @@
-package com.luke.pager.screens.quotescreen.imageprocessing
+package com.luke.pager.screens.quotescreen.scan.imageprocessing
 
 import android.graphics.Rect
 import com.google.mlkit.vision.text.Text
+import kotlin.math.sqrt
 
 data class DBSCANBlockBox(
     val block: Text.TextBlock,
@@ -71,7 +72,7 @@ private fun distanceBetweenRectangles(r1: Rect, r2: Rect): Float {
     val dx = maxOf(0, maxOf(r1.left, r2.left) - minOf(r1.right, r2.right))
     val dy = maxOf(0, maxOf(r1.top, r2.top) - minOf(r1.bottom, r2.bottom))
 
-    return kotlin.math.sqrt((dx * dx + dy * dy).toFloat())
+    return sqrt((dx * dx + dy * dy).toFloat())
 }
 
 private fun minDistanceBetweenLines(box1: DBSCANBlockBox, box2: DBSCANBlockBox): Float {

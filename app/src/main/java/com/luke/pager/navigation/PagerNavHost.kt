@@ -28,7 +28,7 @@ import com.luke.pager.screens.ExploreScreen
 import com.luke.pager.screens.ReviewScreen
 import com.luke.pager.screens.addscreen.SearchAndResultsModal
 import com.luke.pager.screens.quotescreen.QuotesScreen
-import com.luke.pager.screens.quotescreen.modal.ScanScreen
+import com.luke.pager.screens.quotescreen.scan.ScanScreen
 import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
 import kotlinx.coroutines.delay
 
