@@ -35,15 +35,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
-import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.navigation.NavHostController
-import com.luke.pager.R
 import com.luke.pager.screens.quotescreen.ExtendedFabItem
+import com.luke.pager.screens.quotescreen.scan.takePhotoHandler
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.io.File
-import java.util.UUID
 
 @Composable
 fun FabOverlay(
@@ -92,6 +89,15 @@ fun FabOverlay(
             }
         }
     )
+
+    val photoLauncher = takePhotoHandler(
+        snackbarScope = coroutineScope,
+        onPhotoCaptured = { photoUri ->
+            uiStateViewModel.setCapturedImageUri(photoUri.toString())
+            navController.navigate("scan_screen")
+        }
+    )
+
 
     LaunchedEffect(isExpanded) {
         if (isExpanded) {
@@ -158,35 +164,9 @@ fun FabOverlay(
                     ) {
                         uiStateViewModel.setFabExpanded(false)
                         uiStateViewModel.setShowFabActions(false)
-
-                        val testMode = true
-
-                        if (testMode) {
-                            val testImageUri = "android.resource://${context.packageName}/${R.drawable.sample_text_image_four}".toUri()
-                            uiStateViewModel.setCapturedImageUri(testImageUri.toString())
-                            navController.navigate("scan_screen")
-                        } else {
-                            val permissionCheck = ActivityCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.CAMERA
-                            )
-                            if (permissionCheck == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                                val photoFile = File(
-                                    context.cacheDir,
-                                    "${UUID.randomUUID()}.jpg"
-                                )
-                                val newPhotoUri = FileProvider.getUriForFile(
-                                    context,
-                                    "${context.packageName}.provider",
-                                    photoFile
-                                )
-                                lastPhotoUri = newPhotoUri
-                                cameraLauncher.launch(newPhotoUri)
-                            } else {
-                                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                            }
-                        }
+                        photoLauncher(true)
                     }
+
                 }
             }
         }

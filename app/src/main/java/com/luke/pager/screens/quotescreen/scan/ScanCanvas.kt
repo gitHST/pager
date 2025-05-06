@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen.imageprocessing
+package com.luke.pager.screens.quotescreen.scan
 
 import android.util.Log
 import androidx.compose.foundation.Canvas
@@ -41,6 +41,7 @@ fun ScanCanvas(
 
             for (block in cluster) {
                 for (line in block.lines) {
+                    // for (character in line.elements) {
                     val points = line.cornerPoints ?: continue
                     if (points.size < 4) continue
 
@@ -79,6 +80,7 @@ fun ScanCanvas(
                             }
                         )
                     }
+                    // }
                 }
             }
         }

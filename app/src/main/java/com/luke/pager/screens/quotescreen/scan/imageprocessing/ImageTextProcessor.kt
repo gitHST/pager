@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen.imageprocessing
+package com.luke.pager.screens.quotescreen.scan.imageprocessing
 
 import android.content.Context
 import android.graphics.Bitmap
