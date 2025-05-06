@@ -1,7 +1,11 @@
-package com.luke.pager.screens.quotescreen.modal
+package com.luke.pager.screens.quotescreen.scan
 
+import android.graphics.Bitmap
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -37,9 +42,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.google.mlkit.vision.text.Text
-import com.luke.pager.screens.quotescreen.imageprocessing.ClusterDistanceDebug
-import com.luke.pager.screens.quotescreen.imageprocessing.ScanCanvas
-import com.luke.pager.screens.quotescreen.imageprocessing.processImageAndCluster
+import com.luke.pager.screens.quotescreen.scan.imageprocessing.ClusterDistanceDebug
+import com.luke.pager.screens.quotescreen.scan.imageprocessing.processImageAndCluster
 import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
 
 
@@ -55,7 +59,7 @@ fun ScanScreen(
     var imageWidth by remember { mutableIntStateOf(1) }
     var imageHeight by remember { mutableIntStateOf(1) }
     var allClusters by remember { mutableStateOf<List<List<Text.TextBlock>>>(emptyList()) }
-    var rotatedBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
+    var rotatedBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var clusterDistances by remember { mutableStateOf<List<ClusterDistanceDebug>>(emptyList()) }
 
     var DEBUGScanSensitivity by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -126,7 +130,7 @@ fun ScanScreen(
                     .padding(8.dp)
             ) {
                 if (rotatedBitmap != null) {
-                    androidx.compose.foundation.Image(
+                    Image(
                         bitmap = rotatedBitmap!!.asImageBitmap(),
                         contentDescription = "Captured photo",
                         contentScale = ContentScale.FillBounds,
@@ -134,6 +138,31 @@ fun ScanScreen(
                             .fillMaxWidth()
                             .aspectRatio(aspectRatio)
                     )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Button(
+                            onClick = { /* TODO: Retake action */ },
+                            colors = ButtonDefaults.buttonColors()
+                        ) {
+                            Text("Retake")
+                        }
+                        Button(
+                            onClick = { /* TODO: Add another page action */ },
+                            colors = ButtonDefaults.buttonColors()
+                        ) {
+                            Text("Add Page")
+                        }
+                        Button(
+                            onClick = { /* TODO: Done action */ },
+                            colors = ButtonDefaults.buttonColors()
+                        ) {
+                            Text("Done")
+                        }
+                    }
                 } else {
                     Text("Loading image...", modifier = Modifier.fillMaxSize())
                 }
