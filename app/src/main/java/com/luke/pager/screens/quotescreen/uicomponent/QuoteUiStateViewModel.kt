@@ -1,6 +1,7 @@
 package com.luke.pager.screens.quotescreen.uicomponent
 
 import androidx.lifecycle.ViewModel
+import com.luke.pager.screens.quotescreen.scan.ScanPage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +33,17 @@ class QuoteUiStateViewModel : ViewModel() {
 
     private val _capturedImageUri = MutableStateFlow<String?>(null)
     val capturedImageUri: StateFlow<String?> = _capturedImageUri
+
+    private val _scannedPages = MutableStateFlow<List<ScanPage>>(emptyList())
+    val scannedPages: StateFlow<List<ScanPage>> = _scannedPages
+
+    fun addScannedPage(page: ScanPage) {
+        _scannedPages.value = _scannedPages.value + page
+    }
+
+    fun clearScannedPages() {
+        _scannedPages.value = emptyList()
+    }
 
     fun setCapturedImageUri(uri: String?) {
         _capturedImageUri.value = uri

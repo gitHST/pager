@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen.scan
+package com.luke.pager.screens.quotescreen.scan.screens
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
@@ -11,12 +11,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -41,7 +42,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import androidx.navigation.NavController
 import com.google.mlkit.vision.text.Text
+import com.luke.pager.screens.quotescreen.scan.ScanCanvas
+import com.luke.pager.screens.quotescreen.scan.ScanPage
 import com.luke.pager.screens.quotescreen.scan.imageprocessing.ClusterDistanceDebug
 import com.luke.pager.screens.quotescreen.scan.imageprocessing.processImageAndCluster
 import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
@@ -49,6 +53,7 @@ import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
 @Composable
 fun ScanScreen(
     uiStateViewModel: QuoteUiStateViewModel,
+    navController: NavController,
     photoLauncher: () -> Unit
 ) {
     val capturedImageUriState = uiStateViewModel.capturedImageUri.collectAsState()
@@ -66,8 +71,13 @@ fun ScanScreen(
     var DEBUGshowDialog by rememberSaveable { mutableStateOf(true) }
     var DEBUGinputText by remember { mutableStateOf(TextFieldValue("")) }
 
+    val scannedPages by uiStateViewModel.scannedPages.collectAsState()
 
-    if (DEBUGshowDialog) {
+    val ENABLE_DEBUG_DIALOG = false
+    if (!ENABLE_DEBUG_DIALOG) {
+        DEBUGScanSensitivity = 20
+    }
+    if (ENABLE_DEBUG_DIALOG && DEBUGshowDialog) {
         AlertDialog(
             onDismissRequest = {},
             confirmButton = {
@@ -148,15 +158,29 @@ fun ScanScreen(
                         ) {
                             Text("Retake")
                         }
-                        Button(
-                            onClick = { /* TODO: Add another page action */ },
-                            colors = ButtonDefaults.buttonColors()
-                        ) {
+                        Button(onClick = {
+                            if (rotatedBitmap != null) {
+                                val newPage = ScanPage(
+                                    imageUri = capturedImageUri.toUri(),
+                                    rotatedBitmap = rotatedBitmap!!
+                                )
+                                uiStateViewModel.addScannedPage(newPage)
+                            }
+                            photoLauncher()
+                        }) {
                             Text("Add Page")
                         }
                         Button(
-                            onClick = { /* TODO: Done action */ },
-                            colors = ButtonDefaults.buttonColors()
+                            onClick = {
+                                if (rotatedBitmap != null) {
+                                    val newPage = ScanPage(
+                                        imageUri = capturedImageUri.toUri(),
+                                        rotatedBitmap = rotatedBitmap!!
+                                    )
+                                    uiStateViewModel.addScannedPage(newPage)
+                                }
+                                navController.navigate("multi_page_preview")
+                            }
                         ) {
                             Text("Done")
                         }
@@ -181,6 +205,24 @@ fun ScanScreen(
                         .height(200.dp)
                         .padding(top = 8.dp)
                 ) {
+                    if (scannedPages.isNotEmpty()) {
+                        LazyRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                        ) {
+                            items(scannedPages) { page ->
+                                Image(
+                                    bitmap = page.rotatedBitmap.asImageBitmap(),
+                                    contentDescription = "Scanned page",
+                                    modifier = Modifier
+                                        .size(100.dp)
+                                        .padding(end = 8.dp)
+                                )
+                            }
+                        }
+                    }
+
                     LazyColumn(
                         modifier = Modifier.fillMaxSize()
                     ) {
