@@ -46,10 +46,10 @@ import com.luke.pager.screens.quotescreen.scan.imageprocessing.ClusterDistanceDe
 import com.luke.pager.screens.quotescreen.scan.imageprocessing.processImageAndCluster
 import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
 
-
 @Composable
 fun ScanScreen(
-    uiStateViewModel: QuoteUiStateViewModel
+    uiStateViewModel: QuoteUiStateViewModel,
+    photoLauncher: (Boolean) -> Unit
 ) {
     val capturedImageUriState = uiStateViewModel.capturedImageUri.collectAsState()
     val capturedImageUri = capturedImageUriState.value
@@ -144,9 +144,7 @@ fun ScanScreen(
                             .padding(vertical = 12.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        Button(
-                            onClick = { /* TODO: Retake action */ },
-                            colors = ButtonDefaults.buttonColors()
+                        Button(onClick = { photoLauncher(true) }
                         ) {
                             Text("Retake")
                         }

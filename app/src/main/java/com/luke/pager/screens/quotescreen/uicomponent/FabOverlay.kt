@@ -46,7 +46,8 @@ import kotlinx.coroutines.launch
 fun FabOverlay(
     uiStateViewModel: QuoteUiStateViewModel,
     snackbarHostState: SnackbarHostState,
-    navController: NavHostController
+    navController: NavHostController,
+    photoLauncher: (Boolean) -> Unit
 ) {
     val isExpanded by uiStateViewModel.isFabExpanded.collectAsState()
     val showActions by uiStateViewModel.showFabActions.collectAsState()
@@ -164,9 +165,8 @@ fun FabOverlay(
                     ) {
                         uiStateViewModel.setFabExpanded(false)
                         uiStateViewModel.setShowFabActions(false)
-                        photoLauncher(true)
+                        photoLauncher(true)  // or false if you're ready to use real camera
                     }
-
                 }
             }
         }

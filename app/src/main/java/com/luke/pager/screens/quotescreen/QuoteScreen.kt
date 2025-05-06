@@ -61,7 +61,8 @@ fun QuotesScreen(
     currentRoute: String,
     navItems: List<NavItem>,
     uiStateViewModel: QuoteUiStateViewModel,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    photoLauncher: (Boolean) -> Unit
 ) {
     val bookList by bookViewModel.booksSortedByReviewDate.collectAsState()
     val quotes by quoteViewModel.quotes.collectAsState()
@@ -184,7 +185,8 @@ fun QuotesScreen(
                         FabOverlay(
                             uiStateViewModel = uiStateViewModel,
                             snackbarHostState = snackbarHostState,
-                            navController = navController
+                            navController = navController,
+                            photoLauncher = photoLauncher
                         )
                     }
                 }

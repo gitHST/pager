@@ -13,6 +13,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -29,6 +30,7 @@ import com.luke.pager.screens.ReviewScreen
 import com.luke.pager.screens.addscreen.SearchAndResultsModal
 import com.luke.pager.screens.quotescreen.QuotesScreen
 import com.luke.pager.screens.quotescreen.scan.ScanScreen
+import com.luke.pager.screens.quotescreen.scan.takePhotoHandler
 import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
 import kotlinx.coroutines.delay
 
@@ -56,6 +58,16 @@ fun PagerNavHost(
     )
 
     val previousRoute = remember { mutableStateOf<String?>(null) }
+
+    val coroutineScope = rememberCoroutineScope()
+
+    val photoLauncher = takePhotoHandler(
+        snackbarScope = coroutineScope,
+        onPhotoCaptured = { photoUri ->
+            uiStateViewModel.setCapturedImageUri(photoUri.toString())
+            navController.navigate("scan_screen")
+        }
+    )
 
     LaunchedEffect(currentRoute) {
         if (previousRoute.value == "quotes" && currentRoute?.destination?.route != "quotes") {
@@ -126,7 +138,8 @@ fun PagerNavHost(
                     currentRoute = currentRoute,
                     navItems = navItems,
                     uiStateViewModel = uiStateViewModel,
-                    snackbarHostState = snackbarHostState
+                    snackbarHostState = snackbarHostState,
+                    photoLauncher = photoLauncher
                 )
             }
         }
@@ -144,7 +157,8 @@ fun PagerNavHost(
 
         composable("scan_screen") {
             ScanScreen(
-                uiStateViewModel = uiStateViewModel
+                uiStateViewModel = uiStateViewModel,
+                photoLauncher = photoLauncher
             )
         }
     }
