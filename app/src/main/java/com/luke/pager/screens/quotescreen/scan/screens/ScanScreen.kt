@@ -200,7 +200,7 @@ fun ScanScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(aspectRatio),
-                    allClusters = allClusters.drop(1),
+                    allClusters = allClusters,
                     imageWidth = imageWidth,
                     imageHeight = imageHeight,
                     outlineLevel = OutlineLevel.CLUSTER
