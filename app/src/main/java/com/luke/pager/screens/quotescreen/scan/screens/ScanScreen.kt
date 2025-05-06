@@ -44,10 +44,11 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.google.mlkit.vision.text.Text
-import com.luke.pager.screens.quotescreen.scan.ScanCanvas
-import com.luke.pager.screens.quotescreen.scan.ScanPage
+import com.luke.pager.screens.quotescreen.scan.ScanOutlineCanvas
 import com.luke.pager.screens.quotescreen.scan.imageprocessing.ClusterDistanceDebug
 import com.luke.pager.screens.quotescreen.scan.imageprocessing.processImageAndCluster
+import com.luke.pager.screens.quotescreen.scan.staticdataclasses.OutlineLevel
+import com.luke.pager.screens.quotescreen.scan.staticdataclasses.ScanPage
 import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
 
 @Composable
@@ -162,7 +163,10 @@ fun ScanScreen(
                             if (rotatedBitmap != null) {
                                 val newPage = ScanPage(
                                     imageUri = capturedImageUri.toUri(),
-                                    rotatedBitmap = rotatedBitmap!!
+                                    rotatedBitmap = rotatedBitmap!!,
+                                    allClusters = allClusters,
+                                    imageWidth = imageWidth,
+                                    imageHeight = imageHeight
                                 )
                                 uiStateViewModel.addScannedPage(newPage)
                             }
@@ -175,7 +179,10 @@ fun ScanScreen(
                                 if (rotatedBitmap != null) {
                                     val newPage = ScanPage(
                                         imageUri = capturedImageUri.toUri(),
-                                        rotatedBitmap = rotatedBitmap!!
+                                        rotatedBitmap = rotatedBitmap!!,
+                                        allClusters = allClusters,
+                                        imageWidth = imageWidth,
+                                        imageHeight = imageHeight
                                     )
                                     uiStateViewModel.addScannedPage(newPage)
                                 }
@@ -189,13 +196,14 @@ fun ScanScreen(
                     Text("Loading image...", modifier = Modifier.fillMaxSize())
                 }
 
-                ScanCanvas(
+                ScanOutlineCanvas(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(aspectRatio),
-                    allClusters = allClusters,
+                    allClusters = allClusters.drop(1),
                     imageWidth = imageWidth,
-                    imageHeight = imageHeight
+                    imageHeight = imageHeight,
+                    outlineLevel = OutlineLevel.CLUSTER
                 )
 
                 Column(

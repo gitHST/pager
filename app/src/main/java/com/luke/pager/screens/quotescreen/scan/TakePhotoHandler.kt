@@ -7,8 +7,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
@@ -28,6 +30,8 @@ fun takePhotoHandler(
 ): () -> Unit {
     val context = LocalContext.current
     var lastPhotoUri by remember { mutableStateOf<Uri?>(null) }
+
+    var testImageCounter by rememberSaveable { mutableIntStateOf(2) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
@@ -52,13 +56,11 @@ fun takePhotoHandler(
                 if (!shouldShowRationale) {
                     snackbarScope.launch {
                         snackbarScope.launch {
-                            // Snackbar fallback
                         }
                     }
                 } else {
                     snackbarScope.launch {
                         snackbarScope.launch {
-                            // Snackbar fallback
                         }
                     }
                 }
@@ -69,8 +71,16 @@ fun takePhotoHandler(
     return remember {
         {
             if (testMode) {
-                val testImageUri = "android.resource://${context.packageName}/${R.drawable.sample_text_image_four}".toUri()
+                val testImageName = when (testImageCounter) {
+                    2 -> R.drawable.sample_text_image_two
+                    3 -> R.drawable.sample_text_image_three
+                    4 -> R.drawable.sample_text_image_four
+                    5 -> R.drawable.sample_text_image_five
+                    else -> R.drawable.sample_text_image_two
+                }
+                val testImageUri = "android.resource://${context.packageName}/$testImageName".toUri()
                 onPhotoCaptured(testImageUri)
+                testImageCounter = if (testImageCounter >= 5) 2 else testImageCounter + 1
             } else {
                 val permissionCheck = ActivityCompat.checkSelfPermission(
                     context,

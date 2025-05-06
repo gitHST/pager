@@ -1,7 +1,7 @@
 package com.luke.pager.screens.quotescreen.uicomponent
 
 import androidx.lifecycle.ViewModel
-import com.luke.pager.screens.quotescreen.scan.ScanPage
+import com.luke.pager.screens.quotescreen.scan.staticdataclasses.ScanPage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

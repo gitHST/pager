@@ -17,14 +17,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
-import com.luke.pager.screens.quotescreen.scan.ScanPage
+import com.luke.pager.screens.quotescreen.scan.ScanOutlineCanvas
+import com.luke.pager.screens.quotescreen.scan.staticdataclasses.OutlineLevel
+import com.luke.pager.screens.quotescreen.scan.staticdataclasses.ScanPage
 
 @Composable
 fun MultiPagePreviewModal(
@@ -37,7 +39,7 @@ fun MultiPagePreviewModal(
         }
     }
 
-    var currentPage by remember { mutableStateOf(0) }
+    var currentPage by remember { mutableIntStateOf(0) }
 
     Box(
         modifier = Modifier
@@ -47,13 +49,26 @@ fun MultiPagePreviewModal(
     ) {
         if (scannedPages.isNotEmpty()) {
             val current = scannedPages[currentPage]
-            Image(
-                bitmap = current.rotatedBitmap.asImageBitmap(),
-                contentDescription = "Page ${currentPage + 1}",
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(current.rotatedBitmap.width.toFloat() / current.rotatedBitmap.height.toFloat())
-            )
+            ) {
+                Image(
+                    bitmap = current.rotatedBitmap.asImageBitmap(),
+                    contentDescription = "Page ${currentPage + 1}",
+                    modifier = Modifier.matchParentSize(),
+                    alignment = Alignment.Center
+                )
+                ScanOutlineCanvas(
+                    modifier = Modifier.matchParentSize(),
+                    allClusters = current.allClusters,
+                    imageWidth = current.imageWidth,
+                    imageHeight = current.imageHeight,
+                    outlineLevel = OutlineLevel.BLOCK
+                )
+
+            }
 
             Row(
                 modifier = Modifier
