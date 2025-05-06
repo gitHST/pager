@@ -1,16 +1,17 @@
 package com.luke.pager.screens.quotescreen.scan
 
 import android.graphics.Point
-import android.util.Log
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.input.pointer.pointerInput
 import com.google.mlkit.vision.text.Text
 import com.luke.pager.screens.quotescreen.scan.imageprocessing.computeConvexHull
 import com.luke.pager.screens.quotescreen.scan.staticdataclasses.OutlineLevel
@@ -21,25 +22,80 @@ fun ScanOutlineCanvas(
     allClusters: List<List<Text.TextBlock>>,
     imageWidth: Int,
     imageHeight: Int,
-    outlineLevel: OutlineLevel
+    outlineLevel: OutlineLevel,
+    toggledClusters: Set<Int> = emptySet(),
+    onClusterClick: ((Int) -> Unit)? = null,
 ) {
     val clusterColors = listOf(
-        Color.Green,
-        Color.Red,
-        Color.Blue,
-        Color.Magenta,
-        Color.Cyan,
-        Color.Yellow,
-        Color.Gray,
-        Color.LightGray,
-        Color.DarkGray
+        Color(0xFFFF2828),
+        Color(0xFFF46C36),
+        Color(0xFFF39F21),
+        Color(0xFFFBD240),
+        Color(0xFFDCFF3C),
+        Color(0xFF93FF48),
+        Color(0xFF50FF76),
+        Color(0xFF4AFFD3),
+        Color(0xFF4FC1FF),
+        Color(0xFF4F95FF),
+        Color(0xFF4F7BFF),
+        Color(0xFF614FFF),
+        Color(0xFFA14FFF),
+        Color(0xFFD04FFF),
+        Color(0xFFFF4FD3),
+        Color(0xFFFF4F95),
     )
 
-    LaunchedEffect(allClusters) {
-        Log.d("ScanCanvas", "Total clusters detected: ${allClusters.size}")
-    }
+    Canvas(
+        modifier = modifier.pointerInput(allClusters, toggledClusters) {
+            detectTapGestures { offset ->
+                val x = offset.x.toInt()
+                val y = offset.y.toInt()
+                allClusters.forEachIndexed { index, cluster ->
+                    val linePoints = mutableListOf<Point>()
+                    for (block in cluster) {
+                        for (line in block.lines) {
+                            line.cornerPoints?.let { linePoints.addAll(it) }
+                        }
+                    }
+                    if (linePoints.size >= 3) {
+                        val hull = computeConvexHull(linePoints)
+                        val scaledPoints = hull.map { point ->
+                            Offset(
+                                x = point.x.toFloat() * size.width / imageWidth,
+                                y = point.y.toFloat() * size.height / imageHeight
+                            )
+                        }
+                        val path = Path().apply {
+                            moveTo(scaledPoints[0].x, scaledPoints[0].y)
+                            for (i in 1 until scaledPoints.size) {
+                                lineTo(scaledPoints[i].x, scaledPoints[i].y)
+                            }
+                            close()
+                        }
 
-    Canvas(modifier = modifier) {
+                        val androidPath = path.asAndroidPath()
+                        val bounds = android.graphics.RectF()
+                        @Suppress("DEPRECATION")
+                        androidPath.computeBounds(bounds, true)
+                        val region = android.graphics.Region().apply {
+                            setPath(
+                                androidPath,
+                                android.graphics.Region(
+                                    bounds.left.toInt(),
+                                    bounds.top.toInt(),
+                                    bounds.right.toInt(),
+                                    bounds.bottom.toInt()
+                                )
+                            )
+                        }
+                        if (region.contains(x, y)) {
+                            onClusterClick?.invoke(index)
+                        }
+                    }
+                }
+            }
+        }
+    ) {
         fun drawShape(points: Array<Point>, color: Color, clusterIndex: Int) {
             if (points.size < 4) return
 
@@ -58,14 +114,17 @@ fun ScanOutlineCanvas(
                 close()
             }
 
+            val isToggled = toggledClusters.contains(clusterIndex)
+            val fillAlpha = if (isToggled) 0.5f else 0.15f  // 💥 more obvious
+
             drawPath(
                 path = path,
-                color = color.copy(alpha = 0.2f),
+                color = color.copy(alpha = fillAlpha),
                 style = Stroke(width = 0f)
             )
             drawPath(
                 path = path,
-                color = color.copy(alpha = 0.2f),
+                color = color.copy(alpha = fillAlpha),
                 style = androidx.compose.ui.graphics.drawscope.Fill
             )
 
@@ -91,8 +150,6 @@ fun ScanOutlineCanvas(
             }
         }
 
-
-
         allClusters.forEachIndexed { index, cluster ->
             val color = clusterColors.getOrElse(index) { Color.Black }
 
@@ -111,12 +168,12 @@ fun ScanOutlineCanvas(
                 for (block in cluster) {
                     when (outlineLevel) {
                         OutlineLevel.BLOCK -> {
-                            val linePoints = mutableListOf<Point>()
+                            val blockPoints = mutableListOf<Point>()
                             for (line in block.lines) {
-                                line.cornerPoints?.let { linePoints.addAll(it) }
+                                line.cornerPoints?.let { blockPoints.addAll(it) }
                             }
-                            if (linePoints.size >= 3) {
-                                val hull = computeConvexHull(linePoints)
+                            if (blockPoints.size >= 3) {
+                                val hull = computeConvexHull(blockPoints)
                                 drawShape(hull.toTypedArray(), color, index)
                             }
                         }
