@@ -42,6 +42,7 @@ fun AddQuoteModal(
     quoteViewModel: QuoteViewModel,
     overlayAlpha: Float,
     book: BookEntity,
+    prefilledQuoteText: String,
     visible: Boolean
 ) {
     val windowInfo = LocalWindowInfo.current
@@ -49,7 +50,13 @@ fun AddQuoteModal(
     val screenHeight = with(density) { windowInfo.containerSize.height.toDp() }
     val modalHeight = screenHeight / 1.5f
 
-    var quoteText by remember(visible) { mutableStateOf("") }
+    val cleanedPrefilledText = prefilledQuoteText
+        .replace("\n", " ")
+        .replace("\r", " ")
+        .replace(Regex("\\s+"), " ")
+        .trim()
+
+    var quoteText by remember(visible, cleanedPrefilledText) { mutableStateOf(cleanedPrefilledText) }
     var pageNumber by remember(visible) { mutableStateOf("") }
 
     val containerHeightPx = with(density) { modalHeight.toPx().toInt() }

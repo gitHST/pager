@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -26,13 +27,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.luke.pager.screens.quotescreen.scan.ScanOutlineCanvas
 import com.luke.pager.screens.quotescreen.scan.staticdataclasses.OutlineLevel
 import com.luke.pager.screens.quotescreen.scan.staticdataclasses.ScanPage
+import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
 
 @Composable
 fun MultiPagePreviewModal(
     scannedPages: List<ScanPage>,
+    uiStateViewModel: QuoteUiStateViewModel,
+    navController: NavController,
     onDismiss: () -> Unit
 ) {
     DisposableEffect(Unit) {
@@ -116,6 +121,24 @@ fun MultiPagePreviewModal(
                     enabled = currentPage < scannedPages.lastIndex
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next Page")
+                }
+                Button(
+                    onClick = {
+                        val collectedText = globalOrder.joinToString(" ") { (pageIndex, clusterIndex) ->
+                            val page = scannedPages[pageIndex]
+                            val cluster = page.allClusters[clusterIndex]
+                            cluster.joinToString(" ") { block -> block.text }
+                        }
+
+                        uiStateViewModel.setPrefilledQuoteText(collectedText)
+                        uiStateViewModel.setShowQuoteModal(true)
+
+                        navController.navigate("quotes") {
+                            popUpTo("multi_page_preview") { inclusive = true }
+                        }
+                    }
+                ) {
+                    Text("Done")
                 }
             }
         } else {

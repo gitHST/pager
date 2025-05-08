@@ -37,6 +37,13 @@ class QuoteUiStateViewModel : ViewModel() {
     private val _scannedPages = MutableStateFlow<List<ScanPage>>(emptyList())
     val scannedPages: StateFlow<List<ScanPage>> = _scannedPages
 
+    private val _prefilledQuoteText = MutableStateFlow("")
+    val prefilledQuoteText = _prefilledQuoteText.asStateFlow()
+
+    fun setPrefilledQuoteText(text: String) {
+        _prefilledQuoteText.value = text
+    }
+
     fun addScannedPage(page: ScanPage) {
         _scannedPages.value = _scannedPages.value + page
     }
