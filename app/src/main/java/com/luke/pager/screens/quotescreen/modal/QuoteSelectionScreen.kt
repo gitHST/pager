@@ -15,13 +15,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import draggableTextSelection
-
 
 @Composable
 fun QuoteSelectionScreen(
@@ -29,16 +28,12 @@ fun QuoteSelectionScreen(
     onCancel: () -> Unit,
     onDone: (selectedText: String) -> Unit
 ) {
-    var startCursorIndex by remember { mutableStateOf(0) }
-    var endCursorIndex by remember { mutableStateOf(fullText.length) }
+    var startCursorIndex by remember { mutableIntStateOf(0) }
+    var endCursorIndex by remember { mutableIntStateOf(fullText.length) }
 
-    val selectedText = fullText.substring(
-        startCursorIndex.coerceAtMost(endCursorIndex),
-        startCursorIndex.coerceAtLeast(endCursorIndex)
-    )
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background // Surface color directly
+        color = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier
