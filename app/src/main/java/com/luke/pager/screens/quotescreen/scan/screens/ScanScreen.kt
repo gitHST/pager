@@ -72,9 +72,9 @@ fun ScanScreen(
 
     val scannedPages by uiStateViewModel.scannedPages.collectAsState()
 
-    val ENABLE_DEBUG_DIALOG = false
+    val ENABLE_DEBUG_DIALOG = true
     if (!ENABLE_DEBUG_DIALOG) {
-        DEBUGScanSensitivity = 20
+        DEBUGScanSensitivity = 10
     }
     if (ENABLE_DEBUG_DIALOG && DEBUGshowDialog) {
         AlertDialog(
@@ -115,7 +115,7 @@ fun ScanScreen(
     LaunchedEffect(capturedImageUri, DEBUGScanSensitivity) {
         if (capturedImageUri != null && DEBUGScanSensitivity != null) {
             try {
-                val result = processImageAndCluster(context, capturedImageUri.toUri(), eps = DEBUGScanSensitivity?.toFloat() ?: 20f)
+                val result = processImageAndCluster(context, capturedImageUri.toUri(), epsSensitivity = DEBUGScanSensitivity?.toFloat() ?: 2f)
                 textBlocks = result.textBlocks
                 imageWidth = result.imageWidth
                 imageHeight = result.imageHeight

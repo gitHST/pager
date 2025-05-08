@@ -78,16 +78,8 @@ fun CarouselTab(
 
         val dummies = listOf(
             DummyBook(-1, "Dummy Book 1"),
-            DummyBook(-2, "Dummy Book 2"),
-            DummyBook(-3, "Dummy Book 3"),
-            DummyBook(-4, "Dummy Book 4"),
-            DummyBook(-5, "Dummy Book 5"),
-            DummyBook(-6, "Dummy Book 6"),
-            DummyBook(-7, "Dummy Book 7"),
-            DummyBook(-8, "Dummy Book 8"),
-            DummyBook(-9, "Dummy Book 9"),
-            DummyBook(-10, "Dummy Book 10")
         )
+
 
         dummies.forEach {
             realBooks.add(
