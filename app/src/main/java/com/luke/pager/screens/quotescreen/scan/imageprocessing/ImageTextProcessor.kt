@@ -12,6 +12,7 @@ import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import kotlinx.coroutines.tasks.await
 import kotlin.math.atan2
+import kotlin.math.sqrt
 
 data class ClusterResult(
     val textBlocks: List<Text.TextBlock>,
@@ -31,7 +32,6 @@ data class ClusterDistanceDebug(
 suspend fun processImageAndCluster(
     context: Context,
     uri: Uri,
-    epsSensitivity: Float = 2f,
     minPts: Int = 1
 ): ClusterResult {
 
@@ -88,8 +88,10 @@ suspend fun processImageAndCluster(
     Log.d("ImageTextProcessor", "OCR found ${finalTextBlocks.size} text blocks")
 
 // Normalize eps to ~2% of image width
-    val normalizedEps = imageWidth * (epsSensitivity / 100f)
-    Log.d("ImageTextProcessor", "Normalized eps (2% of width): $normalizedEps")
+    val medianLineHeight = estimateMedianLineHeight(finalTextBlocks)
+    val normalizedEps = 0.8f * medianLineHeight
+    Log.d("ImageTextProcessor", "Median line height: $medianLineHeight, using eps = $normalizedEps")
+
 
 // 7️⃣ Build DBSCANBlockBox list
     val allBoxes = mutableListOf<DBSCANBlockBox>()
@@ -165,4 +167,25 @@ fun <T> mergeOverlappingClusters(clusters: List<Collection<T>>): List<Set<T>> {
     }
 
     return merged
+}
+
+fun estimateMedianLineHeight(blocks: List<Text.TextBlock>): Float {
+    val lineHeights = blocks.flatMap { block ->
+        block.lines.mapNotNull { line ->
+            val points = line.cornerPoints
+            if (points != null && points.size >= 4) {
+                val dy = (points[3].y - points[0].y).toFloat()
+                val dx = (points[3].x - points[0].x).toFloat()
+                sqrt(dx * dx + dy * dy)
+            } else {
+                line.boundingBox?.height()?.toFloat()
+            }
+        }
+    }
+
+    return if (lineHeights.isNotEmpty()) {
+        lineHeights.sorted()[lineHeights.size / 2]
+    } else {
+        0f
+    }
 }
