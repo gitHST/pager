@@ -3,7 +3,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.drag
-import androidx.compose.foundation.gestures.forEachGesture
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
@@ -17,10 +16,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.PointerInputScope
-import androidx.compose.ui.input.pointer.consumePositionChange
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
@@ -30,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.hypot
 
-private const val HANDLE_TOUCH_RADIUS_DP = 24f
+private const val HANDLE_TOUCH_RADIUS_DP = 36f
 
 @Composable
 fun draggableTextSelection(
@@ -42,7 +41,6 @@ fun draggableTextSelection(
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
     var activeHandle by remember { mutableStateOf<Handle?>(null) }
 
-    // Scroll state for the entire selection area
     val scrollState = rememberScrollState()
     val density = LocalDensity.current
     val handleTouchRadiusPx = with(density) { HANDLE_TOUCH_RADIUS_DP.dp.toPx() }
@@ -58,47 +56,45 @@ fun draggableTextSelection(
         }
     }
 
-    // The Box now scrolls everything (text + cursors)
     Box(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
             .pointerInput(Unit) {
-                awaitEachGesture(this.(fun PointerInputScope.() {
-                    awaitPointerEventScope {
-                        val down = awaitFirstDown()
-                        val layout = textLayoutResult ?: return@awaitPointerEventScope
-                        // Compute current handle positions
-                        val startPos = layout.getCursorRect(startCursorIndex).center
-                        val endPos = layout.getCursorRect(endCursorIndex).center
-                        // Determine if touch is on one of the handles
-                        val dxStart = down.position.x - startPos.x
-                        val dyStart = down.position.y - startPos.y
-                        val dxEnd = down.position.x - endPos.x
-                        val dyEnd = down.position.y - endPos.y
-                        activeHandle = when {
-                            hypot(dxStart, dyStart) <= handleTouchRadiusPx -> Handle.START
-                            hypot(dxEnd, dyEnd) <= handleTouchRadiusPx -> Handle.END
-                            else -> null
-                        }
-                        // If not on a handle, do not consume—allow scroll
-                        if (activeHandle == null) return@awaitPointerEventScope
-                        // Handle drag for the active cursor
-                        drag(down.id) { change ->
-                            change.consumePositionChange()
-                            val offsetIndex = layout.getOffsetForPosition(change.position)
-                            if (activeHandle == Handle.START) {
-                                startCursorIndex = offsetIndex.coerceIn(0, fullText.length)
-                            } else {
-                                endCursorIndex = offsetIndex.coerceIn(0, fullText.length)
-                            }
-                        }
-                        activeHandle = null
+                awaitEachGesture {
+                    val down = awaitFirstDown()
+                    val layout = textLayoutResult ?: return@awaitEachGesture
+
+                    val startPos = layout.getCursorRect(startCursorIndex).center
+                    val endPos = layout.getCursorRect(endCursorIndex).center
+
+                    val dxStart = down.position.x - startPos.x
+                    val dyStart = down.position.y - startPos.y
+                    val dxEnd = down.position.x - endPos.x
+                    val dyEnd = down.position.y - endPos.y
+
+                    activeHandle = when {
+                        hypot(dxStart, dyStart) <= handleTouchRadiusPx -> Handle.START
+                        hypot(dxEnd, dyEnd) <= handleTouchRadiusPx -> Handle.END
+                        else -> null
                     }
-                }))
+
+                    if (activeHandle == null) return@awaitEachGesture
+
+                    drag(down.id) { change ->
+                        if (change.positionChange() != Offset.Zero) change.consume()
+                        val offsetIndex = layout.getOffsetForPosition(change.position)
+                        if (activeHandle == Handle.START) {
+                            startCursorIndex = offsetIndex.coerceIn(0, fullText.length)
+                        } else {
+                            endCursorIndex = offsetIndex.coerceIn(0, fullText.length)
+                        }
+                    }
+
+                    activeHandle = null
+                }
             }
     ) {
-        // Text + highlighting
         Text(
             text = highlightedText,
             style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
@@ -107,7 +103,6 @@ fun draggableTextSelection(
             onTextLayout = { result -> textLayoutResult = result }
         )
 
-        // Draw cursors
         textLayoutResult?.let { layout ->
             val startPos = layout.getCursorRect(startCursorIndex).center
             val endPos = layout.getCursorRect(endCursorIndex).center
