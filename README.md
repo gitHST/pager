@@ -55,18 +55,24 @@ Pager is an all in one android app for browsing and reviewing books and sharing 
   - The ability to view diary books in a carousel
   - The ability to view all quotes you've added to a book under it in the carousel
 
+### `Version 0.5.0 "Binding"`
+- General
+  - Tablet support
+- Settings
+  - Will add a settings page
+  - The ability to set preferences
+- Customization
+  - The ability to change theme
+  - The ability to change the layout of the diary
+
 ### `Version 1.0.0 "Bookworm"`
 - View books
-    - The ability to sort diary by date reviewed, rating, title, name of author, and date published.
+  - The ability to sort diary by date reviewed, rating, title, name of author, and date published.
 - Search
-    - The ability to do a general search of books, and view all their information
+  - The ability to do a general search of books, and view all their information
 - UI
-    - Fully polished User Interface
-    - Full dark mode integration
-- Settings
-    - Will have a settings page
-    - The ability to change theme
-    - The ability to set preferences
+  - Fully polished User Interface
+  - Full dark mode integration
 
 ### `Version 2.0.0 "Book Club"`
 - Online 
@@ -77,9 +83,9 @@ Pager is an all in one android app for browsing and reviewing books and sharing 
   - The ability to like other users reviews
   - The ability to "Recommend" books to people, and have it show on their device
 - Explore
-    - The explore page will show books your friends like, recommended books, etc
+  - The explore page will show books your friends like, recommended books, etc
 - Notifications
-    - The ability to receive notifications about friends, comments etc
+  - The ability to receive notifications about friends, comments etc
 
 ## Possible feature ideas
 #### Book calendar
