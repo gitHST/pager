@@ -31,9 +31,11 @@ data class ClusterDistanceDebug(
 suspend fun processImageAndCluster(
     context: Context,
     uri: Uri,
-    eps: Float = 20f,
+    epsSensitivity: Float = 2f,
     minPts: Int = 1
 ): ClusterResult {
+
+
     // 1️⃣ Load bitmap (no EXIF rotation)
     val bitmapStream = context.contentResolver.openInputStream(uri)
     val bitmap = BitmapFactory.decodeStream(bitmapStream)
@@ -85,7 +87,11 @@ suspend fun processImageAndCluster(
 
     Log.d("ImageTextProcessor", "OCR found ${finalTextBlocks.size} text blocks")
 
-    // 7️⃣ Build DBSCANBlockBox list
+// Normalize eps to ~2% of image width
+    val normalizedEps = imageWidth * (epsSensitivity / 100f)
+    Log.d("ImageTextProcessor", "Normalized eps (2% of width): $normalizedEps")
+
+// 7️⃣ Build DBSCANBlockBox list
     val allBoxes = mutableListOf<DBSCANBlockBox>()
     for (block in finalTextBlocks) {
         val boundingBox = block.boundingBox ?: continue
@@ -93,8 +99,8 @@ suspend fun processImageAndCluster(
         allBoxes.add(DBSCANBlockBox(block, boundingBox, lineRects))
     }
 
-    // 8️⃣ Run DBSCAN
-    val (clusters, _) = dbscan2D(allBoxes, eps = eps, minPts = minPts)
+// 8️⃣ Run DBSCAN
+    val (clusters, _) = dbscan2D(allBoxes, eps = normalizedEps, minPts = minPts)
     val mergedClusters = mergeOverlappingClusters<DBSCANBlockBox>(clusters.map { it.toList() }).map { it.toList() }
 
     val textClusters = mergedClusters.map { it.map { box -> box.block } }
