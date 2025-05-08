@@ -14,13 +14,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,16 +24,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
@@ -66,56 +58,14 @@ fun ScanScreen(
     var rotatedBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var clusterDistances by remember { mutableStateOf<List<ClusterDistanceDebug>>(emptyList()) }
 
-    var DEBUGScanSensitivity by rememberSaveable { mutableStateOf<Int?>(null) }
-    var DEBUGshowDialog by rememberSaveable { mutableStateOf(true) }
-    var DEBUGinputText by remember { mutableStateOf(TextFieldValue("")) }
-
     val scannedPages by uiStateViewModel.scannedPages.collectAsState()
 
-    val ENABLE_DEBUG_DIALOG = true
-    if (!ENABLE_DEBUG_DIALOG) {
-        DEBUGScanSensitivity = 10
-    }
-    if (ENABLE_DEBUG_DIALOG && DEBUGshowDialog) {
-        AlertDialog(
-            onDismissRequest = {},
-            confirmButton = {
-                Button(
-                    onClick = {
-                        val enteredNumber = DEBUGinputText.text.toIntOrNull()
-                        if (enteredNumber != null) {
-                            DEBUGScanSensitivity = enteredNumber
-                            DEBUGshowDialog = false
-                        }
-                    }
-                ) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {}) {
-                    Text("Cancel")
-                }
-            },
-            title = { Text("Enter scan sensitivity") },
-            text = {
-                OutlinedTextField(
-                    value = DEBUGinputText,
-                    onValueChange = { DEBUGinputText = it },
-                    label = { Text("Your number") },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Done
-                    )
-                )
-            }
-        )
-    }
 
-    LaunchedEffect(capturedImageUri, DEBUGScanSensitivity) {
-        if (capturedImageUri != null && DEBUGScanSensitivity != null) {
+
+    LaunchedEffect(capturedImageUri) {
+        if (capturedImageUri != null) {
             try {
-                val result = processImageAndCluster(context, capturedImageUri.toUri(), epsSensitivity = DEBUGScanSensitivity?.toFloat() ?: 2f)
+                val result = processImageAndCluster(context, capturedImageUri.toUri())
                 textBlocks = result.textBlocks
                 imageWidth = result.imageWidth
                 imageHeight = result.imageHeight
