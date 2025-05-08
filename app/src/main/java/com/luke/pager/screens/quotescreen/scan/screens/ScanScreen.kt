@@ -197,7 +197,11 @@ fun ScanScreen(
                             allClusters = allClusters,
                             imageWidth = imageWidth,
                             imageHeight = imageHeight,
-                            outlineLevel = OutlineLevel.CLUSTER
+                            outlineLevel = OutlineLevel.CLUSTER,
+                            toggledClusters = emptySet(),
+                            globalClusterOrder = emptyList(),
+                            pageClusterOrder = emptyList(),
+                            pageIndex = 0,
                         )
                     }
                 } else {

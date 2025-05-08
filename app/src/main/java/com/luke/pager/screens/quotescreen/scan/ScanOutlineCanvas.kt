@@ -19,11 +19,14 @@ import com.luke.pager.screens.quotescreen.scan.staticdataclasses.OutlineLevel
 @Composable
 fun ScanOutlineCanvas(
     modifier: Modifier,
+    pageIndex: Int,
     allClusters: List<List<Text.TextBlock>>,
     imageWidth: Int,
     imageHeight: Int,
     outlineLevel: OutlineLevel,
-    toggledClusters: Set<Int> = emptySet(),
+    toggledClusters: Set<Int>,
+    globalClusterOrder: List<Pair<Int, Int>>,
+    pageClusterOrder: List<Int>,
     onClusterClick: ((Int) -> Unit)? = null
 ) {
     val clusterColors = listOf(
@@ -115,7 +118,7 @@ fun ScanOutlineCanvas(
             }
 
             val isToggled = toggledClusters.contains(clusterIndex)
-            val fillAlpha = if (isToggled) 0.5f else 0.15f // 💥 more obvious
+            val fillAlpha = if (isToggled) 0.5f else 0.15f
 
             drawPath(
                 path = path,
@@ -135,18 +138,25 @@ fun ScanOutlineCanvas(
             )
 
             val labelPosition = scaledPoints.minByOrNull { it.y } ?: scaledPoints[0]
-            drawContext.canvas.nativeCanvas.apply {
-                drawText(
-                    clusterIndex.toString(),
-                    labelPosition.x,
-                    labelPosition.y - 5,
-                    android.graphics.Paint().apply {
-                        this.color = android.graphics.Color.BLACK
-                        textSize = 30f
-                        isAntiAlias = true
-                        setShadowLayer(4f, 0f, 0f, android.graphics.Color.WHITE)
+
+            if (isToggled) {
+                val globalIndex = globalClusterOrder.indexOf(Pair(pageIndex, clusterIndex))
+                if (globalIndex != -1) {
+                    val labelNumber = globalIndex + 1
+                    drawContext.canvas.nativeCanvas.apply {
+                        drawText(
+                            labelNumber.toString(),
+                            labelPosition.x,
+                            labelPosition.y - 5,
+                            android.graphics.Paint().apply {
+                                this.color = android.graphics.Color.BLACK
+                                textSize = 30f
+                                isAntiAlias = true
+                                setShadowLayer(4f, 0f, 0f, android.graphics.Color.WHITE)
+                            }
+                        )
                     }
-                )
+                }
             }
         }
 
