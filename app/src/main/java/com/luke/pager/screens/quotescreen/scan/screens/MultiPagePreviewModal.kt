@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.luke.pager.screens.quotescreen.modal.QuoteSelectionScreen
 import com.luke.pager.screens.quotescreen.scan.ScanOutlineCanvas
 import com.luke.pager.screens.quotescreen.scan.staticdataclasses.OutlineLevel
 import com.luke.pager.screens.quotescreen.scan.staticdataclasses.ScanPage
@@ -54,6 +55,9 @@ fun MultiPagePreviewModal(
     val globalOrder = pageClickedOrder.flatMapIndexed { pageIndex, list ->
         list.value.map { clusterIndex -> Pair(pageIndex, clusterIndex) }
     }
+
+    var showConfirmationModal by remember { mutableStateOf(false) }
+    var pendingCollectedText by remember { mutableStateOf("") }
 
     Box(
         modifier = Modifier
@@ -130,12 +134,8 @@ fun MultiPagePreviewModal(
                             cluster.joinToString(" ") { block -> block.text }
                         }
 
-                        uiStateViewModel.setPrefilledQuoteText(collectedText)
-                        uiStateViewModel.setShowQuoteModal(true)
-
-                        navController.navigate("quotes") {
-                            popUpTo("multi_page_preview") { inclusive = true }
-                        }
+                        pendingCollectedText = collectedText
+                        showConfirmationModal = true
                     }
                 ) {
                     Text("Done")
@@ -144,5 +144,19 @@ fun MultiPagePreviewModal(
         } else {
             Text("No pages to display")
         }
+    }
+    if (showConfirmationModal) {
+        QuoteSelectionScreen(
+            fullText = pendingCollectedText,
+            onCancel = { showConfirmationModal = false },
+            onDone = { selectedText ->
+                uiStateViewModel.setPrefilledQuoteText(selectedText)
+                uiStateViewModel.setShowQuoteModal(true)
+
+                navController.navigate("quotes") {
+                    popUpTo("multi_page_preview") { inclusive = true }
+                }
+            }
+        )
     }
 }
