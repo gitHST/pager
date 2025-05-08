@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -28,14 +29,16 @@ fun Carousel(
             Text("No books with covers", fontSize = 24.sp)
         }
     } else {
+        val itemWidthDp = with(LocalDensity.current) { itemWidthPx.toDp() }
         LazyRow(
             state = listState,
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.spacedBy((-30 * scale).dp),
             contentPadding = PaddingValues(
-                horizontal = 32.dp * scale,
-                vertical = 64.dp * scale
+                start = 32.dp * scale,
+                end = itemWidthDp * 2, // extra space at end
+                top = 64.dp * scale,
+                bottom = 64.dp * scale
             )
         ) {
             val firstVisibleItemIndex = listState.firstVisibleItemIndex
