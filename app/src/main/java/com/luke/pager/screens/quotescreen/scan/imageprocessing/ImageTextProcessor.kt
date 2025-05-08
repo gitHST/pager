@@ -89,7 +89,7 @@ suspend fun processImageAndCluster(
 
 // Normalize eps to ~2% of image width
     val medianLineHeight = estimateMedianLineHeight(finalTextBlocks)
-    val normalizedEps = 0.8f * medianLineHeight
+    val normalizedEps = 0.5f * medianLineHeight
     Log.d("ImageTextProcessor", "Median line height: $medianLineHeight, using eps = $normalizedEps")
 
 
