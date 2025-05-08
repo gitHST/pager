@@ -1,12 +1,9 @@
-
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,7 +36,6 @@ fun draggableTextSelection(
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
     var activeHandle by remember { mutableStateOf<Handle?>(null) }
 
-    val scrollState = rememberScrollState()
     val density = LocalDensity.current
     val handleTouchRadiusPx = with(density) { HANDLE_TOUCH_RADIUS_DP.dp.toPx() }
 
@@ -58,9 +54,7 @@ fun draggableTextSelection(
         modifier = modifier.fillMaxWidth()
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
+            modifier = Modifier.fillMaxSize()
         ) {
             Text(
                 text = highlightedText,
@@ -90,9 +84,6 @@ fun draggableTextSelection(
                                     else -> null
                                 }
                             },
-                            onDragEnd = {
-                                activeHandle = null
-                            },
                             onDrag = { change, _ ->
                                 val offsetIndex = layout.getOffsetForPosition(change.position)
                                 when (activeHandle) {
@@ -102,7 +93,10 @@ fun draggableTextSelection(
                                 }
                                 startPos = layout.getCursorRect(startCursorIndex).center
                                 endPos = layout.getCursorRect(endCursorIndex).center
-                            }
+                            },
+                            onDragEnd = {
+                                activeHandle = null
+                            },
                         )
                     }
             ) {
