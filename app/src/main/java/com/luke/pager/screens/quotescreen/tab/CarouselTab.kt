@@ -311,7 +311,8 @@ fun CarouselTab(
                 quoteViewModel = quoteViewModel,
                 overlayAlpha = overlayAlpha,
                 book = book.book,
-                visible = showQuoteModal
+                visible = showQuoteModal,
+                prefilledQuoteText = uiStateViewModel.prefilledQuoteText.collectAsState().value
             )
         }
     }

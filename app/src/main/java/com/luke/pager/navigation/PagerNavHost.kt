@@ -168,6 +168,8 @@ fun PagerNavHost(
         composable("multi_page_preview") {
             MultiPagePreviewModal(
                 scannedPages = uiStateViewModel.scannedPages.collectAsState().value,
+                uiStateViewModel = uiStateViewModel,
+                navController = navController,
                 onDismiss = {
                     uiStateViewModel.clearScannedPages()
                 }
