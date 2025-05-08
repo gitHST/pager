@@ -1,8 +1,6 @@
 package com.luke.pager.screens.quotescreen.scan.screens
 
-import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -27,7 +25,6 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.luke.pager.screens.quotescreen.scan.ScanOutlineCanvas
 import com.luke.pager.screens.quotescreen.scan.staticdataclasses.OutlineLevel
@@ -45,8 +42,12 @@ fun MultiPagePreviewModal(
     }
 
     var currentPage by remember { mutableIntStateOf(0) }
-    val toggledClusters = remember(scannedPages) {
-        scannedPages.map { mutableStateOf(setOf<Int>()) }.toMutableStateList()
+    val pageClickedOrder = remember(scannedPages) {
+        scannedPages.map { mutableStateOf(listOf<Int>()) }.toMutableStateList()
+    }
+
+    val globalOrder = pageClickedOrder.flatMapIndexed { pageIndex, list ->
+        list.value.map { clusterIndex -> Pair(pageIndex, clusterIndex) }
     }
 
     Box(
@@ -61,11 +62,6 @@ fun MultiPagePreviewModal(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(current.rotatedBitmap.width.toFloat() / current.rotatedBitmap.height.toFloat())
-                    .pointerInput(Unit) {
-                        detectTapGestures { offset ->
-                            Log.d("MultiPagePreviewModal", "Tap at ($offset)")
-                        }
-                    }
             ) {
                 Image(
                     bitmap = current.rotatedBitmap.asImageBitmap(),
@@ -74,20 +70,22 @@ fun MultiPagePreviewModal(
                     alignment = Alignment.Center
                 )
                 ScanOutlineCanvas(
-                    modifier = Modifier
-                        .matchParentSize(),
+                    modifier = Modifier.matchParentSize(),
+                    pageIndex = currentPage,
                     allClusters = current.allClusters,
                     imageWidth = current.imageWidth,
                     imageHeight = current.imageHeight,
                     outlineLevel = OutlineLevel.CLUSTER,
-                    toggledClusters = toggledClusters[currentPage].value,
+                    toggledClusters = pageClickedOrder[currentPage].value.toSet(),
+                    globalClusterOrder = globalOrder,
+                    pageClusterOrder = pageClickedOrder[currentPage].value,
                     onClusterClick = { clusterIndex ->
-                        val currentSet = toggledClusters[currentPage].value
-                        toggledClusters[currentPage].value =
-                            if (currentSet.contains(clusterIndex)) {
-                                currentSet - clusterIndex
+                        val currentList = pageClickedOrder[currentPage].value
+                        pageClickedOrder[currentPage].value =
+                            if (currentList.contains(clusterIndex)) {
+                                currentList - clusterIndex
                             } else {
-                                currentSet + clusterIndex
+                                currentList + clusterIndex
                             }
                     }
                 )
