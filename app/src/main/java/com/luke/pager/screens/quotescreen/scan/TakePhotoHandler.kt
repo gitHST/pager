@@ -25,8 +25,8 @@ import java.util.UUID
 fun takePhotoHandler(
     snackbarScope: CoroutineScope,
     onPhotoCaptured: (Uri) -> Unit,
-    testMode: Boolean = false): () -> Unit
-{
+    testMode: Boolean = false
+): () -> Unit {
     val context = LocalContext.current
     var lastPhotoUri by remember { mutableStateOf<Uri?>(null) }
     var testImageCounter by rememberSaveable { mutableIntStateOf(2) }

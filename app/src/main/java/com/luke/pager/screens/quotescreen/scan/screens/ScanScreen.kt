@@ -201,7 +201,7 @@ fun ScanScreen(
                             toggledClusters = emptySet(),
                             globalClusterOrder = emptyList(),
                             pageClusterOrder = emptyList(),
-                            pageIndex = 0,
+                            pageIndex = 0
                         )
                     }
                 } else {
