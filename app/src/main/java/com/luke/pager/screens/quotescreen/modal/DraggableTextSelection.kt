@@ -11,31 +11,37 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlin.math.absoluteValue
+import kotlin.math.hypot
+
+private const val HANDLE_TOUCH_RADIUS_DP = 24f
 
 @Composable
 fun draggableTextSelection(
     fullText: String,
     modifier: Modifier = Modifier
 ): SelectionResult {
-    var startCursorIndex by remember { mutableStateOf(0) }
-    var endCursorIndex by remember { mutableStateOf(fullText.length) }
+    var startCursorIndex by remember { mutableIntStateOf(0) }
+    var endCursorIndex by remember { mutableIntStateOf(fullText.length) }
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
     var activeHandle by remember { mutableStateOf<Handle?>(null) }
 
     val scrollState = rememberScrollState()
+    val density = LocalDensity.current
+    val handleTouchRadiusPx = with(density) { HANDLE_TOUCH_RADIUS_DP.dp.toPx() }
 
     val highlightedText = remember(startCursorIndex, endCursorIndex, fullText) {
         buildAnnotatedString {
@@ -49,8 +55,7 @@ fun draggableTextSelection(
     }
 
     Box(
-        modifier = modifier
-            .fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         Column(
             modifier = Modifier
@@ -67,8 +72,8 @@ fun draggableTextSelection(
         }
 
         textLayoutResult?.let { layout ->
-            val startPos = layout.getCursorRect(startCursorIndex).topLeft
-            val endPos = layout.getCursorRect(endCursorIndex).topLeft
+            var startPos = layout.getCursorRect(startCursorIndex).center
+            var endPos = layout.getCursorRect(endCursorIndex).center
 
             Canvas(
                 modifier = Modifier
@@ -76,21 +81,27 @@ fun draggableTextSelection(
                     .pointerInput(Unit) {
                         detectDragGestures(
                             onDragStart = { offset ->
-                                val touchOffset = layout.getOffsetForPosition(offset)
-                                val distToStart = (touchOffset - startCursorIndex).absoluteValue
-                                val distToEnd = (touchOffset - endCursorIndex).absoluteValue
-                                activeHandle = if (distToStart < distToEnd) Handle.START else Handle.END
+                                val distToStart = hypot(offset.x - startPos.x, offset.y - startPos.y)
+                                val distToEnd = hypot(offset.x - endPos.x, offset.y - endPos.y)
+
+                                activeHandle = when {
+                                    distToStart <= handleTouchRadiusPx -> Handle.START
+                                    distToEnd <= handleTouchRadiusPx -> Handle.END
+                                    else -> null
+                                }
                             },
                             onDragEnd = {
                                 activeHandle = null
                             },
                             onDrag = { change, _ ->
-                                val offset = layout.getOffsetForPosition(change.position)
+                                val offsetIndex = layout.getOffsetForPosition(change.position)
                                 when (activeHandle) {
-                                    Handle.START -> startCursorIndex = offset.coerceIn(0, fullText.length)
-                                    Handle.END -> endCursorIndex = offset.coerceIn(0, fullText.length)
+                                    Handle.START -> startCursorIndex = offsetIndex.coerceIn(0, fullText.length)
+                                    Handle.END -> endCursorIndex = offsetIndex.coerceIn(0, fullText.length)
                                     null -> {}
                                 }
+                                startPos = layout.getCursorRect(startCursorIndex).center
+                                endPos = layout.getCursorRect(endCursorIndex).center
                             }
                         )
                     }
@@ -98,12 +109,12 @@ fun draggableTextSelection(
                 drawCircle(
                     color = Color.Red,
                     radius = 12f,
-                    center = Offset(startPos.x, startPos.y)
+                    center = startPos
                 )
                 drawCircle(
                     color = Color.Blue,
                     radius = 12f,
-                    center = Offset(endPos.x, endPos.y)
+                    center = endPos
                 )
             }
         }
