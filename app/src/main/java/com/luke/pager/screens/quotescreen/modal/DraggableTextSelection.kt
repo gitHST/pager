@@ -27,6 +27,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.luke.pager.screens.quotescreen.scan.staticdataclasses.Handle
+import com.luke.pager.screens.quotescreen.scan.staticdataclasses.TextSelectionResult
 import kotlin.math.hypot
 
 private const val HANDLE_TOUCH_RADIUS_DP = 36f
@@ -35,7 +37,7 @@ private const val HANDLE_TOUCH_RADIUS_DP = 36f
 fun draggableTextSelection(
     fullText: String,
     modifier: Modifier = Modifier
-): SelectionResult {
+): TextSelectionResult {
     var startCursorIndex by remember { mutableIntStateOf(0) }
     var endCursorIndex by remember { mutableIntStateOf(fullText.length) }
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
@@ -121,12 +123,5 @@ fun draggableTextSelection(
         }
     }
 
-    return SelectionResult(startCursorIndex, endCursorIndex)
+    return TextSelectionResult(startCursorIndex, endCursorIndex)
 }
-
-private enum class Handle { START, END }
-
-data class SelectionResult(
-    val startIndex: Int,
-    val endIndex: Int
-)
