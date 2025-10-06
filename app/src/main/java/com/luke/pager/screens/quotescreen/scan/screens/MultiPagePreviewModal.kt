@@ -128,10 +128,10 @@ fun MultiPagePreviewModal(
                 }
                 Button(
                     onClick = {
-                        val collectedText = globalOrder.joinToString(" ") { (pageIndex, clusterIndex) ->
+                        val collectedText = globalOrder.joinToString("\n") { (pageIndex, clusterIndex) ->
                             val page = scannedPages[pageIndex]
                             val cluster = page.allClusters[clusterIndex]
-                            cluster.joinToString(" ") { block -> block.text }
+                            cluster.joinToString("\n") { block -> block.text }
                         }
 
                         pendingCollectedText = collectedText
