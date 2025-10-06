@@ -51,7 +51,7 @@ fun draggableTextSelection(
         buildAnnotatedString {
             append(fullText)
             addStyle(
-                style = SpanStyle(background = Color.Yellow),
+                style = SpanStyle(background = Color(0xFFB3E5FC)),
                 start = startCursorIndex.coerceAtMost(endCursorIndex),
                 end = startCursorIndex.coerceAtLeast(endCursorIndex)
             )

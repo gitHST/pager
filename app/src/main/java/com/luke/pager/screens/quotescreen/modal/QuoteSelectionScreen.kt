@@ -28,8 +28,11 @@ fun QuoteSelectionScreen(
     onCancel: () -> Unit,
     onDone: (selectedText: String) -> Unit
 ) {
+    val cleanedFullText = remember(fullText) {
+        fullText.replace(Regex("\\s*\\n+\\s*"), " ").trim()
+    }
     var startCursorIndex by remember { mutableIntStateOf(0) }
-    var endCursorIndex by remember { mutableIntStateOf(fullText.length) }
+    var endCursorIndex by remember { mutableIntStateOf(cleanedFullText.length) }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -52,7 +55,7 @@ fun QuoteSelectionScreen(
                     .fillMaxWidth()
             ) {
                 draggableTextSelection(
-                    fullText = fullText,
+                    fullText = cleanedFullText,
                     modifier = Modifier.fillMaxSize()
                 ).also { result ->
                     startCursorIndex = result.startIndex
