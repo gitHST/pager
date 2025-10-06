@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -85,13 +84,8 @@ fun ScanScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         if (capturedImageUri != null && imageWidth > 0 && imageHeight > 0) {
-            val aspectRatio = imageWidth.toFloat() / imageHeight.toFloat()
-
             Column(modifier = Modifier.fillMaxSize()) {
                 Row(
                     modifier = Modifier
@@ -112,8 +106,7 @@ fun ScanScreen(
                                 uiStateViewModel.clearScannedPages()
                             }
                         },
-                        modifier = Modifier
-                            .size(36.dp)
+                        modifier = Modifier.size(36.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
@@ -127,10 +120,10 @@ fun ScanScreen(
                     IconButton(
                         onClick = {
                             if (!isLoading) {
-                                if (rotatedBitmap != null) {
+                                rotatedBitmap?.let {
                                     val newPage = ScanPage(
                                         imageUri = capturedImageUri.toUri(),
-                                        rotatedBitmap = rotatedBitmap!!,
+                                        rotatedBitmap = it,
                                         allClusters = allClusters,
                                         imageWidth = imageWidth,
                                         imageHeight = imageHeight
@@ -141,8 +134,7 @@ fun ScanScreen(
                             }
                         },
                         enabled = !isLoading,
-                        modifier = Modifier
-                            .size(36.dp)
+                        modifier = Modifier.size(36.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
@@ -153,128 +145,136 @@ fun ScanScreen(
                     }
                 }
 
-                if (rotatedBitmap != null) {
+                Column(modifier = Modifier.fillMaxSize()) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .aspectRatio(aspectRatio)
+                            .weight(0.75f)
                     ) {
-                        Image(
-                            bitmap = rotatedBitmap!!.asImageBitmap(),
-                            contentDescription = "Captured photo",
-                            contentScale = ContentScale.FillBounds,
-                            modifier = Modifier.matchParentSize()
-                        )
-                        ScanOutlineCanvas(
-                            modifier = Modifier.matchParentSize(),
-                            allClusters = allClusters,
-                            imageWidth = imageWidth,
-                            imageHeight = imageHeight,
-                            outlineLevel = OutlineLevel.CLUSTER,
-                            toggledClusters = emptySet(),
-                            globalClusterOrder = emptyList(),
-                            pageClusterOrder = emptyList(),
-                            pageIndex = 0
-                        )
+                        if (rotatedBitmap != null) {
+                            Box(modifier = Modifier.matchParentSize()) {
+                                Image(
+                                    bitmap = rotatedBitmap!!.asImageBitmap(),
+                                    contentDescription = "Captured photo",
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(16.dp)
+                                )
+                                ScanOutlineCanvas(
+                                    modifier = Modifier
+                                        .matchParentSize()
+                                        .padding(16.dp),
+                                    allClusters = allClusters,
+                                    imageWidth = imageWidth,
+                                    imageHeight = imageHeight,
+                                    outlineLevel = OutlineLevel.CLUSTER,
+                                    toggledClusters = emptySet(),
+                                    globalClusterOrder = emptyList(),
+                                    pageClusterOrder = emptyList(),
+                                    pageIndex = 0
+                                )
 
-                        Button(
-                            onClick = {
-                                if (rotatedBitmap != null) {
-                                    val newPage = ScanPage(
-                                        imageUri = capturedImageUri.toUri(),
-                                        rotatedBitmap = rotatedBitmap!!,
-                                        allClusters = allClusters,
-                                        imageWidth = imageWidth,
-                                        imageHeight = imageHeight
-                                    )
-                                    uiStateViewModel.addScannedPage(newPage)
+                                Button(
+                                    onClick = {
+                                        rotatedBitmap?.let {
+                                            val newPage = ScanPage(
+                                                imageUri = capturedImageUri.toUri(),
+                                                rotatedBitmap = it,
+                                                allClusters = allClusters,
+                                                imageWidth = imageWidth,
+                                                imageHeight = imageHeight
+                                            )
+                                            uiStateViewModel.addScannedPage(newPage)
+                                        }
+                                        photoLauncher()
+                                    },
+                                    modifier = Modifier
+                                        .align(Alignment.BottomStart)
+                                        .padding(20.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                    elevation = ButtonDefaults.buttonElevation(6.dp)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Add,
+                                            contentDescription = "Add Page",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                        Text(
+                                            text = "Add Page",
+                                            color = Color.White,
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
                                 }
-                                photoLauncher()
-                            },
-                            modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .padding(16.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                            elevation = ButtonDefaults.buttonElevation(6.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = "Add Page",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Text(
-                                    text = "Add Page",
-                                    color = Color.White,
-                                    modifier = Modifier.padding(start = 8.dp)
-                                )
-                            }
-                        }
 
-                        Button(
-                            onClick = { photoLauncher() },
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(16.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                            elevation = ButtonDefaults.buttonElevation(6.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Autorenew,
-                                    contentDescription = "Retake Photo",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Text(
-                                    text = "Retake",
-                                    color = Color.White,
-                                    modifier = Modifier.padding(start = 8.dp)
-                                )
+                                Button(
+                                    onClick = { photoLauncher() },
+                                    modifier = Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .padding(20.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                    elevation = ButtonDefaults.buttonElevation(6.dp)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Autorenew,
+                                            contentDescription = "Retake Photo",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                        Text(
+                                            text = "Retake",
+                                            color = Color.White,
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
+                                }
                             }
-                        }
-                    }
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.primary,
-                            strokeWidth = 4.dp,
-                            modifier = Modifier.size(48.dp)
-                        )
-                    }
-                }
-
-                if (scannedPages.isNotEmpty()) {
-                    LazyRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .padding(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        items(scannedPages) { page ->
-                            Image(
-                                bitmap = page.rotatedBitmap.asImageBitmap(),
-                                contentDescription = "Scanned page",
+                        } else {
+                            Box(
                                 modifier = Modifier
-                                    .size(100.dp)
-                                    .padding(end = 8.dp)
-                            )
+                                    .fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    color = MaterialTheme.colorScheme.primary,
+                                    strokeWidth = 4.dp,
+                                    modifier = Modifier.size(48.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    if (scannedPages.isNotEmpty()) {
+                        LazyRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(0.25f)
+                                .padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            items(scannedPages) { page ->
+                                Image(
+                                    bitmap = page.rotatedBitmap.asImageBitmap(),
+                                    contentDescription = "Scanned page",
+                                    modifier = Modifier
+                                        .size(100.dp)
+                                        .padding(end = 8.dp)
+                                )
+                            }
                         }
                     }
                 }
             }
         } else {
-            Text("No image yet", modifier = Modifier.fillMaxSize(), color = Color.White)
+            Text(
+                "No image yet",
+                modifier = Modifier.fillMaxSize(),
+                color = Color.White
+            )
         }
     }
 }
