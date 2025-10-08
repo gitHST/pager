@@ -87,7 +87,6 @@ fun MultiPagePreviewModal(
                     outlineLevel = OutlineLevel.CLUSTER,
                     toggledClusters = pageClickedOrder[currentPage].value.toSet(),
                     globalClusterOrder = globalOrder,
-                    pageClusterOrder = pageClickedOrder[currentPage].value,
                     onClusterClick = { clusterIndex ->
                         val currentList = pageClickedOrder[currentPage].value
                         pageClickedOrder[currentPage].value =
