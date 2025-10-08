@@ -68,7 +68,7 @@ fun PagerNavHost(
             uiStateViewModel.setCapturedImageUri(photoUri.toString())
             navController.navigate("scan_screen")
         },
-        testMode = true
+        testMode = false
     )
 
     LaunchedEffect(currentRoute) {

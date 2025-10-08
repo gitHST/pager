@@ -37,13 +37,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.google.mlkit.vision.text.Text
-import com.luke.pager.screens.quotescreen.scan.ScanOutlineCanvas
+import com.luke.pager.screens.quotescreen.scan.ScanImageWithOverlay
 import com.luke.pager.screens.quotescreen.scan.imageprocessing.processImageAndCluster
 import com.luke.pager.screens.quotescreen.scan.staticdataclasses.OutlineLevel
 import com.luke.pager.screens.quotescreen.scan.staticdataclasses.ScanPage
@@ -150,29 +149,18 @@ fun ScanScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(0.75f)
+                            .padding(16.dp)
                     ) {
                         if (rotatedBitmap != null) {
                             Box(modifier = Modifier.matchParentSize()) {
-                                Image(
-                                    bitmap = rotatedBitmap!!.asImageBitmap(),
-                                    contentDescription = "Captured photo",
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(16.dp)
-                                )
-                                ScanOutlineCanvas(
-                                    modifier = Modifier
-                                        .matchParentSize()
-                                        .padding(16.dp),
+                                ScanImageWithOverlay(
+                                    bitmap = rotatedBitmap!!,
                                     allClusters = allClusters,
                                     imageWidth = imageWidth,
                                     imageHeight = imageHeight,
                                     outlineLevel = OutlineLevel.CLUSTER,
-                                    toggledClusters = emptySet(),
-                                    globalClusterOrder = emptyList(),
-                                    pageClusterOrder = emptyList(),
-                                    pageIndex = 0
+                                    modifier = Modifier
+                                        .fillMaxWidth(),
                                 )
 
                                 Button(

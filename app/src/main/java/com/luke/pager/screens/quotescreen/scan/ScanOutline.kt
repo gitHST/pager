@@ -26,7 +26,6 @@ fun ScanOutlineCanvas(
     outlineLevel: OutlineLevel,
     toggledClusters: Set<Int>,
     globalClusterOrder: List<Pair<Int, Int>>,
-    pageClusterOrder: List<Int>,
     onClusterClick: ((Int) -> Unit)? = null
 ) {
     val clusterColors = listOf(
