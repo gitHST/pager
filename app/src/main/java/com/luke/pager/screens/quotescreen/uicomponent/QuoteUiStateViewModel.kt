@@ -44,13 +44,14 @@ class QuoteUiStateViewModel : ViewModel() {
         _prefilledQuoteText.value = text
     }
 
-    fun addScannedPage(page: ScanPage) {
-        _scannedPages.value = _scannedPages.value + page
-    }
-
     fun clearScannedPages() {
         _scannedPages.value = emptyList()
     }
+
+    fun setScannedPages(pages: List<ScanPage>) {
+        _scannedPages.value = pages
+    }
+
 
     fun setCapturedImageUri(uri: String?) {
         _capturedImageUri.value = uri
