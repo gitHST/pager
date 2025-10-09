@@ -65,8 +65,17 @@ fun ScanScreen(
     var imageHeight by remember { mutableIntStateOf(1) }
     var allClusters by remember { mutableStateOf<List<List<Text.TextBlock>>>(emptyList()) }
     var rotatedBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var isLaunchingCamera by remember { mutableStateOf(false) }
+    var targetPageCount by remember { mutableIntStateOf(1) }
 
     val scannedPages by uiStateViewModel.scannedPages.collectAsState()
+
+
+    LaunchedEffect(scannedPages.size) {
+        if (targetPageCount < scannedPages.size) {
+            targetPageCount = scannedPages.size
+        }
+    }
 
     LaunchedEffect(capturedImageUri) {
         if (capturedImageUri != null) {
@@ -77,8 +86,24 @@ fun ScanScreen(
                 imageHeight = result.imageHeight
                 rotatedBitmap = result.rotatedBitmap
                 allClusters = result.allClusters
+
+                if (scannedPages.size < targetPageCount) {
+                    rotatedBitmap?.let {
+                        val newPage = ScanPage(
+                            imageUri = capturedImageUri.toUri(),
+                            rotatedBitmap = it,
+                            allClusters = allClusters,
+                            imageWidth = imageWidth,
+                            imageHeight = imageHeight
+                        )
+                        uiStateViewModel.addScannedPage(newPage)
+                    }
+                }
+
+                isLaunchingCamera = false
             } catch (e: Exception) {
                 e.printStackTrace()
+                isLaunchingCamera = false
             }
         }
     }
@@ -151,7 +176,7 @@ fun ScanScreen(
                             .weight(0.75f)
                             .padding(16.dp)
                     ) {
-                        if (rotatedBitmap != null) {
+                        if (rotatedBitmap != null && !isLaunchingCamera) {
                             Box(modifier = Modifier.matchParentSize()) {
                                 ScanImageWithOverlay(
                                     bitmap = rotatedBitmap!!,
@@ -159,49 +184,15 @@ fun ScanScreen(
                                     imageWidth = imageWidth,
                                     imageHeight = imageHeight,
                                     outlineLevel = OutlineLevel.CLUSTER,
-                                    modifier = Modifier
-                                        .fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth(),
                                 )
-
                                 Button(
                                     onClick = {
-                                        rotatedBitmap?.let {
-                                            val newPage = ScanPage(
-                                                imageUri = capturedImageUri.toUri(),
-                                                rotatedBitmap = it,
-                                                allClusters = allClusters,
-                                                imageWidth = imageWidth,
-                                                imageHeight = imageHeight
-                                            )
-                                            uiStateViewModel.addScannedPage(newPage)
-                                        }
+                                        isLaunchingCamera = true
                                         photoLauncher()
                                     },
                                     modifier = Modifier
                                         .align(Alignment.BottomStart)
-                                        .padding(20.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                                    elevation = ButtonDefaults.buttonElevation(6.dp)
-                                ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Default.Add,
-                                            contentDescription = "Add Page",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                        Text(
-                                            text = "Add Page",
-                                            color = Color.White,
-                                            modifier = Modifier.padding(start = 8.dp)
-                                        )
-                                    }
-                                }
-
-                                Button(
-                                    onClick = { photoLauncher() },
-                                    modifier = Modifier
-                                        .align(Alignment.BottomEnd)
                                         .padding(20.dp),
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                                     elevation = ButtonDefaults.buttonElevation(6.dp)
@@ -213,18 +204,36 @@ fun ScanScreen(
                                             tint = Color.White,
                                             modifier = Modifier.size(24.dp)
                                         )
-                                        Text(
-                                            text = "Retake",
-                                            color = Color.White,
-                                            modifier = Modifier.padding(start = 8.dp)
+                                        Text("Retake", color = Color.White, modifier = Modifier.padding(start = 8.dp))
+                                    }
+                                }
+
+                                Button(
+                                    onClick = {
+                                        targetPageCount++
+                                        isLaunchingCamera = true
+                                        photoLauncher()
+                                    },
+                                    modifier = Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .padding(20.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                    elevation = ButtonDefaults.buttonElevation(6.dp)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Add,
+                                            contentDescription = "Add Page",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(24.dp)
                                         )
+                                        Text("Add Page", color = Color.White, modifier = Modifier.padding(start = 8.dp))
                                     }
                                 }
                             }
                         } else {
                             Box(
-                                modifier = Modifier
-                                    .fillMaxSize(),
+                                modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
                             ) {
                                 CircularProgressIndicator(
@@ -236,7 +245,7 @@ fun ScanScreen(
                         }
                     }
 
-                    if (scannedPages.isNotEmpty()) {
+                    if (scannedPages.isNotEmpty() && !isLaunchingCamera && rotatedBitmap != null) {
                         LazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()
