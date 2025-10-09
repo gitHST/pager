@@ -4,10 +4,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -102,8 +104,8 @@ fun MultiPagePreviewModal(
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                    .padding(bottom = 72.dp),
+                horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
@@ -115,7 +117,11 @@ fun MultiPagePreviewModal(
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous Page")
                 }
 
+                Spacer(modifier = Modifier.width(8.dp))
+
                 Text("${currentPage + 1} / ${scannedPages.size}")
+
+                Spacer(modifier = Modifier.width(8.dp))
 
                 IconButton(
                     onClick = {
@@ -125,6 +131,13 @@ fun MultiPagePreviewModal(
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next Page")
                 }
+            }
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
                 Button(
                     onClick = {
                         val collectedText = globalOrder.joinToString("\n") { (pageIndex, clusterIndex) ->
