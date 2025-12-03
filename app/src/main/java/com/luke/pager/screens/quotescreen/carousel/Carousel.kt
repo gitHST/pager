@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.luke.pager.screens.quotescreen.DisplayBook
+import com.luke.pager.screens.quotescreen.quotelist.DisplayBook
 
 @Composable
 fun Carousel(

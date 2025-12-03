@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen.scan.screens
+package com.luke.pager.screens.quotescreen.scan
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -30,11 +30,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.luke.pager.screens.quotescreen.modal.QuoteSelectionScreen
-import com.luke.pager.screens.quotescreen.scan.ScanOutlineCanvas
-import com.luke.pager.screens.quotescreen.scan.staticdataclasses.OutlineLevel
-import com.luke.pager.screens.quotescreen.scan.staticdataclasses.ScanPage
-import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
+import com.luke.pager.screens.quotescreen.scan.imageprocessing.staticdataclasses.OutlineLevel
+import com.luke.pager.screens.quotescreen.scan.imageprocessing.staticdataclasses.ScanPage
+import com.luke.pager.screens.quotescreen.selection.QuoteSelectionScreen
+import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
 
 @Composable
 fun MultiPagePreviewModal(

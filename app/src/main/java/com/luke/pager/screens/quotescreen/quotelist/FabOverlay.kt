@@ -1,5 +1,7 @@
-package com.luke.pager.screens.quotescreen.uicomponent
+package com.luke.pager.screens.quotescreen.quotelist
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -14,6 +16,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,7 +32,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import com.luke.pager.screens.quotescreen.ExtendedFabItem
+import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
 import kotlinx.coroutines.delay
 
 @Composable
@@ -115,26 +120,26 @@ fun FabOverlay(
     }
 
     if (showPermissionDeniedDialog) {
-        androidx.compose.material3.AlertDialog(
+        AlertDialog(
             onDismissRequest = { showPermissionDeniedDialog = false },
-            title = { androidx.compose.material3.Text("Permission Required") },
-            text = { androidx.compose.material3.Text("Camera permission is permanently denied. Please enable it in settings to use the Scan feature.") },
+            title = { Text("Permission Required") },
+            text = { Text("Camera permission is permanently denied. Please enable it in settings to use the Scan feature.") },
             confirmButton = {
-                androidx.compose.material3.TextButton(onClick = {
+                TextButton(onClick = {
                     showPermissionDeniedDialog = false
-                    val intent = android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                         data = "package:${context.packageName}".toUri()
                     }
                     context.startActivity(intent)
                 }) {
-                    androidx.compose.material3.Text("Open Settings")
+                    Text("Open Settings")
                 }
             },
             dismissButton = {
-                androidx.compose.material3.TextButton(onClick = {
+                TextButton(onClick = {
                     showPermissionDeniedDialog = false
                 }) {
-                    androidx.compose.material3.Text("Cancel")
+                    Text("Cancel")
                 }
             }
         )

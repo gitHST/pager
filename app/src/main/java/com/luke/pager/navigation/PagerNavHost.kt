@@ -28,11 +28,11 @@ import com.luke.pager.screens.DiaryScreen
 import com.luke.pager.screens.ExploreScreen
 import com.luke.pager.screens.ReviewScreen
 import com.luke.pager.screens.addscreen.SearchAndResultsModal
-import com.luke.pager.screens.quotescreen.QuotesScreen
-import com.luke.pager.screens.quotescreen.scan.screens.MultiPagePreviewModal
-import com.luke.pager.screens.quotescreen.scan.screens.ScanScreen
+import com.luke.pager.screens.quotescreen.quotelist.QuotesScreen
+import com.luke.pager.screens.quotescreen.scan.MultiPagePreviewModal
+import com.luke.pager.screens.quotescreen.scan.ScanScreen
 import com.luke.pager.screens.quotescreen.scan.takePhotoHandler
-import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
+import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalAnimationApi::class)

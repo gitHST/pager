@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen.uicomponent
+package com.luke.pager.screens.quotescreen.addquote
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.runtime.Composable

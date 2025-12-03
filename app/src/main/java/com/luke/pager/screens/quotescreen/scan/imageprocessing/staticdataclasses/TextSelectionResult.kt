@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen.scan.staticdataclasses
+package com.luke.pager.screens.quotescreen.scan.imageprocessing.staticdataclasses
 
 data class TextSelectionResult(
     val startIndex: Int,
