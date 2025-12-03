@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen
+package com.luke.pager.screens.quotescreen.quotelist
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -47,10 +47,7 @@ import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.navigation.NavItem
 import com.luke.pager.screens.components.NoBooksYetMessage
 import com.luke.pager.screens.components.Title
-import com.luke.pager.screens.quotescreen.tab.AllQuotesTab
-import com.luke.pager.screens.quotescreen.tab.CarouselTab
-import com.luke.pager.screens.quotescreen.uicomponent.FabOverlay
-import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
+import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable

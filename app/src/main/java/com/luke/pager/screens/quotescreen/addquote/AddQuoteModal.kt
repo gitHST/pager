@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen.modal
+package com.luke.pager.screens.quotescreen.addquote
 
 import BookCoverImage
 import androidx.activity.compose.BackHandler
@@ -34,7 +34,6 @@ import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.screens.components.CenteredModalScaffold
 import com.luke.pager.screens.components.ScrollingTextField
-import com.luke.pager.screens.quotescreen.uicomponent.SubmitQuoteHeader
 
 @Composable
 fun AddQuoteModal(

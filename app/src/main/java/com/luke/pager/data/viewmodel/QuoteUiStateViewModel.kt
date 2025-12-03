@@ -1,7 +1,7 @@
-package com.luke.pager.screens.quotescreen.uicomponent
+package com.luke.pager.data.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.luke.pager.screens.quotescreen.scan.staticdataclasses.ScanPage
+import com.luke.pager.screens.quotescreen.scan.imageprocessing.staticdataclasses.ScanPage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -51,7 +51,6 @@ class QuoteUiStateViewModel : ViewModel() {
     fun setScannedPages(pages: List<ScanPage>) {
         _scannedPages.value = pages
     }
-
 
     fun setCapturedImageUri(uri: String?) {
         _capturedImageUri.value = uri

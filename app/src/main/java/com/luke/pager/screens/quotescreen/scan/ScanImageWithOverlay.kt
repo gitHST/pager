@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.google.mlkit.vision.text.Text
-import com.luke.pager.screens.quotescreen.scan.staticdataclasses.OutlineLevel
+import com.luke.pager.screens.quotescreen.scan.imageprocessing.staticdataclasses.OutlineLevel
 
 @Composable
 fun ScanImageWithOverlay(
