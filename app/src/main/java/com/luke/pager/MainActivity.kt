@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
                 .build()
                 .apply {
                     GlobalScope.launch {
-                        // 👇 comment out this line to keep the database
+                        // comment out this line to keep the database
                         // clearAllTables()
                         // seedDatabaseIfEmpty(this@apply)
                     }

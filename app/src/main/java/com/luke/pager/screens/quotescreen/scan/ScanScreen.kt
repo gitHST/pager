@@ -64,7 +64,7 @@ fun ScanScreen(
     uiStateViewModel: QuoteUiStateViewModel,
     navController: NavController,
     photoLauncher: () -> Unit,
-    debugMode: Boolean = true
+    debugMode: Boolean = false
 ){
     val context = LocalContext.current
 
@@ -302,7 +302,7 @@ fun ScanScreen(
 
                     if (scannedPages.isNotEmpty()) {
                         Text(
-                            text = "Check each photo includes the full quote.",
+                            text = "Check your quote is fully highlighted",
                             style = MaterialTheme.typography.bodyMedium,
                             fontStyle = FontStyle.Italic,
                             textAlign = TextAlign.Center,
@@ -366,16 +366,6 @@ fun ScanScreen(
                     modifier = Modifier.size(48.dp)
                 )
             }
-        }
-        if (debugMode) {
-            Text(
-                text = "DEBUG MODE",
-                color = Color.Red.copy(alpha = 0.9f),
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 24.dp)
-            )
         }
 
     }

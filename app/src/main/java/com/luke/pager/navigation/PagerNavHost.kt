@@ -30,8 +30,8 @@ import com.luke.pager.screens.ExploreScreen
 import com.luke.pager.screens.ReviewScreen
 import com.luke.pager.screens.addscreen.SearchAndResultsModal
 import com.luke.pager.screens.quotescreen.quotelist.QuotesScreen
+import com.luke.pager.screens.quotescreen.scan.MultiPagePreviewModal
 import com.luke.pager.screens.quotescreen.scan.ScanScreen
-import com.luke.pager.screens.quotescreen.scan.screens.MultiPagePreviewModal
 import com.luke.pager.screens.quotescreen.scan.takePhotoHandler
 import kotlinx.coroutines.delay
 
@@ -62,14 +62,19 @@ fun PagerNavHost(
 
     val coroutineScope = rememberCoroutineScope()
 
+    val testMode = true
+
     val photoLauncher = takePhotoHandler(
         snackbarScope = coroutineScope,
         onPhotoCaptured = { photoUri ->
             uiStateViewModel.setCapturedImageUri(photoUri.toString())
-            navController.navigate("scan_screen")
+            if (navController.currentDestination?.route != "scan_screen") {
+                navController.navigate("scan_screen")
+            }
         },
-        testMode = false
+        testMode = testMode
     )
+
 
     LaunchedEffect(currentRoute) {
         if (previousRoute.value == "quotes" && currentRoute?.destination?.route != "quotes") {
@@ -161,7 +166,8 @@ fun PagerNavHost(
             ScanScreen(
                 uiStateViewModel = uiStateViewModel,
                 photoLauncher = photoLauncher,
-                navController = navController
+                navController = navController,
+                debugMode = testMode
             )
         }
 
