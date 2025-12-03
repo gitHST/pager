@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen.modal
+package com.luke.pager.screens.quotescreen.selection
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -74,14 +74,14 @@ fun QuoteSelectionScreen(
                 }
 
                 Button(onClick = {
-                    val selectedText = fullText.substring(
-                        startCursorIndex.coerceAtMost(endCursorIndex),
-                        startCursorIndex.coerceAtLeast(endCursorIndex)
-                    )
+                    val start = startCursorIndex.coerceAtMost(endCursorIndex)
+                    val end = startCursorIndex.coerceAtLeast(endCursorIndex)
+                    val selectedText = cleanedFullText.substring(start, end)
                     onDone(selectedText)
                 }) {
                     Text("Done")
                 }
+
             }
         }
     }

@@ -27,8 +27,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.luke.pager.screens.quotescreen.scan.staticdataclasses.Handle
-import com.luke.pager.screens.quotescreen.scan.staticdataclasses.TextSelectionResult
+import com.luke.pager.screens.quotescreen.scan.imageprocessing.staticdataclasses.Handle
+import com.luke.pager.screens.quotescreen.scan.imageprocessing.staticdataclasses.TextSelectionResult
 import kotlin.math.hypot
 
 private const val HANDLE_TOUCH_RADIUS_DP = 36f

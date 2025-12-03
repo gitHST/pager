@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import com.google.mlkit.vision.text.Text
 import com.luke.pager.screens.quotescreen.scan.imageprocessing.computeConvexHull
-import com.luke.pager.screens.quotescreen.scan.staticdataclasses.OutlineLevel
+import com.luke.pager.screens.quotescreen.scan.imageprocessing.staticdataclasses.OutlineLevel
 
 @Composable
 fun ScanOutlineCanvas(

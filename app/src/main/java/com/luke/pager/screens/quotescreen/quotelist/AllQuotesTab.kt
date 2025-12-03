@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen.tab
+package com.luke.pager.screens.quotescreen.quotelist
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.entities.QuoteEntity
-import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
+import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
 
 @Composable
 fun AllQuotesTab(

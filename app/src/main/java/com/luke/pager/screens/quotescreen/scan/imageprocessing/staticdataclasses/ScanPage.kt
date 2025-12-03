@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen.scan.staticdataclasses
+package com.luke.pager.screens.quotescreen.scan.imageprocessing.staticdataclasses
 
 import android.graphics.Bitmap
 import android.net.Uri

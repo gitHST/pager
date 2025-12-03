@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen.scan.screens
+package com.luke.pager.screens.quotescreen.scan
 
 import android.graphics.Bitmap
 import android.util.Log
@@ -46,11 +46,10 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.google.mlkit.vision.text.Text
-import com.luke.pager.screens.quotescreen.scan.ScanImageWithOverlay
 import com.luke.pager.screens.quotescreen.scan.imageprocessing.processImageAndCluster
-import com.luke.pager.screens.quotescreen.scan.staticdataclasses.OutlineLevel
-import com.luke.pager.screens.quotescreen.scan.staticdataclasses.ScanPage
-import com.luke.pager.screens.quotescreen.uicomponent.QuoteUiStateViewModel
+import com.luke.pager.screens.quotescreen.scan.imageprocessing.staticdataclasses.OutlineLevel
+import com.luke.pager.screens.quotescreen.scan.imageprocessing.staticdataclasses.ScanPage
+import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
