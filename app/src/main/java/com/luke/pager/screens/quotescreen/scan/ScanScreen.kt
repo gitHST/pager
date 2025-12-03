@@ -2,6 +2,7 @@ package com.luke.pager.screens.quotescreen.scan
 
 import android.graphics.Bitmap
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,38 +40,42 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
-import com.google.mlkit.vision.text.Text
+import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
 import com.luke.pager.screens.quotescreen.scan.imageprocessing.processImageAndCluster
 import com.luke.pager.screens.quotescreen.scan.imageprocessing.staticdataclasses.OutlineLevel
 import com.luke.pager.screens.quotescreen.scan.imageprocessing.staticdataclasses.ScanPage
-import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import com.google.mlkit.vision.text.Text as MlText
+
 
 @Composable
 fun ScanScreen(
     uiStateViewModel: QuoteUiStateViewModel,
     navController: NavController,
-    photoLauncher: () -> Unit
-) {
+    photoLauncher: () -> Unit,
+    debugMode: Boolean = true
+){
     val context = LocalContext.current
 
     val scannedPages by uiStateViewModel.scannedPages.collectAsState()
     val capturedImageUri by uiStateViewModel.capturedImageUri.collectAsState()
 
-    var textBlocks by remember { mutableStateOf<List<Text.TextBlock>>(emptyList()) }
+    var textBlocks by remember { mutableStateOf<List<MlText.TextBlock>>(emptyList()) }
     var imageWidth by remember { mutableIntStateOf(1) }
     var imageHeight by remember { mutableIntStateOf(1) }
-    var allClusters by remember { mutableStateOf<List<List<Text.TextBlock>>>(emptyList()) }
+    var allClusters by remember { mutableStateOf<List<List<MlText.TextBlock>>>(emptyList()) }
     var rotatedBitmap by remember { mutableStateOf<Bitmap?>(null) }
-
     var isLaunchingCamera by remember { mutableStateOf(false) }
     var targetPageCount by remember { mutableIntStateOf(1) }
     var isRetaking by remember { mutableStateOf(false) }
@@ -130,12 +135,15 @@ fun ScanScreen(
         }
     }
 
-
     LaunchedEffect(scannedPages) {
         snapshotFlow { scannedPages.map { it.imageUri } }
             .distinctUntilChanged()
             .collectLatest { _ ->
-                Log.d("ScanScreen", "snapshotFlow triggered | scannedPages=${scannedPages.map { it.imageUri }} | isRetaking=$isRetaking | targetPageCount=$targetPageCount")
+                Log.d(
+                    "ScanScreen",
+                    "snapshotFlow triggered | scannedPages=${scannedPages.map { it.imageUri }} | " +
+                            "isRetaking=$isRetaking | targetPageCount=$targetPageCount"
+                )
 
                 if (isRetaking) {
                     selectedPage = scannedPages.firstOrNull { it.rotatedBitmap == rotatedBitmap }
@@ -149,9 +157,7 @@ fun ScanScreen(
                 }
                 isLaunchingCamera = false
             }
-
     }
-
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (scannedPages.isNotEmpty() && imageWidth > 0 && imageHeight > 0) {
@@ -184,8 +190,18 @@ fun ScanScreen(
 
                     IconButton(
                         onClick = {
-                            selectedPage?.let {
-                                navController.navigate("multi_page_preview")
+                            val hasAnyText = scannedPages.any { it.allClusters.isNotEmpty() }
+
+                            if (!hasAnyText && !debugMode) {
+                                Toast.makeText(
+                                    context,
+                                    "Sorry, none of your images contain any text!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
+                                selectedPage?.let {
+                                    navController.navigate("multi_page_preview")
+                                }
                             }
                         },
                         enabled = !isLaunchingCamera,
@@ -216,7 +232,7 @@ fun ScanScreen(
                                     imageWidth = selectedPage!!.imageWidth,
                                     imageHeight = selectedPage!!.imageHeight,
                                     outlineLevel = OutlineLevel.CLUSTER,
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier.fillMaxWidth()
                                 )
 
                                 Button(
@@ -227,7 +243,9 @@ fun ScanScreen(
                                     modifier = Modifier
                                         .align(Alignment.BottomStart)
                                         .padding(20.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    ),
                                     elevation = ButtonDefaults.buttonElevation(6.dp)
                                 ) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -237,7 +255,11 @@ fun ScanScreen(
                                             tint = Color.White,
                                             modifier = Modifier.size(24.dp)
                                         )
-                                        Text("Retake", color = Color.White, modifier = Modifier.padding(start = 8.dp))
+                                        Text(
+                                            "Retake",
+                                            color = Color.White,
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
                                     }
                                 }
 
@@ -249,7 +271,9 @@ fun ScanScreen(
                                     modifier = Modifier
                                         .align(Alignment.BottomEnd)
                                         .padding(20.dp),
-                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    ),
                                     elevation = ButtonDefaults.buttonElevation(6.dp)
                                 ) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -259,7 +283,11 @@ fun ScanScreen(
                                             tint = Color.White,
                                             modifier = Modifier.size(24.dp)
                                         )
-                                        Text("Add Page", color = Color.White, modifier = Modifier.padding(start = 8.dp))
+                                        Text(
+                                            "Add Page",
+                                            color = Color.White,
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
                                     }
                                 }
                             }
@@ -273,6 +301,16 @@ fun ScanScreen(
                     }
 
                     if (scannedPages.isNotEmpty()) {
+                        Text(
+                            text = "Check each photo includes the full quote.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontStyle = FontStyle.Italic,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 4.dp)
+                        )
+
                         LazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -281,23 +319,40 @@ fun ScanScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             items(scannedPages, key = { it.imageUri.toString() }) { page ->
-                                Image(
-                                    bitmap = page.rotatedBitmap.asImageBitmap(),
-                                    contentDescription = "Scanned page",
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
                                     modifier = Modifier
-                                        .size(100.dp)
                                         .padding(end = 8.dp)
                                         .clickable {
                                             selectedPage = page
                                             Log.d("ScanScreen", "Thumbnail clicked, selectedPage=$selectedPage")
                                         }
-                                        .then(
-                                            if (selectedPage == page)
-                                                Modifier.border(3.dp, MaterialTheme.colorScheme.primary)
-                                            else Modifier
-                                        )
-                                )
+                                ) {
+                                    val hasText = page.allClusters.isNotEmpty()
 
+                                    Image(
+                                        bitmap = page.rotatedBitmap.asImageBitmap(),
+                                        contentDescription = "Scanned page",
+                                        modifier = Modifier
+                                            .size(100.dp)
+                                            .then(
+                                                if (selectedPage == page)
+                                                    Modifier.border(3.dp, MaterialTheme.colorScheme.primary)
+                                                else Modifier
+                                            )
+                                            .alpha(if (hasText) 1f else 0.6f)
+                                    )
+
+                                    if (!hasText) {
+                                        Text(
+                                            text = "No text detected",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            fontStyle = FontStyle.Italic,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                            modifier = Modifier.padding(top = 4.dp)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -312,5 +367,16 @@ fun ScanScreen(
                 )
             }
         }
+        if (debugMode) {
+            Text(
+                text = "DEBUG MODE",
+                color = Color.Red.copy(alpha = 0.9f),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 24.dp)
+            )
+        }
+
     }
 }
