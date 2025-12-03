@@ -21,6 +21,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.luke.pager.data.viewmodel.BookViewModel
+import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.data.viewmodel.ReviewViewModel
 import com.luke.pager.screens.ActivityScreen
@@ -29,10 +30,9 @@ import com.luke.pager.screens.ExploreScreen
 import com.luke.pager.screens.ReviewScreen
 import com.luke.pager.screens.addscreen.SearchAndResultsModal
 import com.luke.pager.screens.quotescreen.quotelist.QuotesScreen
-import com.luke.pager.screens.quotescreen.scan.MultiPagePreviewModal
 import com.luke.pager.screens.quotescreen.scan.ScanScreen
+import com.luke.pager.screens.quotescreen.scan.screens.MultiPagePreviewModal
 import com.luke.pager.screens.quotescreen.scan.takePhotoHandler
-import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -169,10 +169,7 @@ fun PagerNavHost(
             MultiPagePreviewModal(
                 scannedPages = uiStateViewModel.scannedPages.collectAsState().value,
                 uiStateViewModel = uiStateViewModel,
-                navController = navController,
-                onDismiss = {
-                    uiStateViewModel.clearScannedPages()
-                }
+                navController = navController
             )
         }
     }
