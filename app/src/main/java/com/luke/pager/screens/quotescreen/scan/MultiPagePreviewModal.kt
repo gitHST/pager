@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen.scan.screens
+package com.luke.pager.screens.quotescreen.scan
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
@@ -37,7 +37,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
-import com.luke.pager.screens.quotescreen.scan.ScanOutlineCanvas
 import com.luke.pager.screens.quotescreen.scan.imageprocessing.staticdataclasses.OutlineLevel
 import com.luke.pager.screens.quotescreen.scan.imageprocessing.staticdataclasses.ScanPage
 import com.luke.pager.screens.quotescreen.selection.QuoteSelectionScreen
@@ -59,7 +58,6 @@ fun MultiPagePreviewModal(
 
     var showConfirmationModal by remember { mutableStateOf(false) }
     var pendingCollectedText by remember { mutableStateOf("") }
-    val anySelected = globalOrder.isNotEmpty()
 
     Box(
         modifier = Modifier
