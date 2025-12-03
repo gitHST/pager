@@ -1,5 +1,6 @@
 package com.luke.pager.screens.quotescreen.scan.screens
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -28,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -56,6 +59,7 @@ fun MultiPagePreviewModal(
 
     var showConfirmationModal by remember { mutableStateOf(false) }
     var pendingCollectedText by remember { mutableStateOf("") }
+    val anySelected = globalOrder.isNotEmpty()
 
     Box(
         modifier = Modifier
@@ -118,41 +122,45 @@ fun MultiPagePreviewModal(
                         .padding(bottom = 12.dp)
                 )
 
-                Row(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 72.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(bottom = 72.dp)
                 ) {
-                    IconButton(
-                        onClick = {
-                            if (currentPage > 0) currentPage--
-                        },
-                        enabled = currentPage > 0
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Previous Page"
-                        )
-                    }
+                    if (scannedPages.size > 1) {
+                        Row(
+                            modifier = Modifier.align(Alignment.Center),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(
+                                onClick = { if (currentPage > 0) currentPage-- },
+                                enabled = currentPage > 0
+                            ) {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Previous Page"
+                                )
+                            }
 
-                    Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
 
-                    Text("${currentPage + 1} / ${scannedPages.size}")
+                            Text("${currentPage + 1} / ${scannedPages.size}")
 
-                    Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
 
-                    IconButton(
-                        onClick = {
-                            if (currentPage < scannedPages.lastIndex) currentPage++
-                        },
-                        enabled = currentPage < scannedPages.lastIndex
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = "Next Page"
-                        )
+                            IconButton(
+                                onClick = { if (currentPage < scannedPages.lastIndex) currentPage++ },
+                                enabled = currentPage < scannedPages.lastIndex
+                            ) {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.ArrowForward,
+                                    contentDescription = "Next Page"
+                                )
+                            }
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.height(48.dp))
                     }
                 }
             }
@@ -173,8 +181,18 @@ fun MultiPagePreviewModal(
                     Text("Back")
                 }
 
+                val anySelected = globalOrder.isNotEmpty()
+
+                val doneAlpha by animateFloatAsState(
+                    targetValue = if (anySelected) 1f else 0.4f,
+                    label = "DoneButtonAlpha"
+                )
+
+
                 Button(
                     onClick = {
+                        if (!anySelected) return@Button
+
                         val collectedText = globalOrder.joinToString("\n") { (pageIndex, clusterIndex) ->
                             val page = scannedPages[pageIndex]
                             val cluster = page.allClusters[clusterIndex]
@@ -183,10 +201,13 @@ fun MultiPagePreviewModal(
 
                         pendingCollectedText = collectedText
                         showConfirmationModal = true
-                    }
+                    },
+                    enabled = anySelected,
+                    modifier = Modifier.alpha(doneAlpha)
                 ) {
                     Text("Done")
                 }
+
             }
         } else {
             Text("No pages to display", modifier = Modifier.align(Alignment.Center))
