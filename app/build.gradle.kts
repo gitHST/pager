@@ -72,7 +72,6 @@ android {
     }
 }
 
-
 tasks.named("ktlintCheck") {
     group = "verification"
 }
@@ -80,8 +79,6 @@ tasks.named("ktlintCheck") {
 tasks.named("ktlintFormat") {
     group = "formatting"
 }
-
-
 
 dependencies {
     implementation(libs.androidx.appcompat)

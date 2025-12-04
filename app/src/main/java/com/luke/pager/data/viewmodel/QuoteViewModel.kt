@@ -49,5 +49,4 @@ class QuoteViewModel(private val quoteRepository: QuoteRepository) : ViewModel()
             loadAllQuotes()
         }
     }
-
 }

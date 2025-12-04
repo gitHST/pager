@@ -58,14 +58,13 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import com.google.mlkit.vision.text.Text as MlText
 
-
 @Composable
 fun ScanScreen(
     uiStateViewModel: QuoteUiStateViewModel,
     navController: NavController,
     photoLauncher: () -> Unit,
     debugMode: Boolean = false
-){
+) {
     val context = LocalContext.current
 
     val scannedPages by uiStateViewModel.scannedPages.collectAsState()
@@ -127,7 +126,6 @@ fun ScanScreen(
                         Log.d("ScanScreen", "Added new page, scannedPages size=${updatedPages.size}")
                     }
                 }
-
             } catch (e: Exception) {
                 e.printStackTrace()
                 Log.e("ScanScreen", "Error processing image: ${e.message}")
@@ -142,7 +140,7 @@ fun ScanScreen(
                 Log.d(
                     "ScanScreen",
                     "snapshotFlow triggered | scannedPages=${scannedPages.map { it.imageUri }} | " +
-                            "isRetaking=$isRetaking | targetPageCount=$targetPageCount"
+                        "isRetaking=$isRetaking | targetPageCount=$targetPageCount"
                 )
 
                 if (isRetaking) {
@@ -336,9 +334,11 @@ fun ScanScreen(
                                         modifier = Modifier
                                             .size(100.dp)
                                             .then(
-                                                if (selectedPage == page)
+                                                if (selectedPage == page) {
                                                     Modifier.border(3.dp, MaterialTheme.colorScheme.primary)
-                                                else Modifier
+                                                } else {
+                                                    Modifier
+                                                }
                                             )
                                             .alpha(if (hasText) 1f else 0.6f)
                                     )
@@ -367,6 +367,5 @@ fun ScanScreen(
                 )
             }
         }
-
     }
 }

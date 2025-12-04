@@ -23,5 +23,4 @@ interface QuoteDao {
 
     @Delete
     suspend fun deleteQuote(quote: QuoteEntity)
-
 }
