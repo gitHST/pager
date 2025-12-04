@@ -37,9 +37,17 @@ class QuoteViewModel(private val quoteRepository: QuoteRepository) : ViewModel()
     fun updateQuote(quote: QuoteEntity) {
         viewModelScope.launch {
             quoteRepository.updateQuote(quote)
-            // Refresh both the current book's quotes and the global list
             loadQuotesForBook(quote.bookId)
             loadAllQuotes()
         }
     }
+
+    fun deleteQuote(quote: QuoteEntity) {
+        viewModelScope.launch {
+            quoteRepository.deleteQuote(quote)
+            loadQuotesForBook(quote.bookId)
+            loadAllQuotes()
+        }
+    }
+
 }
