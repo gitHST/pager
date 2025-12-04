@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.google.ksp)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ktlint)
-    alias(libs.plugins.jacoco)
 }
 
 android {
@@ -14,9 +13,9 @@ android {
     defaultConfig {
         applicationId = "com.luke.pager"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 4
-        versionName = "0.2.2"
+        targetSdk = 34
+        versionCode = 5
+        versionName = "0.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -51,12 +50,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 
     buildFeatures {
@@ -73,17 +72,6 @@ android {
     }
 }
 
-jacoco {
-    toolVersion = "0.8.10"
-}
-
-tasks.withType<Test> {
-    useJUnit()
-    extensions.configure<JacocoTaskExtension> {
-        isIncludeNoLocationClasses = true
-        excludes = listOf("jdk.internal.*")
-    }
-}
 
 tasks.named("ktlintCheck") {
     group = "verification"
@@ -93,44 +81,7 @@ tasks.named("ktlintFormat") {
     group = "formatting"
 }
 
-tasks.register<JacocoReport>("jacocoTestReport") {
-    dependsOn("testDebugUnitTest")
 
-    reports {
-        xml.required.set(true)
-        html.required.set(true)
-    }
-
-    val fileFilter = listOf(
-        "**/R.class",
-        "**/R$*.class",
-        "**/BuildConfig.*",
-        "**/Manifest*.*",
-        "**/*Test*.*",
-        "android/**/*.*"
-    )
-
-    val buildDirFile = layout.buildDirectory.asFile.get()
-
-    val debugTree = fileTree(buildDirFile.resolve("intermediates/javac/debug")) {
-        exclude(fileFilter)
-    }
-
-    val kotlinDebugTree = fileTree(buildDirFile.resolve("tmp/kotlin-classes/debug")) {
-        exclude(fileFilter)
-    }
-
-    classDirectories.setFrom(files(debugTree, kotlinDebugTree))
-    sourceDirectories.setFrom(files("src/main/java", "src/main/kotlin"))
-    executionData.setFrom(
-        fileTree(buildDirFile) {
-            include(
-                "**/jacoco/testDebugUnitTest.exec",
-                "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec"
-            )
-        }
-    )
-}
 
 dependencies {
     implementation(libs.androidx.appcompat)
@@ -161,7 +112,6 @@ dependencies {
 
     ksp(libs.androidx.room.compiler)
 
-    testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
