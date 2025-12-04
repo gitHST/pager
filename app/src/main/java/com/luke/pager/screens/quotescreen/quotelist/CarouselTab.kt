@@ -142,13 +142,10 @@ fun CarouselTab(
     val coroutineScope = rememberCoroutineScope()
     val itemWidthPx = with(LocalDensity.current) { 120.dp.toPx() }
 
-    // Shared colour for meta info (page number + edit icon)
     val metaTextColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
 
-    // null means "no active quote"
     var activeQuoteId by remember { mutableStateOf<Long?>(null) }
 
-    // null means "no quote currently being edited"
     var editingQuote by remember { mutableStateOf<QuoteEntity?>(null) }
 
     LaunchedEffect(listState.isScrollInProgress) {

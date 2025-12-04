@@ -1,5 +1,6 @@
 package com.luke.pager.screens.quotescreen.editquote
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -7,11 +8,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.luke.pager.data.entities.QuoteEntity
 import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.screens.components.DualActionHeader
 import kotlinx.coroutines.launch
-import com.luke.pager.data.entities.QuoteEntity
-import androidx.compose.foundation.ScrollState
 
 
 @Composable
@@ -28,7 +28,7 @@ fun EditQuoteHeader(
     val coroutineScope = rememberCoroutineScope()
 
     DualActionHeader(
-        leftButtonText = " Go back ",
+        leftButtonText = " Cancel ",
         onLeftClick = {
             if (!isSubmitting) {
                 onDismiss()

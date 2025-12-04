@@ -66,7 +66,6 @@ fun QuotesScreen(
     val placeholderBitmap = remember { createPlaceholderBitmap() }
     val selectedTabIndex by uiStateViewModel.selectedTabIndex.collectAsState()
 
-    // Tab swipe state (for queueing / direction switching)
     var isSwipeInProgress by remember { mutableStateOf(false) }
     var queuedDirection by remember { mutableIntStateOf(0) }
     val maxTabIndex = 1
@@ -83,7 +82,6 @@ fun QuotesScreen(
     fun requestTabSwipe(direction: Int) {
         val targetIndex = (selectedTabIndex + direction).coerceIn(0, maxTabIndex)
         if (targetIndex == selectedTabIndex) {
-            // No-op (already at edge)
             return
         }
 
@@ -92,12 +90,10 @@ fun QuotesScreen(
             queuedDirection = 0
             performSwipe(direction)
         } else {
-            // Queue or replace queued direction (queue length = 1)
             queuedDirection = direction
         }
     }
 
-    // When the tab index changes, wait for the animation, then run queued swipe (if any)
     LaunchedEffect(selectedTabIndex) {
         if (!isSwipeInProgress) return@LaunchedEffect
 
@@ -106,7 +102,6 @@ fun QuotesScreen(
         if (queuedDirection != 0) {
             val direction = queuedDirection
             queuedDirection = 0
-            // Keep swipe "in progress"; the next LaunchedEffect will clear it
             performSwipe(direction)
         } else {
             isSwipeInProgress = false
@@ -127,11 +122,9 @@ fun QuotesScreen(
         modifier = Modifier.pointerInput(selectedTabIndex, isSwipeInProgress, queuedDirection) {
             detectHorizontalDragGestures { _, dragAmount ->
                 when {
-                    // Swipe right → previous tab
                     dragAmount > swipeThreshold && selectedTabIndex > 0 ->
                         requestTabSwipe(-1)
 
-                    // Swipe left → next tab
                     dragAmount < -swipeThreshold && selectedTabIndex < maxTabIndex ->
                         requestTabSwipe(1)
                 }

@@ -36,18 +36,15 @@ suspend fun processImageAndCluster(
 ): ClusterResult {
 
 
-    // 1️⃣ Load bitmap (no EXIF rotation)
     val bitmapStream = context.contentResolver.openInputStream(uri)
     val bitmap = BitmapFactory.decodeStream(bitmapStream)
     bitmapStream?.close()
 
-    // 2️⃣ First OCR pass: detect text orientation
     val tempImage = InputImage.fromBitmap(bitmap, 0)
     val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
     val result = recognizer.process(tempImage).await()
     val textBlocks = result.textBlocks
 
-    // 3️⃣ Detect dominant angle
     val angles = textBlocks.mapNotNull { block ->
         val corners = block.cornerPoints
         if (corners != null && corners.size >= 2) {
@@ -63,7 +60,6 @@ suspend fun processImageAndCluster(
 
     val avgAngle = if (angles.isNotEmpty()) angles.average() else 0.0
 
-    // 4️⃣ Decide rotation based on angle
     val rotationDegrees = when {
         avgAngle in -45.0..45.0 -> 0
         avgAngle in 45.0..135.0 -> -90
@@ -71,14 +67,12 @@ suspend fun processImageAndCluster(
         else -> 180
     }
 
-    // 5️⃣ Rotate bitmap if needed
     val correctedBitmap = if (rotationDegrees != 0) {
         rotateBitmap(bitmap, rotationDegrees.toFloat())
     } else {
         bitmap
     }
 
-    // 6️⃣ OCR pass #2: on the rotated image
     val finalImage = InputImage.fromBitmap(correctedBitmap, 0)
     val finalResult = recognizer.process(finalImage).await()
     val finalTextBlocks = finalResult.textBlocks
@@ -87,13 +81,11 @@ suspend fun processImageAndCluster(
 
     Log.d("ImageTextProcessor", "OCR found ${finalTextBlocks.size} text blocks")
 
-// Normalize eps to ~2% of image width
     val medianLineHeight = estimateMedianLineHeight(finalTextBlocks)
     val normalizedEps = 0.5f * medianLineHeight
     Log.d("ImageTextProcessor", "Median line height: $medianLineHeight, using eps = $normalizedEps")
 
 
-// 7️⃣ Build DBSCANBlockBox list
     val allBoxes = mutableListOf<DBSCANBlockBox>()
     for (block in finalTextBlocks) {
         val boundingBox = block.boundingBox ?: continue
@@ -101,7 +93,6 @@ suspend fun processImageAndCluster(
         allBoxes.add(DBSCANBlockBox(block, boundingBox, lineRects))
     }
 
-// 8️⃣ Run DBSCAN
     val (clusters, _) = dbscan2D(allBoxes, eps = normalizedEps, minPts = minPts)
     val mergedClusters = mergeOverlappingClusters<DBSCANBlockBox>(clusters.map { it.toList() }).map { it.toList() }
 
