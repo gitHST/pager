@@ -150,11 +150,10 @@ fun AddQuoteModal(
                     }
                 },
                 modifier = Modifier
-                    .width(120.dp)
-                    .height(48.dp),
+                    .width(120.dp),
                 textStyle = MaterialTheme.typography.bodyMedium,
                 singleLine = true,
-                placeholder = { Text("__") },
+                placeholder = { Text("~") },
                 leadingIcon = {
                     Text(
                         text = "Page:",
