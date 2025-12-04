@@ -10,12 +10,7 @@ Use this checklist before releasing a version of the app on GitHub.
 - [ ] Comment out the restorefromdb lines in MainActivity
 - [ ] Removed unused screens from nav bar and nav host
 - [ ] All lint and static analysis issues resolved
-- [ ] Logs removed or wrapped with debug flags
-- [ ] No hardcoded strings (use `strings.xml`)
 - [ ] Version code & version name updated (`build.gradle.kts`)
-- [ ] Dependencies updated (`libs.versions.toml`)
-- [ ] Database migrations implemented and tested (Room)
-- [ ] Unused resources/imports removed
 - [ ] Proguard/R8 rules configured
 
 ---
