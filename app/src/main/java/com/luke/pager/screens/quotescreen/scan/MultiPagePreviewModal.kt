@@ -64,166 +64,164 @@ fun MultiPagePreviewModal(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        if (scannedPages.isNotEmpty()) {
-            val current = scannedPages[currentPage]
+        if (!showConfirmationModal) {
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Box(
+            if (scannedPages.isNotEmpty()) {
+                val current = scannedPages[currentPage]
+
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .aspectRatio(
-                            current.rotatedBitmap.width.toFloat() /
-                                    current.rotatedBitmap.height.toFloat()
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .aspectRatio(
+                                current.rotatedBitmap.width.toFloat() /
+                                        current.rotatedBitmap.height.toFloat()
+                            )
+                            .padding(bottom = 24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            bitmap = current.rotatedBitmap.asImageBitmap(),
+                            contentDescription = "Page ${currentPage + 1}",
+                            modifier = Modifier.matchParentSize(),
+                            alignment = Alignment.Center
                         )
-                        .padding(bottom = 24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        bitmap = current.rotatedBitmap.asImageBitmap(),
-                        contentDescription = "Page ${currentPage + 1}",
-                        modifier = Modifier.matchParentSize(),
-                        alignment = Alignment.Center
+                        ScanOutlineCanvas(
+                            modifier = Modifier.matchParentSize(),
+                            pageIndex = currentPage,
+                            allClusters = current.allClusters,
+                            imageWidth = current.imageWidth,
+                            imageHeight = current.imageHeight,
+                            outlineLevel = OutlineLevel.CLUSTER,
+                            toggledClusters = pageClickedOrder[currentPage].value.toSet(),
+                            globalClusterOrder = globalOrder,
+                            onClusterClick = { clusterIndex ->
+                                val currentList = pageClickedOrder[currentPage].value
+                                pageClickedOrder[currentPage].value =
+                                    if (currentList.contains(clusterIndex)) {
+                                        currentList - clusterIndex
+                                    } else {
+                                        currentList + clusterIndex
+                                    }
+                            }
+                        )
+                    }
+
+                    Text(
+                        text = "Tap the block(s) containing your quote in order – \nyou’ll trim it in the next step",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontStyle = FontStyle.Italic,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
                     )
-                    ScanOutlineCanvas(
-                        modifier = Modifier.matchParentSize(),
-                        pageIndex = currentPage,
-                        allClusters = current.allClusters,
-                        imageWidth = current.imageWidth,
-                        imageHeight = current.imageHeight,
-                        outlineLevel = OutlineLevel.CLUSTER,
-                        toggledClusters = pageClickedOrder[currentPage].value.toSet(),
-                        globalClusterOrder = globalOrder,
-                        onClusterClick = { clusterIndex ->
-                            val currentList = pageClickedOrder[currentPage].value
-                            pageClickedOrder[currentPage].value =
-                                if (currentList.contains(clusterIndex)) {
-                                    currentList - clusterIndex
-                                } else {
-                                    currentList + clusterIndex
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 72.dp)
+                    ) {
+                        if (scannedPages.size > 1) {
+                            Row(
+                                modifier = Modifier.align(Alignment.Center),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                IconButton(
+                                    onClick = { if (currentPage > 0) currentPage-- },
+                                    enabled = currentPage > 0
+                                ) {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = "Previous Page"
+                                    )
                                 }
+
+                                Spacer(modifier = Modifier.width(8.dp))
+
+                                Text("${currentPage + 1} / ${scannedPages.size}")
+
+                                Spacer(modifier = Modifier.width(8.dp))
+
+                                IconButton(
+                                    onClick = { if (currentPage < scannedPages.lastIndex) currentPage++ },
+                                    enabled = currentPage < scannedPages.lastIndex
+                                ) {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.ArrowForward,
+                                        contentDescription = "Next Page"
+                                    )
+                                }
+                            }
+                        } else {
+                            Spacer(modifier = Modifier.height(48.dp))
                         }
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(
+                        onClick = { navController.popBackStack() }
+                    ) {
+                        Text("Back")
+                    }
+
+                    val anySelected = globalOrder.isNotEmpty()
+
+                    val doneAlpha by animateFloatAsState(
+                        targetValue = if (anySelected) 1f else 0.4f,
+                        label = "DoneButtonAlpha"
                     )
-                }
 
-                Text(
-                    text = "Tap the block(s) containing your quote in order – \nyou’ll trim it in the next step",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontStyle = FontStyle.Italic,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp)
-                )
+                    Button(
+                        onClick = {
+                            if (!anySelected) return@Button
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 72.dp)
-                ) {
-                    if (scannedPages.size > 1) {
-                        Row(
-                            modifier = Modifier.align(Alignment.Center),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            IconButton(
-                                onClick = { if (currentPage > 0) currentPage-- },
-                                enabled = currentPage > 0
-                            ) {
-                                Icon(
-                                    Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Previous Page"
-                                )
+                            val collectedText = globalOrder.joinToString("\n") { (pageIndex, clusterIndex) ->
+                                val page = scannedPages[pageIndex]
+                                val cluster = page.allClusters[clusterIndex]
+                                cluster.joinToString("\n") { block -> block.text }
                             }
 
-                            Spacer(modifier = Modifier.width(8.dp))
-
-                            Text("${currentPage + 1} / ${scannedPages.size}")
-
-                            Spacer(modifier = Modifier.width(8.dp))
-
-                            IconButton(
-                                onClick = { if (currentPage < scannedPages.lastIndex) currentPage++ },
-                                enabled = currentPage < scannedPages.lastIndex
-                            ) {
-                                Icon(
-                                    Icons.AutoMirrored.Filled.ArrowForward,
-                                    contentDescription = "Next Page"
-                                )
-                            }
-                        }
-                    } else {
-                        Spacer(modifier = Modifier.height(48.dp))
+                            pendingCollectedText = collectedText
+                            showConfirmationModal = true
+                        },
+                        enabled = anySelected,
+                        modifier = Modifier.alpha(doneAlpha)
+                    ) {
+                        Text("Done")
                     }
                 }
+            } else {
+                Text("No pages to display", modifier = Modifier.align(Alignment.Center))
             }
-
-            Row(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(
-                    onClick = {
-                        navController.popBackStack()
-                    }
-                ) {
-                    Text("Back")
-                }
-
-                val anySelected = globalOrder.isNotEmpty()
-
-                val doneAlpha by animateFloatAsState(
-                    targetValue = if (anySelected) 1f else 0.4f,
-                    label = "DoneButtonAlpha"
-                )
-
-
-                Button(
-                    onClick = {
-                        if (!anySelected) return@Button
-
-                        val collectedText = globalOrder.joinToString("\n") { (pageIndex, clusterIndex) ->
-                            val page = scannedPages[pageIndex]
-                            val cluster = page.allClusters[clusterIndex]
-                            cluster.joinToString("\n") { block -> block.text }
-                        }
-
-                        pendingCollectedText = collectedText
-                        showConfirmationModal = true
-                    },
-                    enabled = anySelected,
-                    modifier = Modifier.alpha(doneAlpha)
-                ) {
-                    Text("Done")
-                }
-
-            }
-        } else {
-            Text("No pages to display", modifier = Modifier.align(Alignment.Center))
         }
-    }
 
-    if (showConfirmationModal) {
-        QuoteSelectionScreen(
-            fullText = pendingCollectedText,
-            onCancel = { showConfirmationModal = false },
-            onDone = { selectedText ->
-                uiStateViewModel.setPrefilledQuoteText(selectedText)
-                uiStateViewModel.setShowQuoteModal(true)
-
-                navController.navigate("quotes") {
-                    popUpTo("multi_page_preview") { inclusive = true }
+        if (showConfirmationModal) {
+            QuoteSelectionScreen(
+                fullText = pendingCollectedText,
+                onCancel = { showConfirmationModal = false },
+                onDone = { selectedText ->
+                    uiStateViewModel.setPrefilledQuoteText(selectedText)
+                    uiStateViewModel.setShowQuoteModal(true)
+                    navController.navigate("quotes") {
+                        popUpTo("multi_page_preview") { inclusive = true }
+                    }
                 }
-            }
-        )
+            )
+        }
     }
 }
