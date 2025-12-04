@@ -22,6 +22,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.entities.QuoteEntity
 import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
+import com.luke.pager.screens.components.HorizontalShadowDiv
 
 @Composable
 fun AllQuotesTab(
@@ -48,6 +51,19 @@ fun AllQuotesTab(
             quotes.sortedBy { it.dateAdded }
         } else {
             quotes.sortedByDescending { it.dateAdded }
+        }
+    }
+
+    val scrollState = rememberScrollState()
+
+    val hasScrolled by remember {
+        derivedStateOf { scrollState.value > 0 }
+    }
+
+    val hasNotReachedEnd by remember {
+        derivedStateOf {
+            val max = scrollState.maxValue
+            scrollState.value < max
         }
     }
 
@@ -67,20 +83,28 @@ fun AllQuotesTab(
             }
         } else {
             Box(Modifier.fillMaxSize()) {
+
+                HorizontalShadowDiv(
+                    visible = hasScrolled,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .offset(y = (-1).dp),
+                    shadowFacingUp = false
+                )
+
+
                 Column(
                     modifier = Modifier
-                        .verticalScroll(rememberScrollState())
+                        .verticalScroll(scrollState)
                         .fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     sortedQuotes.forEachIndexed { index, quote ->
                         val associatedBook = bookList.find { it.id == quote.bookId }
                         val authors = associatedBook?.authors ?: "Unknown Author"
                         val year = associatedBook?.firstPublishDate?.take(4) ?: "Unknown Year"
-
-                        if (index == 0) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
 
                         Column {
                             Text(
@@ -89,6 +113,7 @@ fun AllQuotesTab(
                                 style = MaterialTheme.typography.bodyMedium
                             )
                             Spacer(modifier = Modifier.height(10.dp))
+
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
@@ -111,20 +136,27 @@ fun AllQuotesTab(
                                     )
                                 }
                             }
-                            Box(
-                                Modifier
-                                    .padding(top = 8.dp)
-                                    .fillMaxWidth()
-                                    .height(1.dp)
-                                    .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f))
-                            )
-                        }
 
-                        if (index == sortedQuotes.lastIndex) {
-                            Spacer(modifier = Modifier.height(8.dp))
+                            if (index != sortedQuotes.lastIndex) {
+                                Box(
+                                    Modifier
+                                        .padding(top = 8.dp)
+                                        .fillMaxWidth()
+                                        .height(1.dp)
+                                        .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f))
+                                )
+                            } else {
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
                         }
                     }
                 }
+
+                HorizontalShadowDiv(
+                    shadowFacingUp = true,
+                    visible = hasNotReachedEnd,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
 
                 IconButton(
                     onClick = { uiStateViewModel.toggleSortOrder() },
