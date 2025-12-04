@@ -1,7 +1,9 @@
 package com.luke.pager.navigation
 
 import androidx.activity.compose.LocalActivity
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,7 +42,10 @@ fun PagerNavHost(
     quoteViewModel: QuoteViewModel,
     snackbarHostState: SnackbarHostState
 ) {
-    val currentRoute by navController.currentBackStackEntryAsState()
+    // Order used for deciding slide direction
+    val topLevelRoutes = listOf("diary", "plus", "quotes")
+
+    val currentRouteEntry by navController.currentBackStackEntryAsState()
 
     val uiStateViewModel: QuoteUiStateViewModel = viewModel(
         viewModelStoreOwner = LocalActivity.current as ViewModelStoreOwner
@@ -63,17 +68,128 @@ fun PagerNavHost(
         testMode = testMode
     )
 
-    LaunchedEffect(currentRoute) {
-        if (previousRoute.value == "quotes" && currentRoute?.destination?.route != "quotes") {
+    LaunchedEffect(currentRouteEntry) {
+        val newRoute = currentRouteEntry?.destination?.route
+        if (previousRoute.value == "quotes" && newRoute != "quotes") {
             delay(500)
             uiStateViewModel.reset()
         }
-        previousRoute.value = currentRoute?.destination?.route
+        previousRoute.value = newRoute
     }
 
     NavHost(
         navController = navController,
-        startDestination = "diary"
+        startDestination = "diary",
+        enterTransition = {
+            val fromRoute = initialState.destination.route
+            val toRoute = targetState.destination.route
+
+            val fromIndex = topLevelRoutes.indexOf(fromRoute)
+            val toIndex = topLevelRoutes.indexOf(toRoute)
+
+            when {
+                // Both are top-level → slide based on index
+                fromIndex != -1 && toIndex != -1 && toIndex > fromIndex ->
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(durationMillis = 250)
+                    )
+
+                fromIndex != -1 && toIndex != -1 && toIndex < fromIndex ->
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(durationMillis = 250)
+                    )
+
+                // Non–top-level (detail / scan etc) → default "forward" slide from right
+                else ->
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(durationMillis = 250)
+                    )
+            }
+        },
+        exitTransition = {
+            val fromRoute = initialState.destination.route
+            val toRoute = targetState.destination.route
+
+            val fromIndex = topLevelRoutes.indexOf(fromRoute)
+            val toIndex = topLevelRoutes.indexOf(toRoute)
+
+            when {
+                fromIndex != -1 && toIndex != -1 && toIndex > fromIndex ->
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(durationMillis = 250)
+                    )
+
+                fromIndex != -1 && toIndex != -1 && toIndex < fromIndex ->
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(durationMillis = 250)
+                    )
+
+                else ->
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(durationMillis = 250)
+                    )
+            }
+        },
+        popEnterTransition = {
+            val fromRoute = initialState.destination.route
+            val toRoute = targetState.destination.route
+
+            val fromIndex = topLevelRoutes.indexOf(fromRoute)
+            val toIndex = topLevelRoutes.indexOf(toRoute)
+
+            when {
+                fromIndex != -1 && toIndex != -1 && toIndex > fromIndex ->
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(durationMillis = 250)
+                    )
+
+                fromIndex != -1 && toIndex != -1 && toIndex < fromIndex ->
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(durationMillis = 250)
+                    )
+
+                else ->
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(durationMillis = 250)
+                    )
+            }
+        },
+        popExitTransition = {
+            val fromRoute = initialState.destination.route
+            val toRoute = targetState.destination.route
+
+            val fromIndex = topLevelRoutes.indexOf(fromRoute)
+            val toIndex = topLevelRoutes.indexOf(toRoute)
+
+            when {
+                fromIndex != -1 && toIndex != -1 && toIndex > fromIndex ->
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(durationMillis = 250)
+                    )
+
+                fromIndex != -1 && toIndex != -1 && toIndex < fromIndex ->
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(durationMillis = 250)
+                    )
+
+                else ->
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(durationMillis = 250)
+                    )
+            }
+        }
     ) {
         composable("activity") {
             ActivityScreen(bookViewModel)
