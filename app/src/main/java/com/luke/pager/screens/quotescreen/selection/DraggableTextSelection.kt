@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.luke.pager.screens.quotescreen.scan.imageprocessing.staticdataclasses.Handle
 import com.luke.pager.screens.quotescreen.scan.imageprocessing.staticdataclasses.TextSelectionResult
+import com.luke.pager.screens.quotescreen.selection.MagnifierState
 import kotlin.math.hypot
 
 private const val HANDLE_TOUCH_RADIUS_DP = 36f
@@ -38,7 +39,8 @@ private const val HANDLE_TOUCH_RADIUS_DP = 36f
 @Composable
 fun draggableTextSelection(
     fullText: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onMagnifierStateChange: (MagnifierState) -> Unit = {}
 ): TextSelectionResult {
     var startCursorIndex by remember { mutableIntStateOf(0) }
     var endCursorIndex by remember { mutableIntStateOf(fullText.length) }
@@ -49,7 +51,7 @@ fun draggableTextSelection(
     val density = LocalDensity.current
     val handleTouchRadiusPx = with(density) { HANDLE_TOUCH_RADIUS_DP.dp.toPx() }
 
-    val handleColor = MaterialTheme.colorScheme.primary
+    val handleColor = Color.Black
 
     val highlightedText = remember(startCursorIndex, endCursorIndex, fullText) {
         buildAnnotatedString {
@@ -71,14 +73,18 @@ fun draggableTextSelection(
                     val down = awaitFirstDown()
                     val layout = textLayoutResult ?: return@awaitEachGesture
 
-                    fun handlePosFor(index: Int): Offset {
+                    fun handlePosFor(index: Int, isStart: Boolean): Offset {
                         val rect = layout.getCursorRect(index.coerceIn(0, fullText.length))
                         val midY = (rect.top + rect.bottom) / 2f
-                        return Offset(rect.left, midY)
+                        return if (isStart) {
+                            Offset(rect.left, midY)
+                        } else {
+                            Offset(rect.right, midY)
+                        }
                     }
 
-                    val startPos = handlePosFor(startCursorIndex)
-                    val endPos = handlePosFor(endCursorIndex)
+                    val startPos = handlePosFor(startCursorIndex, isStart = true)
+                    val endPos = handlePosFor(endCursorIndex, isStart = false)
 
                     val dxStart = down.position.x - startPos.x
                     val dyStart = down.position.y - startPos.y
@@ -91,7 +97,50 @@ fun draggableTextSelection(
                         else -> null
                     }
 
-                    if (activeHandle == null) return@awaitEachGesture
+                    if (activeHandle == null) {
+                        onMagnifierStateChange(MagnifierState(isActive = false))
+                        return@awaitEachGesture
+                    }
+
+                    fun updateMagnifier() {
+                        val startIsLeading = startCursorIndex <= endCursorIndex
+                        val endIsLeading = !startIsLeading
+
+                        val (rawAnchor, caretIndex, isLeading) = when (activeHandle) {
+                            Handle.START -> {
+                                Triple(
+                                    handlePosFor(startCursorIndex, isStart = true),
+                                    startCursorIndex,
+                                    startIsLeading
+                                )
+                            }
+
+                            Handle.END -> {
+                                Triple(
+                                    handlePosFor(endCursorIndex, isStart = false),
+                                    endCursorIndex,
+                                    endIsLeading
+                                )
+                            }
+
+                            null -> Triple(null, null, true)
+                        }
+
+                        val adjustedAnchor = rawAnchor?.copy(
+                            y = rawAnchor.y - scrollState.value.toFloat()
+                        )
+
+                        onMagnifierStateChange(
+                            MagnifierState(
+                                anchor = adjustedAnchor,
+                                caretIndex = caretIndex,
+                                isLeadingHandle = isLeading,
+                                isActive = adjustedAnchor != null && caretIndex != null
+                            )
+                        )
+                    }
+
+                    updateMagnifier()
 
                     drag(down.id) { change ->
                         if (change.positionChange() != Offset.Zero) change.consume()
@@ -101,9 +150,11 @@ fun draggableTextSelection(
                         } else {
                             endCursorIndex = offsetIndex.coerceIn(0, fullText.length)
                         }
+                        updateMagnifier()
                     }
 
                     activeHandle = null
+                    onMagnifierStateChange(MagnifierState(isActive = false))
                 }
             }
     ) {
@@ -116,53 +167,39 @@ fun draggableTextSelection(
         )
 
         textLayoutResult?.let { layout ->
-            // Rects for the raw cursor positions
             val rectStart = layout.getCursorRect(startCursorIndex.coerceIn(0, fullText.length))
             val rectEnd = layout.getCursorRect(endCursorIndex.coerceIn(0, fullText.length))
 
-            // Mid-Y for each rect
             val startMidY = (rectStart.top + rectStart.bottom) / 2f
             val endMidY = (rectEnd.top + rectEnd.bottom) / 2f
 
-            // Anchors for each handle:
-            //  - start anchored to its LEFT edge
-            //  - end anchored to its RIGHT edge
             val startAnchor = Offset(rectStart.left, startMidY)
             val endAnchor = Offset(rectEnd.right, endMidY)
 
-            // Leading in text order is purely based on indices, not geometry
             val startIsLeading = startCursorIndex <= endCursorIndex
             val endIsLeading = !startIsLeading
 
             Canvas(modifier = Modifier.matchParentSize()) {
-                val r = 18f
+                val r = 24f
                 val nib = r
 
-                fun drawHandle(anchor: Offset, isLeading: Boolean, isStartHandle: Boolean) {
-                    // Leading handle: circle outside on the LEFT of its text edge
-                    // Trailing handle: circle outside on the RIGHT of its text edge
+                fun drawHandle(anchor: Offset, isLeading: Boolean) {
                     val circleCenter = if (isLeading) {
-                        // outside left
                         Offset(anchor.x - r, anchor.y)
                     } else {
-                        // outside right
                         Offset(anchor.x + r, anchor.y)
                     }
 
-                    // Draw main circle
                     drawCircle(
                         color = handleColor,
                         radius = r,
                         center = circleCenter
                     )
 
-                    // Nib:
-                    //  - Leading → nib to the RIGHT of circle (pointing into text)
-                    //  - Trailing → nib to the LEFT of circle (pointing into text)
                     val nibTopLeft = if (isLeading) {
-                        Offset(circleCenter.x, circleCenter.y)          // right side
+                        Offset(circleCenter.x, circleCenter.y)
                     } else {
-                        Offset(circleCenter.x - nib, circleCenter.y)    // left side
+                        Offset(circleCenter.x - nib, circleCenter.y)
                     }
 
                     drawRect(
@@ -171,7 +208,6 @@ fun draggableTextSelection(
                         size = Size(nib, nib)
                     )
 
-                    // Subtle outline
                     drawCircle(
                         color = Color.Black.copy(alpha = 0.15f),
                         radius = r,
@@ -180,19 +216,8 @@ fun draggableTextSelection(
                     )
                 }
 
-                // Start handle at its own rect, role decided by index order
-                drawHandle(
-                    anchor = startAnchor,
-                    isLeading = startIsLeading,
-                    isStartHandle = true
-                )
-
-                // End handle at its own rect, opposite role
-                drawHandle(
-                    anchor = endAnchor,
-                    isLeading = endIsLeading,
-                    isStartHandle = false
-                )
+                drawHandle(anchor = startAnchor, isLeading = startIsLeading)
+                drawHandle(anchor = endAnchor, isLeading = endIsLeading)
             }
         }
     }
