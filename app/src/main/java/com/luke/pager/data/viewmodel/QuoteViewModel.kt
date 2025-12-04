@@ -19,6 +19,7 @@ class QuoteViewModel(private val quoteRepository: QuoteRepository) : ViewModel()
             _quotes.value = quoteRepository.getQuotesByBookId(bookId)
         }
     }
+
     fun addQuote(quote: QuoteEntity) {
         viewModelScope.launch {
             quoteRepository.insertQuote(quote)
@@ -26,9 +27,19 @@ class QuoteViewModel(private val quoteRepository: QuoteRepository) : ViewModel()
             loadAllQuotes()
         }
     }
+
     fun loadAllQuotes() {
         viewModelScope.launch {
             _allQuotes.value = quoteRepository.getAllQuotes()
+        }
+    }
+
+    fun updateQuote(quote: QuoteEntity) {
+        viewModelScope.launch {
+            quoteRepository.updateQuote(quote)
+            // Refresh both the current book's quotes and the global list
+            loadQuotesForBook(quote.bookId)
+            loadAllQuotes()
         }
     }
 }
