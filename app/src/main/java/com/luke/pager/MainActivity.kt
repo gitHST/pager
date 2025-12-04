@@ -197,8 +197,7 @@ fun PagerAppUI(
                         navController,
                         bookViewModel,
                         reviewViewModel,
-                        quoteViewModel,
-                        snackbarHostState
+                        quoteViewModel
                     )
                 }
             }
