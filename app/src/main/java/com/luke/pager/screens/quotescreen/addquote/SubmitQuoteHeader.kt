@@ -30,7 +30,7 @@ fun SubmitQuoteHeader(
     val coroutineScope = rememberCoroutineScope()
 
     DualActionHeader(
-        leftButtonText = " Go back ",
+        leftButtonText = " Cancel ",
         onLeftClick = onDismiss,
         rightButtonText = " Submit quote ",
         isRightButtonLoading = isSubmitting,

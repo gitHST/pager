@@ -20,4 +20,9 @@ class QuoteRepository(private val quoteDao: QuoteDao) {
     suspend fun updateQuote(quote: QuoteEntity) {
         quoteDao.updateQuote(quote)
     }
+
+    suspend fun deleteQuote(quote: QuoteEntity) {
+        quoteDao.deleteQuote(quote)
+    }
+
 }

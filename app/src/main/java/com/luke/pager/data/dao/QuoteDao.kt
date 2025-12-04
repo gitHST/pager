@@ -1,6 +1,7 @@
 package com.luke.pager.data.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
@@ -19,4 +20,8 @@ interface QuoteDao {
 
     @Update
     suspend fun updateQuote(quote: QuoteEntity)
+
+    @Delete
+    suspend fun deleteQuote(quote: QuoteEntity)
+
 }

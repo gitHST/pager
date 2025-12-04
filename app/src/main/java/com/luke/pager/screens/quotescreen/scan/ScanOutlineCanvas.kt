@@ -47,7 +47,6 @@ fun ScanOutlineCanvas(
         Color(0xFFFF4F95)
     )
 
-    // 👇 Only show numeric labels if more than 1 block is selected globally
     val showLabels = globalClusterOrder.size > 1
 
     Canvas(
@@ -139,15 +138,11 @@ fun ScanOutlineCanvas(
                 style = Stroke(width = 5f)
             )
 
-            // 🔢 Draw selection order number only if:
-            // - this cluster is selected, AND
-            // - more than 1 block is selected overall
             if (isToggled && showLabels) {
                 val globalIndex = globalClusterOrder.indexOf(pageIndex to clusterIndex)
                 if (globalIndex != -1) {
                     val labelNumber = globalIndex + 1
 
-                    // centroid of polygon for centered label
                     var sumX = 0f
                     var sumY = 0f
                     for (p in scaledPoints) {

@@ -3,6 +3,8 @@ package com.luke.pager.screens.quotescreen.editquote
 import BookCoverImage
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,10 +15,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -59,6 +70,7 @@ fun EditQuoteModal(
 
     var quoteText by remember(visible, cleanedPrefilledText) { mutableStateOf(cleanedPrefilledText) }
     var pageNumber by remember(visible) { mutableStateOf(quote.pageNumber?.toString() ?: "") }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
 
     BackHandler(enabled = visible) { onDismiss() }
 
@@ -143,34 +155,97 @@ fun EditQuoteModal(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            TextField(
-                value = pageNumber,
-                onValueChange = { newValue ->
-                    if (newValue.all { it.isDigit() }) {
-                        pageNumber = newValue
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextField(
+                    value = pageNumber,
+                    onValueChange = { newValue ->
+                        if (newValue.all { it.isDigit() }) {
+                            pageNumber = newValue
+                        }
+                    },
+                    modifier = Modifier
+                        .width(120.dp),
+                    textStyle = MaterialTheme.typography.bodyMedium,
+                    singleLine = true,
+                    placeholder = { Text("_") },
+                    leadingIcon = {
+                        Text(
+                            text = "Page:",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+                    },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent
+                    )
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            showDeleteConfirm = true
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete quote",
+                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.85f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
+        if (showDeleteConfirm) {
+            AlertDialog(
+                onDismissRequest = { showDeleteConfirm = false },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showDeleteConfirm = false
+                            quoteViewModel.deleteQuote(quote)
+                            onDismiss()
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError
+                        ),
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
+                        Text("Delete", style = MaterialTheme.typography.bodyMedium)
                     }
                 },
-                modifier = Modifier
-                    .width(120.dp),
-                textStyle = MaterialTheme.typography.bodyMedium,
-                singleLine = true,
-                placeholder = { Text("_") },
-                leadingIcon = {
-                    Text(
-                        text = "Page:",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(start = 4.dp)
-                    )
+                dismissButton = {
+                    TextButton(onClick = { showDeleteConfirm = false }) {
+                        Text("Cancel", style = MaterialTheme.typography.bodyMedium)
+                    }
                 },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    disabledContainerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
-                )
+                title = {
+                    Text("Delete quote", style = MaterialTheme.typography.titleLarge)
+                },
+                text = {
+                    Text(
+                        "Delete this quote?",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             )
         }
+
+
     }
 }

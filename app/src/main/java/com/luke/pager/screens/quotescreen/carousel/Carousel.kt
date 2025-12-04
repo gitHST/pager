@@ -36,7 +36,7 @@ fun Carousel(
             horizontalArrangement = Arrangement.spacedBy((-30 * scale).dp),
             contentPadding = PaddingValues(
                 start = 32.dp * scale,
-                end = itemWidthDp * 2, // extra space at end
+                end = itemWidthDp * 2,
                 top = 64.dp * scale,
                 bottom = 64.dp * scale
             )

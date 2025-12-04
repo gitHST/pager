@@ -42,7 +42,6 @@ fun PagerNavHost(
     quoteViewModel: QuoteViewModel,
     snackbarHostState: SnackbarHostState
 ) {
-    // Order used for deciding slide direction
     val topLevelRoutes = listOf("diary", "plus", "quotes")
 
     val currentRouteEntry by navController.currentBackStackEntryAsState()
@@ -88,7 +87,6 @@ fun PagerNavHost(
             val toIndex = topLevelRoutes.indexOf(toRoute)
 
             when {
-                // Both are top-level → slide based on index
                 fromIndex != -1 && toIndex != -1 && toIndex > fromIndex ->
                     slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.Left,
@@ -101,7 +99,6 @@ fun PagerNavHost(
                         animationSpec = tween(durationMillis = 250)
                     )
 
-                // Non–top-level (detail / scan etc) → default "forward" slide from right
                 else ->
                     slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.Left,
