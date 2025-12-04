@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen.addquote
+package com.luke.pager.screens.quotescreen.editquote
 
 import BookCoverImage
 import androidx.activity.compose.BackHandler
@@ -31,58 +31,59 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import com.luke.pager.data.entities.BookEntity
+import com.luke.pager.data.entities.QuoteEntity
 import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.screens.components.CenteredModalScaffold
 import com.luke.pager.screens.components.ScrollingTextField
 
 @Composable
-fun AddQuoteModal(
+fun EditQuoteModal(
     onDismiss: () -> Unit,
     quoteViewModel: QuoteViewModel,
-    overlayAlpha: Float,
+    overlayAlpha: Float = 0.5f,
     book: BookEntity,
-    prefilledQuoteText: String,
+    quote: QuoteEntity,
     visible: Boolean
 ) {
     val windowInfo = LocalWindowInfo.current
     val density = LocalDensity.current
     val screenHeight = with(density) { windowInfo.containerSize.height.toDp() }
     val modalHeight = screenHeight / 1.5f
+    val containerHeightPx = with(density) { modalHeight.toPx().toInt() }
 
-    val cleanedPrefilledText = prefilledQuoteText
+    val cleanedPrefilledText = quote.quoteText
         .replace("\n", " ")
         .replace("\r", " ")
         .replace(Regex("\\s+"), " ")
         .trim()
 
     var quoteText by remember(visible, cleanedPrefilledText) { mutableStateOf(cleanedPrefilledText) }
-    var pageNumber by remember(visible) { mutableStateOf("") }
-
-    val containerHeightPx = with(density) { modalHeight.toPx().toInt() }
+    var pageNumber by remember(visible) { mutableStateOf(quote.pageNumber?.toString() ?: "") }
 
     BackHandler(enabled = visible) { onDismiss() }
 
     CenteredModalScaffold(
-        overlayAlpha = overlayAlpha,
         onDismiss = onDismiss,
+        overlayAlpha = overlayAlpha,
         visible = visible
     ) { scrollState ->
-        SubmitQuoteHeader(
+
+        EditQuoteHeader(
             onDismiss = onDismiss,
+            quote = quote,
             quoteText = quoteText,
             pageNum = pageNumber,
-            bookId = book.id,
             quoteViewModel = quoteViewModel,
             scrollState = scrollState
         )
 
         Spacer(modifier = Modifier.height(16.dp))
+
         Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .animateContentSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .animateContentSize()
         ) {
             Row(
                 modifier = Modifier
