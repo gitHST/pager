@@ -111,7 +111,7 @@ fun MultiPagePreviewModal(
                 }
 
                 Text(
-                    text = "Tap the block(s) with your quote in order – \nyou’ll trim it in the next step",
+                    text = "Tap the block(s) containing your quote in order – \nyou’ll trim it in the next step",
                     style = MaterialTheme.typography.bodyMedium,
                     fontStyle = FontStyle.Italic,
                     textAlign = TextAlign.Center,

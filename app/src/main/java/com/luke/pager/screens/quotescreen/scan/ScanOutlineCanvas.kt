@@ -47,6 +47,9 @@ fun ScanOutlineCanvas(
         Color(0xFFFF4F95)
     )
 
+    // 👇 Only show numeric labels if more than 1 block is selected globally
+    val showLabels = globalClusterOrder.size > 1
+
     Canvas(
         modifier = modifier.pointerInput(allClusters, toggledClusters) {
             detectTapGestures { offset ->
@@ -136,23 +139,44 @@ fun ScanOutlineCanvas(
                 style = Stroke(width = 5f)
             )
 
-            val labelPosition = scaledPoints.minByOrNull { it.y } ?: scaledPoints[0]
-
-            if (isToggled) {
-                val globalIndex = globalClusterOrder.indexOf(Pair(pageIndex, clusterIndex))
+            // 🔢 Draw selection order number only if:
+            // - this cluster is selected, AND
+            // - more than 1 block is selected overall
+            if (isToggled && showLabels) {
+                val globalIndex = globalClusterOrder.indexOf(pageIndex to clusterIndex)
                 if (globalIndex != -1) {
                     val labelNumber = globalIndex + 1
+
+                    // centroid of polygon for centered label
+                    var sumX = 0f
+                    var sumY = 0f
+                    for (p in scaledPoints) {
+                        sumX += p.x
+                        sumY += p.y
+                    }
+                    val centerX = sumX / scaledPoints.size
+                    val centerY = sumY / scaledPoints.size
+
                     drawContext.canvas.nativeCanvas.apply {
+                        val paint = android.graphics.Paint().apply {
+                            this.color = android.graphics.Color.BLACK
+                            textSize = 48f
+                            isAntiAlias = true
+                            isFakeBoldText = true
+                            textAlign = android.graphics.Paint.Align.CENTER
+                            setShadowLayer(
+                                6f,
+                                0f,
+                                0f,
+                                android.graphics.Color.WHITE
+                            )
+                        }
+
                         drawText(
                             labelNumber.toString(),
-                            labelPosition.x,
-                            labelPosition.y - 5,
-                            android.graphics.Paint().apply {
-                                this.color = android.graphics.Color.BLACK
-                                textSize = 30f
-                                isAntiAlias = true
-                                setShadowLayer(4f, 0f, 0f, android.graphics.Color.WHITE)
-                            }
+                            centerX,
+                            centerY,
+                            paint
                         )
                     }
                 }
