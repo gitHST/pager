@@ -83,7 +83,6 @@ fun AllQuotesTab(
             }
         } else {
             Box(Modifier.fillMaxSize()) {
-
                 HorizontalShadowDiv(
                     visible = hasScrolled,
                     modifier = Modifier
@@ -91,7 +90,6 @@ fun AllQuotesTab(
                         .offset(y = (-1).dp),
                     shadowFacingUp = false
                 )
-
 
                 Column(
                     modifier = Modifier

@@ -60,4 +60,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Search results box shrinks and grows with keyboard (untested on smaller devices)
 - Review box fits screen size nicely
 - Clicking search now hides keyboard
+
 ---
+## [0.3.0] - 2025-12-04
+### Added
+- Complete Quotes system, including:
+    - Carousel view for quotes per book
+    - All Quotes view with sort controls and scrolling
+    - Add Quote modal
+    - Edit Quote modal with edit/delete functionality
+    - Page number input
+- Scanner for quotes that uses ML Kit to extract text from images
+- Swipe logic improvements:
+- New edit/delete confirmation dialog matching visual style of Review deletion dialog
+
+### Fixed
+- Page number field clipping issue in Add/Edit Quote modals
+- Visual alignment issues in All Quotes and Carousel quotes list
+- Test tasks failing due to incompatible JDK and Jacoco conflicts
+
+### Changed
+- Updated swipe animations for Quotes tab transitions.

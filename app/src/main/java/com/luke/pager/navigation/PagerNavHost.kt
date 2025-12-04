@@ -38,7 +38,7 @@ fun PagerNavHost(
     navController: NavHostController,
     bookViewModel: BookViewModel,
     reviewViewModel: ReviewViewModel,
-    quoteViewModel: QuoteViewModel,
+    quoteViewModel: QuoteViewModel
 ) {
     val topLevelRoutes = listOf("diary", "plus", "quotes")
 

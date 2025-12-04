@@ -79,10 +79,10 @@ fun AddQuoteModal(
         Spacer(modifier = Modifier.height(16.dp))
         Column(
             modifier =
-                Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .animateContentSize()
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .animateContentSize()
         ) {
             Row(
                 modifier = Modifier

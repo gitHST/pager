@@ -44,7 +44,6 @@ fun QuoteSelectionScreen(
         color = Color.Transparent
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
