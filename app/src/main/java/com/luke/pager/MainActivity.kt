@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
         }
 
         // exportDatabase()
-        // restoreDatabase()
+        restoreDatabase()
         // /data/data/com.luke.pager/files/
 
         val db =
