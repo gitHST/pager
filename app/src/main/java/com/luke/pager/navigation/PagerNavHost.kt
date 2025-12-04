@@ -4,7 +4,6 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -40,7 +39,6 @@ fun PagerNavHost(
     bookViewModel: BookViewModel,
     reviewViewModel: ReviewViewModel,
     quoteViewModel: QuoteViewModel,
-    snackbarHostState: SnackbarHostState
 ) {
     val topLevelRoutes = listOf("diary", "plus", "quotes")
 
@@ -213,7 +211,6 @@ fun PagerNavHost(
                 bookViewModel = bookViewModel,
                 quoteViewModel = quoteViewModel,
                 uiStateViewModel = uiStateViewModel,
-                snackbarHostState = snackbarHostState,
                 photoLauncher = photoLauncher
             )
         }

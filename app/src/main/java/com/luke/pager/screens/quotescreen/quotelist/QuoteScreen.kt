@@ -22,7 +22,6 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -57,7 +56,6 @@ fun QuotesScreen(
     bookViewModel: BookViewModel,
     quoteViewModel: QuoteViewModel,
     uiStateViewModel: QuoteUiStateViewModel,
-    snackbarHostState: SnackbarHostState,
     photoLauncher: () -> Unit
 ) {
     val bookList by bookViewModel.booksSortedByReviewDate.collectAsState()
