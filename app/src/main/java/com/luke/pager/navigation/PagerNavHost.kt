@@ -2,10 +2,6 @@ package com.luke.pager.navigation
 
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,14 +40,6 @@ fun PagerNavHost(
     quoteViewModel: QuoteViewModel,
     snackbarHostState: SnackbarHostState
 ) {
-    val navItems = listOf(
-        // NavItem("activity", "Activity"),
-        NavItem("diary", "Diary", Icons.Filled.Book),
-        NavItem("plus", "Add", Icons.Filled.Add),
-        // NavItem("explore", "Explore"),
-        NavItem("quotes", "Quotes", Icons.Filled.FormatQuote)
-    )
-
     val currentRoute by navController.currentBackStackEntryAsState()
 
     val uiStateViewModel: QuoteUiStateViewModel = viewModel(
@@ -75,7 +63,6 @@ fun PagerNavHost(
         testMode = testMode
     )
 
-
     LaunchedEffect(currentRoute) {
         if (previousRoute.value == "quotes" && currentRoute?.destination?.route != "quotes") {
             delay(500)
@@ -89,66 +76,33 @@ fun PagerNavHost(
         startDestination = "diary"
     ) {
         composable("activity") {
-            SwipeToNavigate(
-                navController = navController,
-                currentRoute = currentRoute?.destination?.route.orEmpty(),
-                navItems = navItems
-            ) { _, _ ->
-                ActivityScreen(bookViewModel)
-            }
+            ActivityScreen(bookViewModel)
         }
 
         composable("diary") {
-            SwipeToNavigate(
-                navController = navController,
-                currentRoute = currentRoute?.destination?.route.orEmpty(),
-                navItems = navItems
-            ) { _, _ ->
-                DiaryScreen(navController, bookViewModel)
-            }
+            DiaryScreen(navController, bookViewModel)
         }
 
         composable("plus") {
-            SwipeToNavigate(
-                navController = navController,
-                currentRoute = currentRoute?.destination?.route.orEmpty(),
-                navItems = navItems
-            ) { _, _ ->
-                SearchAndResultsModal(
-                    onDismiss = {},
-                    bookViewModel = bookViewModel,
-                    navController = navController
-                )
-            }
+            SearchAndResultsModal(
+                onDismiss = {},
+                bookViewModel = bookViewModel,
+                navController = navController
+            )
         }
 
         composable("explore") {
-            SwipeToNavigate(
-                navController = navController,
-                currentRoute = currentRoute?.destination?.route.orEmpty(),
-                navItems = navItems
-            ) { _, _ ->
-                ExploreScreen(bookViewModel)
-            }
+            ExploreScreen(bookViewModel)
         }
 
         composable("quotes") {
-            SwipeToNavigate(
-                navController = navController,
-                currentRoute = currentRoute?.destination?.route.orEmpty(),
-                navItems = navItems
-            ) { currentRoute, navItems ->
-                QuotesScreen(
-                    bookViewModel = bookViewModel,
-                    quoteViewModel = quoteViewModel,
-                    navController = navController,
-                    currentRoute = currentRoute,
-                    navItems = navItems,
-                    uiStateViewModel = uiStateViewModel,
-                    snackbarHostState = snackbarHostState,
-                    photoLauncher = photoLauncher
-                )
-            }
+            QuotesScreen(
+                bookViewModel = bookViewModel,
+                quoteViewModel = quoteViewModel,
+                uiStateViewModel = uiStateViewModel,
+                snackbarHostState = snackbarHostState,
+                photoLauncher = photoLauncher
+            )
         }
 
         composable("review_screen/{reviewId}") { backStackEntry ->

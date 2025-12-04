@@ -40,23 +40,18 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.graphics.createBitmap
-import androidx.navigation.NavHostController
 import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.viewmodel.BookViewModel
+import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
-import com.luke.pager.navigation.NavItem
 import com.luke.pager.screens.components.NoBooksYetMessage
 import com.luke.pager.screens.components.Title
-import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun QuotesScreen(
     bookViewModel: BookViewModel,
     quoteViewModel: QuoteViewModel,
-    navController: NavHostController,
-    currentRoute: String,
-    navItems: List<NavItem>,
     uiStateViewModel: QuoteUiStateViewModel,
     snackbarHostState: SnackbarHostState,
     photoLauncher: () -> Unit
@@ -66,7 +61,6 @@ fun QuotesScreen(
     val allQuotes by quoteViewModel.allQuotes.collectAsState()
     val placeholderBitmap = remember { createPlaceholderBitmap() }
     val selectedTabIndex by uiStateViewModel.selectedTabIndex.collectAsState()
-    val currentPageIndex = navItems.indexOfFirst { it.route == currentRoute }
 
     LaunchedEffect(Unit) {
         quoteViewModel.loadAllQuotes()
@@ -80,12 +74,14 @@ fun QuotesScreen(
 
     Column(
         modifier = Modifier.pointerInput(selectedTabIndex) {
+            // Swipe ONLY between Carousel (0) and All quotes (1).
             detectHorizontalDragGestures { _, dragAmount ->
                 when {
-                    dragAmount > 50 && selectedTabIndex > 0 -> uiStateViewModel.setSelectedTabIndex(selectedTabIndex - 1)
-                    dragAmount < -50 && selectedTabIndex < 1 -> uiStateViewModel.setSelectedTabIndex(selectedTabIndex + 1)
-                    dragAmount > 50 -> navController.navigate(navItems[(currentPageIndex - 1).coerceAtLeast(0)].route)
-                    dragAmount < -50 -> navController.navigate(navItems[(currentPageIndex + 1).coerceAtMost(navItems.lastIndex)].route)
+                    dragAmount > 50 && selectedTabIndex > 0 ->
+                        uiStateViewModel.setSelectedTabIndex(selectedTabIndex - 1)
+
+                    dragAmount < -50 && selectedTabIndex < 1 ->
+                        uiStateViewModel.setSelectedTabIndex(selectedTabIndex + 1)
                 }
             }
         }
