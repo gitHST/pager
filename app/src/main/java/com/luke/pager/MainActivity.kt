@@ -163,23 +163,23 @@ fun PagerAppUI(
 
         val animatedBackgroundColor by animateColorAsState(
             targetValue = animatedTargetColor ?: Color.Transparent,
-            animationSpec = tween(durationMillis = 500)
+            animationSpec = tween(durationMillis = 200)
         )
 
         Box(
             modifier =
-            Modifier
-                .fillMaxSize()
-                .background(animatedBackgroundColor)
+                Modifier
+                    .fillMaxSize()
+                    .background(animatedBackgroundColor)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.clean_gray_paper),
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds,
                 modifier =
-                Modifier
-                    .fillMaxSize()
-                    .alpha(0.9f)
+                    Modifier
+                        .fillMaxSize()
+                        .alpha(0.9f)
             )
 
             Scaffold(
@@ -189,9 +189,9 @@ fun PagerAppUI(
             ) { paddingValues ->
                 Box(
                     modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
                 ) {
                     PagerNavHost(
                         navController,
