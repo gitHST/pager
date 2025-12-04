@@ -29,7 +29,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,6 +49,7 @@ import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.screens.components.NoBooksYetMessage
 import com.luke.pager.screens.components.Title
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -62,6 +66,53 @@ fun QuotesScreen(
     val placeholderBitmap = remember { createPlaceholderBitmap() }
     val selectedTabIndex by uiStateViewModel.selectedTabIndex.collectAsState()
 
+    // Tab swipe state (for queueing / direction switching)
+    var isSwipeInProgress by remember { mutableStateOf(false) }
+    var queuedDirection by remember { mutableIntStateOf(0) }
+    val maxTabIndex = 1
+    val swipeThreshold = 50f
+    val swipeAnimationDurationMillis = 300
+
+    fun performSwipe(direction: Int) {
+        val targetIndex = (selectedTabIndex + direction).coerceIn(0, maxTabIndex)
+        if (targetIndex != selectedTabIndex) {
+            uiStateViewModel.setSelectedTabIndex(targetIndex)
+        }
+    }
+
+    fun requestTabSwipe(direction: Int) {
+        val targetIndex = (selectedTabIndex + direction).coerceIn(0, maxTabIndex)
+        if (targetIndex == selectedTabIndex) {
+            // No-op (already at edge)
+            return
+        }
+
+        if (!isSwipeInProgress) {
+            isSwipeInProgress = true
+            queuedDirection = 0
+            performSwipe(direction)
+        } else {
+            // Queue or replace queued direction (queue length = 1)
+            queuedDirection = direction
+        }
+    }
+
+    // When the tab index changes, wait for the animation, then run queued swipe (if any)
+    LaunchedEffect(selectedTabIndex) {
+        if (!isSwipeInProgress) return@LaunchedEffect
+
+        delay(swipeAnimationDurationMillis.toLong())
+
+        if (queuedDirection != 0) {
+            val direction = queuedDirection
+            queuedDirection = 0
+            // Keep swipe "in progress"; the next LaunchedEffect will clear it
+            performSwipe(direction)
+        } else {
+            isSwipeInProgress = false
+        }
+    }
+
     LaunchedEffect(Unit) {
         quoteViewModel.loadAllQuotes()
     }
@@ -73,15 +124,16 @@ fun QuotesScreen(
     }
 
     Column(
-        modifier = Modifier.pointerInput(selectedTabIndex) {
-            // Swipe ONLY between Carousel (0) and All quotes (1).
+        modifier = Modifier.pointerInput(selectedTabIndex, isSwipeInProgress, queuedDirection) {
             detectHorizontalDragGestures { _, dragAmount ->
                 when {
-                    dragAmount > 50 && selectedTabIndex > 0 ->
-                        uiStateViewModel.setSelectedTabIndex(selectedTabIndex - 1)
+                    // Swipe right → previous tab
+                    dragAmount > swipeThreshold && selectedTabIndex > 0 ->
+                        requestTabSwipe(-1)
 
-                    dragAmount < -50 && selectedTabIndex < 1 ->
-                        uiStateViewModel.setSelectedTabIndex(selectedTabIndex + 1)
+                    // Swipe left → next tab
+                    dragAmount < -swipeThreshold && selectedTabIndex < maxTabIndex ->
+                        requestTabSwipe(1)
                 }
             }
         }
