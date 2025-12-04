@@ -12,7 +12,12 @@ class QuoteRepository(private val quoteDao: QuoteDao) {
     suspend fun insertQuote(quote: QuoteEntity) {
         quoteDao.insertQuote(quote)
     }
+
     suspend fun getAllQuotes(): List<QuoteEntity> {
         return quoteDao.getAllQuotes()
+    }
+
+    suspend fun updateQuote(quote: QuoteEntity) {
+        quoteDao.updateQuote(quote)
     }
 }

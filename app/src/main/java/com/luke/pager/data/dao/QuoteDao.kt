@@ -3,6 +3,7 @@ package com.luke.pager.data.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.luke.pager.data.entities.QuoteEntity
 
 @Dao
@@ -15,4 +16,7 @@ interface QuoteDao {
 
     @Query("SELECT * FROM quotes ORDER BY date_added DESC")
     suspend fun getAllQuotes(): List<QuoteEntity>
+
+    @Update
+    suspend fun updateQuote(quote: QuoteEntity)
 }
