@@ -81,7 +81,7 @@ fun CarouselTab(
         }.toMutableList()
 
         val dummies = listOf(
-            DummyBook(-1, "Dummy Book 1"),
+            DummyBook(-1, "Dummy Book 1")
         )
 
         dummies.forEach {
@@ -132,10 +132,10 @@ fun CarouselTab(
             } else {
                 val lastVisibleItem = visibleItems.last()
                 lastVisibleItem.index < totalItemsCount - 1 ||
-                        (
-                                lastVisibleItem.index == totalItemsCount - 1 &&
-                                        lastVisibleItem.offset + lastVisibleItem.size > quotesListState.layoutInfo.viewportEndOffset
-                                )
+                    (
+                        lastVisibleItem.index == totalItemsCount - 1 &&
+                            lastVisibleItem.offset + lastVisibleItem.size > quotesListState.layoutInfo.viewportEndOffset
+                        )
             }
         }
     }
@@ -151,7 +151,7 @@ fun CarouselTab(
     LaunchedEffect(listState.isScrollInProgress) {
         if (!listState.isScrollInProgress) {
             val nearestIndex = listState.firstVisibleItemIndex +
-                    if (listState.firstVisibleItemScrollOffset > 150) 1 else 0
+                if (listState.firstVisibleItemScrollOffset > 150) 1 else 0
 
             coroutineScope.launch {
                 listState.animateScrollToItem(nearestIndex)

@@ -9,7 +9,7 @@ Use this checklist before releasing a version of the app on GitHub.
 - [ ] Code compiles with no errors or warnings
 - [ ] Comment out the restorefromdb lines in MainActivity
 - [ ] Removed unused screens from nav bar and nav host
-- [ ] All lint and static analysis issues resolved
+- [ ] All lint and static analysis issues resolved ./gradlew ktlintFormat
 - [ ] Version code & version name updated (`build.gradle.kts`)
 - [ ] Proguard/R8 rules configured
 

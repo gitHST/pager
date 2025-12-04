@@ -13,7 +13,6 @@ import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.screens.components.DualActionHeader
 import kotlinx.coroutines.launch
 
-
 @Composable
 fun EditQuoteHeader(
     onDismiss: () -> Unit,

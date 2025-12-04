@@ -24,5 +24,4 @@ class QuoteRepository(private val quoteDao: QuoteDao) {
     suspend fun deleteQuote(quote: QuoteEntity) {
         quoteDao.deleteQuote(quote)
     }
-
 }

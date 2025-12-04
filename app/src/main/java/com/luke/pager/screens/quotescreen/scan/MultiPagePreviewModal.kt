@@ -65,7 +65,6 @@ fun MultiPagePreviewModal(
             .padding(16.dp)
     ) {
         if (!showConfirmationModal) {
-
             if (scannedPages.isNotEmpty()) {
                 val current = scannedPages[currentPage]
 
@@ -80,7 +79,7 @@ fun MultiPagePreviewModal(
                             .weight(1f)
                             .aspectRatio(
                                 current.rotatedBitmap.width.toFloat() /
-                                        current.rotatedBitmap.height.toFloat()
+                                    current.rotatedBitmap.height.toFloat()
                             )
                             .padding(bottom = 24.dp),
                         contentAlignment = Alignment.Center

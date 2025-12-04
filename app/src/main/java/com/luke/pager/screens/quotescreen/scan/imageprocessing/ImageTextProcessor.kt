@@ -34,8 +34,6 @@ suspend fun processImageAndCluster(
     uri: Uri,
     minPts: Int = 1
 ): ClusterResult {
-
-
     val bitmapStream = context.contentResolver.openInputStream(uri)
     val bitmap = BitmapFactory.decodeStream(bitmapStream)
     bitmapStream?.close()
@@ -84,7 +82,6 @@ suspend fun processImageAndCluster(
     val medianLineHeight = estimateMedianLineHeight(finalTextBlocks)
     val normalizedEps = 0.5f * medianLineHeight
     Log.d("ImageTextProcessor", "Median line height: $medianLineHeight, using eps = $normalizedEps")
-
 
     val allBoxes = mutableListOf<DBSCANBlockBox>()
     for (block in finalTextBlocks) {
