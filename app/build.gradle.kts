@@ -22,11 +22,29 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            storeFile = file(project.property("RELEASE_STORE_FILE") as String)
-            storePassword = project.property("RELEASE_STORE_PASSWORD") as String
-            keyAlias = project.property("RELEASE_KEY_ALIAS") as String
-            keyPassword = project.property("RELEASE_KEY_PASSWORD") as String
+        // Don't try to use Windows keystore path on CI (Linux)
+        val isCi = System.getenv("CI") == "true"
+
+        val releaseStoreFile = project.findProperty("RELEASE_STORE_FILE") as String?
+        val releaseStorePassword = project.findProperty("RELEASE_STORE_PASSWORD") as String?
+        val releaseKeyAlias = project.findProperty("RELEASE_KEY_ALIAS") as String?
+        val releaseKeyPassword = project.findProperty("RELEASE_KEY_PASSWORD") as String?
+
+        if (!isCi &&
+            !releaseStoreFile.isNullOrBlank() &&
+            !releaseStorePassword.isNullOrBlank() &&
+            !releaseKeyAlias.isNullOrBlank() &&
+            !releaseKeyPassword.isNullOrBlank()
+        ) {
+            val keystoreFile = file(releaseStoreFile)
+            if (keystoreFile.exists()) {
+                create("release") {
+                    storeFile = keystoreFile
+                    storePassword = releaseStorePassword
+                    keyAlias = releaseKeyAlias
+                    keyPassword = releaseKeyPassword
+                }
+            }
         }
     }
 
@@ -37,7 +55,10 @@ android {
         }
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("release")
+
+            val releaseSigning = signingConfigs.findByName("release")
+            signingConfig = releaseSigning ?: signingConfigs.getByName("debug")
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
