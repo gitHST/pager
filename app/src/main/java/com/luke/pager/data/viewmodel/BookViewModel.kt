@@ -8,15 +8,12 @@ import com.luke.pager.data.entities.ReviewEntity
 import com.luke.pager.data.repo.IBookRepository
 import com.luke.pager.data.repo.IReviewRepository
 import com.luke.pager.network.OpenLibraryBook
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.net.URL
 
 class BookViewModel(
     private val bookRepository: IBookRepository,
@@ -44,23 +41,10 @@ class BookViewModel(
         return bookRepository.insertAndReturnId(book)
     }
 
-    suspend fun downloadCoverImage(coverId: Int?): ByteArray? {
-        return withContext(Dispatchers.IO) {
-            try {
-                coverId?.let {
-                    val url = URL("https://covers.openlibrary.org/b/id/$it-M.jpg")
-                    url.readBytes()
-                }
-            } catch (_: Exception) {
-                null
-            }
-        }
-    }
-
     fun loadBooks() {
         viewModelScope.launch {
-            bookRepository.getAllBooks().collect {
-                _books.value = it
+            bookRepository.getAllBooks().collect { books ->
+                _books.value = books
             }
         }
     }
@@ -82,15 +66,13 @@ class BookViewModel(
         onSuccess: () -> Unit
     ) {
         viewModelScope.launch {
-            val coverImage = downloadCoverImage(openBook.coverIndex)
-
             val book =
                 BookEntity(
                     title = openBook.title,
                     authors = openBook.authorName?.joinToString(),
                     openlibraryKey = openBook.key,
                     firstPublishDate = openBook.firstPublishYear?.toString(),
-                    cover = coverImage
+                    coverId = openBook.coverIndex
                 )
 
             val bookId = insertAndReturnId(book)
