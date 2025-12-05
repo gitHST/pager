@@ -16,6 +16,8 @@ data class BookEntity(
     val isbn: String? = null,
     @ColumnInfo(name = "cover")
     val cover: ByteArray? = null,
+    @ColumnInfo(name = "cover_id")
+    val coverId: Int? = null,
     @ColumnInfo(name = "publisher")
     val publisher: String? = null,
     @ColumnInfo(name = "publish_date")
@@ -53,7 +55,14 @@ data class BookEntity(
         if (title != other.title) return false
         if (authors != other.authors) return false
         if (isbn != other.isbn) return false
-        if (!cover.contentEquals(other.cover)) return false
+
+        // cover: null-safe deep comparison
+        if (cover != null || other.cover != null) {
+            if (cover == null || other.cover == null) return false
+            if (!cover.contentEquals(other.cover)) return false
+        }
+
+        if (coverId != other.coverId) return false
         if (publisher != other.publisher) return false
         if (publishDate != other.publishDate) return false
         if (language != other.language) return false
@@ -76,6 +85,7 @@ data class BookEntity(
         result = 31 * result + (authors?.hashCode() ?: 0)
         result = 31 * result + (isbn?.hashCode() ?: 0)
         result = 31 * result + (cover?.contentHashCode() ?: 0)
+        result = 31 * result + (coverId ?: 0)
         result = 31 * result + (publisher?.hashCode() ?: 0)
         result = 31 * result + (publishDate?.hashCode() ?: 0)
         result = 31 * result + (language?.hashCode() ?: 0)

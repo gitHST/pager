@@ -9,16 +9,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
-
 class FirebaseBookRepository(
     private val firestore: FirebaseFirestore = Firebase.firestore
 ) : IBookRepository {
 
+    // For now: flat "books" collection. We'll change this when we add Auth (users/{uid}/books).
     private val booksCollection = firestore.collection("books")
 
     override fun getAllBooks(): Flow<List<BookEntity>> = callbackFlow {
         val listener = booksCollection.addSnapshotListener { snapshot, error ->
             if (error != null) {
+                // TODO: you can add logging here if you want
                 return@addSnapshotListener
             }
             if (snapshot == null) return@addSnapshotListener
@@ -34,6 +35,7 @@ class FirebaseBookRepository(
     }
 
     override suspend fun insertAndReturnId(book: BookEntity): Long {
+        // TEMP: we still control numeric IDs here. We'll switch to Firestore auto IDs in a later step.
         val id = if (book.id == 0L) {
             System.currentTimeMillis()
         } else {
@@ -47,6 +49,8 @@ class FirebaseBookRepository(
 
         return id
     }
+
+    // ---------- Helpers ----------
 
     private fun com.google.firebase.firestore.DocumentSnapshot.toBookEntityOrNull(): BookEntity? {
         val idFromField = getLong("id")
@@ -68,13 +72,15 @@ class FirebaseBookRepository(
         val bookmarked = getBoolean("bookmarked") ?: false
         val genres = getString("genres")
         val dateAdded = getString("date_added")
+        val coverId = getLong("cover_id")?.toInt()
 
         return BookEntity(
             id = id,
             title = title,
             authors = authors,
             isbn = isbn,
-            cover = null,
+            cover = null,        // We do NOT read image bytes from Firestore
+            coverId = coverId,
             publisher = publisher,
             publishDate = publishDate,
             language = language,
@@ -90,22 +96,25 @@ class FirebaseBookRepository(
         )
     }
 
-    private fun BookEntity.toFirestoreMap(): Map<String, Any?> = mapOf(
-        "id" to id,
-        "title" to title,
-        "authors" to authors,
-        "isbn" to isbn,
-        "publisher" to publisher,
-        "publish_date" to publishDate,
-        "language" to language,
-        "subject" to subject,
-        "number_of_pages" to numberOfPages,
-        "description" to description,
-        "edition" to edition,
-        "openlibrary_key" to openlibraryKey,
-        "first_publish_date" to firstPublishDate,
-        "bookmarked" to bookmarked,
-        "genres" to genres,
-        "date_added" to dateAdded
-    )
+    private fun BookEntity.toFirestoreMap(): Map<String, Any?> =
+        mapOf(
+            "id" to id,
+            "title" to title,
+            "authors" to authors,
+            "isbn" to isbn,
+            // "cover" intentionally omitted — we never push ByteArray blobs to Firestore
+            "cover_id" to coverId,
+            "publisher" to publisher,
+            "publish_date" to publishDate,
+            "language" to language,
+            "subject" to subject,
+            "number_of_pages" to numberOfPages,
+            "description" to description,
+            "edition" to edition,
+            "openlibrary_key" to openlibraryKey,
+            "first_publish_date" to firstPublishDate,
+            "bookmarked" to bookmarked,
+            "genres" to genres,
+            "date_added" to dateAdded
+        )
 }
