@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.luke.pager.screens.quotescreen.quotelist.DisplayBook
+import com.luke.pager.screens.quotescreen.DisplayBook
 
 @Composable
 fun Carousel(
@@ -49,7 +49,9 @@ fun Carousel(
                 key = { _, item -> item.book.id }
             ) { index, item ->
                 val rawDistance = index - firstVisibleItemIndex
-                val continuousDistance = rawDistance - (firstVisibleItemScrollOffset / itemWidthPx)
+                val continuousDistance =
+                    rawDistance - (firstVisibleItemScrollOffset / itemWidthPx)
+
                 Box(
                     modifier = Modifier
                         .height((160 * scale).dp)
@@ -62,6 +64,7 @@ fun Carousel(
                         continuousDistance = continuousDistance,
                         isDummy = item.isDummy,
                         hasCover = item.hasCover,
+                        coverUrl = item.coverUrl,
                         scale = scale
                     )
                 }

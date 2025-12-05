@@ -21,7 +21,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -29,7 +28,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import coil.compose.AsyncImage
 import kotlin.math.abs
+
 
 @Composable
 fun CarouselItemContinuous(
@@ -37,6 +38,7 @@ fun CarouselItemContinuous(
     continuousDistance: Float,
     isDummy: Boolean,
     hasCover: Boolean,
+    coverUrl: String? = null,
     cornerRadius: Int = 8,
     width: Dp = 110.dp,
     contentScale: ContentScale = ContentScale.Crop,
@@ -87,21 +89,29 @@ fun CarouselItemContinuous(
         contentAlignment = Alignment.Center
     ) {
         if (hasCover) {
-            Image(
-                bitmap = imageBitmap,
-                contentDescription = null,
-                contentScale = contentScale,
-                modifier = Modifier.fillMaxSize()
-            )
+            if (coverUrl != null) {
+                AsyncImage(
+                    model = coverUrl,
+                    contentDescription = null,
+                    contentScale = contentScale,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Image(
+                    bitmap = imageBitmap,
+                    contentDescription = null,
+                    contentScale = contentScale,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         } else {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(cornerRadius.dp))
-                    .background(Color(0xFFE0E0E0).copy(alpha = 0.5f))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
                     .border(
                         width = 1.dp,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
                         shape = RoundedCornerShape(cornerRadius.dp)
                     )
                     .padding(8.dp),

@@ -84,9 +84,9 @@ fun DiaryScreen(
         } else {
             LazyColumn(
                 modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                    Modifier
+                        .fillMaxSize()
+                        .padding(start = 16.dp, end = 16.dp, top = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 groupedBooks.forEach { (date, bookPairs) ->
@@ -122,14 +122,23 @@ fun BookItem(
     onReviewClick: () -> Unit
 ) {
     val trimAmount = 37
+
+    // 🔹 Build coverUrl from coverId if we don't have local bytes
+    val coverUrl =
+        if (book.cover == null && book.coverId != null) {
+            "https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg"
+        } else {
+            null
+        }
+
     Card(
         modifier =
-        Modifier
-            .fillMaxWidth()
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            ) { onReviewClick() },
+            Modifier
+                .fillMaxWidth()
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) { onReviewClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(28.dp)
@@ -139,7 +148,8 @@ fun BookItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             BookCoverImage(
-                coverData = book.cover
+                coverData = book.cover,
+                coverUrl = coverUrl
             )
             Spacer(modifier = Modifier.width(12.dp))
 
@@ -188,10 +198,10 @@ fun BookItem(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         style =
-                        MaterialTheme.typography.bodyMedium.copy(
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontStyle = if (isPlaceholder) FontStyle.Italic else FontStyle.Normal
-                        )
+                            MaterialTheme.typography.bodyMedium.copy(
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontStyle = if (isPlaceholder) FontStyle.Italic else FontStyle.Normal
+                            )
                     )
                 }
 
@@ -209,9 +219,9 @@ fun BookItem(
                                 }
                             Box(
                                 modifier =
-                                Modifier
-                                    .weight(1f)
-                                    .fillMaxHeight(),
+                                    Modifier
+                                        .weight(1f)
+                                        .fillMaxHeight(),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(

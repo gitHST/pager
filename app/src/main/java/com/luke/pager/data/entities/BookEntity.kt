@@ -6,8 +6,8 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "books")
 data class BookEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id: Long = 0,
+    @PrimaryKey
+    val id: String = "",        // Firestore auto ID
     @ColumnInfo(name = "title")
     val title: String,
     @ColumnInfo(name = "authors")
@@ -49,20 +49,14 @@ data class BookEntity(
 
         other as BookEntity
 
-        if (id != other.id) return false
+        if (coverId != other.coverId) return false
         if (numberOfPages != other.numberOfPages) return false
         if (bookmarked != other.bookmarked) return false
+        if (id != other.id) return false
         if (title != other.title) return false
         if (authors != other.authors) return false
         if (isbn != other.isbn) return false
-
-        // cover: null-safe deep comparison
-        if (cover != null || other.cover != null) {
-            if (cover == null || other.cover == null) return false
-            if (!cover.contentEquals(other.cover)) return false
-        }
-
-        if (coverId != other.coverId) return false
+        if (!cover.contentEquals(other.cover)) return false
         if (publisher != other.publisher) return false
         if (publishDate != other.publishDate) return false
         if (language != other.language) return false
@@ -78,14 +72,14 @@ data class BookEntity(
     }
 
     override fun hashCode(): Int {
-        var result = id.hashCode()
+        var result = coverId ?: 0
         result = 31 * result + (numberOfPages ?: 0)
         result = 31 * result + bookmarked.hashCode()
+        result = 31 * result + id.hashCode()
         result = 31 * result + title.hashCode()
         result = 31 * result + (authors?.hashCode() ?: 0)
         result = 31 * result + (isbn?.hashCode() ?: 0)
         result = 31 * result + (cover?.contentHashCode() ?: 0)
-        result = 31 * result + (coverId ?: 0)
         result = 31 * result + (publisher?.hashCode() ?: 0)
         result = 31 * result + (publishDate?.hashCode() ?: 0)
         result = 31 * result + (language?.hashCode() ?: 0)

@@ -20,10 +20,10 @@ import androidx.room.PrimaryKey
     indices = [Index(value = ["book_id"])]
 )
 data class ReviewEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    @PrimaryKey
+    val id: String = "",
     @ColumnInfo(name = "book_id")
-    val bookId: Long,
+    val bookId: String,
     @ColumnInfo(name = "date_started_reading")
     val dateStartedReading: String? = null,
     @ColumnInfo(name = "date_finished_reading")

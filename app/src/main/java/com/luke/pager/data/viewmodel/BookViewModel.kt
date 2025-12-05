@@ -23,8 +23,8 @@ class BookViewModel(
     private val _books = MutableStateFlow<List<BookEntity>>(emptyList())
     val books: StateFlow<List<BookEntity>> get() = _books
 
-    private val _allReviews = MutableStateFlow<Map<Long, ReviewEntity?>>(emptyMap())
-    val allReviews: StateFlow<Map<Long, ReviewEntity?>> get() = _allReviews
+    private val _allReviews = MutableStateFlow<Map<String, ReviewEntity?>>(emptyMap())
+    val allReviews: StateFlow<Map<String, ReviewEntity?>> get() = _allReviews
 
     val booksSortedByReviewDate: StateFlow<List<BookEntity>> =
         combine(_books, _allReviews) { books, reviews ->
@@ -32,12 +32,15 @@ class BookViewModel(
                 reviews[book.id]?.dateReviewed
             }
         }.stateIn(
-            viewModelScope,
-            SharingStarted.Eagerly,
-            emptyList()
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = emptyList()
         )
 
-    suspend fun insertAndReturnId(book: BookEntity): Long {
+    /**
+     * Insert a book and return its Firestore auto-generated string ID.
+     */
+    suspend fun insertAndReturnId(book: BookEntity): String {
         return bookRepository.insertAndReturnId(book)
     }
 
@@ -52,10 +55,15 @@ class BookViewModel(
     fun loadAllReviews() {
         viewModelScope.launch {
             val reviews = reviewRepository.getAllReviews()
-            _allReviews.value = reviews.associateBy { it.bookId }
+            _allReviews.value = reviews.associateBy { it.bookId } // bookId is String
         }
     }
 
+    /**
+     * Create a new Book + Review pair for an OpenLibrary result.
+     * - Book gets a Firestore auto ID (string)
+     * - Review uses that ID as bookId
+     */
     fun submitReview(
         openBook: OpenLibraryBook,
         rating: Float?,
@@ -68,6 +76,7 @@ class BookViewModel(
         viewModelScope.launch {
             val book =
                 BookEntity(
+                    // id is left as default "", FirebaseBookRepository will replace it
                     title = openBook.title,
                     authors = openBook.authorName?.joinToString(),
                     openlibraryKey = openBook.key,
@@ -75,12 +84,14 @@ class BookViewModel(
                     coverId = openBook.coverIndex
                 )
 
-            val bookId = insertAndReturnId(book)
+            // Firestore auto-ID from repository (string)
+            val bookId: String = insertAndReturnId(book)
 
             val sanitizedReviewText = reviewText.takeIf { it.isNotBlank() }
 
             val review =
                 ReviewEntity(
+                    // id left as default "", FirebaseReviewRepository will assign auto-ID
                     bookId = bookId,
                     rating = rating,
                     reviewText = sanitizedReviewText,

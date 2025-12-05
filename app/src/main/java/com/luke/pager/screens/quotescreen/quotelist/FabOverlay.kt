@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
+import com.luke.pager.screens.quotescreen.ExtendedFabItem
 import kotlinx.coroutines.delay
 
 @Composable

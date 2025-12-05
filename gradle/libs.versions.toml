@@ -65,8 +65,8 @@ kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-cor
 smile = { group = "com.github.haifengl", name = "smile-core", version.ref = "smile" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.6.0" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
-firebase-auth = { module = "com.google.firebase:firebase-auth-ktx" }
-firebase-storage = { module = "com.google.firebase:firebase-storage-ktx" }
+firebase-auth = { module = "com.google.firebase:firebase-auth" }
+firebase-storage = { module = "com.google.firebase:firebase-storage" }
 
 
 [plugins]

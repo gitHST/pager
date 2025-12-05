@@ -9,8 +9,9 @@ import com.luke.pager.data.entities.QuoteEntity
 
 @Dao
 interface QuoteDao {
+
     @Query("SELECT * FROM quotes WHERE book_id = :bookId ORDER BY date_added DESC")
-    suspend fun getQuotesByBookId(bookId: Long): List<QuoteEntity>
+    suspend fun getQuotesByBookId(bookId: String): List<QuoteEntity>
 
     @Insert
     suspend fun insertQuote(quote: QuoteEntity)

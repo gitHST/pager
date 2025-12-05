@@ -5,5 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface IBookRepository {
     fun getAllBooks(): Flow<List<BookEntity>>
-    suspend fun insertAndReturnId(book: BookEntity): Long
+
+    // 🔥 was Long, now String
+    suspend fun insertAndReturnId(book: BookEntity): String
 }

@@ -10,52 +10,45 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class FirebaseBookRepository(
+    private val uid: String,
     private val firestore: FirebaseFirestore = Firebase.firestore
 ) : IBookRepository {
 
-    // For now: flat "books" collection. We'll change this when we add Auth (users/{uid}/books).
-    private val booksCollection = firestore.collection("books")
+    // Per-user Firestore path
+    private val booksCollection =
+        firestore.collection("users")
+            .document(uid)
+            .collection("books")
 
     override fun getAllBooks(): Flow<List<BookEntity>> = callbackFlow {
         val listener = booksCollection.addSnapshotListener { snapshot, error ->
-            if (error != null) {
-                // TODO: you can add logging here if you want
-                return@addSnapshotListener
-            }
-            if (snapshot == null) return@addSnapshotListener
+            if (error != null) return@addSnapshotListener
 
-            val books = snapshot.documents.mapNotNull { doc ->
+            val books = snapshot?.documents?.mapNotNull { doc ->
                 doc.toBookEntityOrNull()
-            }
+            } ?: emptyList()
 
             trySend(books).isSuccess
         }
-
         awaitClose { listener.remove() }
     }
 
-    override suspend fun insertAndReturnId(book: BookEntity): Long {
-        // TEMP: we still control numeric IDs here. We'll switch to Firestore auto IDs in a later step.
-        val id = if (book.id == 0L) {
-            System.currentTimeMillis()
-        } else {
-            book.id
-        }
+    override suspend fun insertAndReturnId(book: BookEntity): String {
+        // Firestore auto-ID
+        val docRef = booksCollection.document()
+        val id = docRef.id
 
-        val docRef = booksCollection.document(id.toString())
-        val toSave = book.copy(id = id)
+        val bookToSave = book.copy(id = id)
 
-        docRef.set(toSave.toFirestoreMap()).await()
+        docRef.set(bookToSave.toFirestoreMap()).await()
 
         return id
     }
 
-    // ---------- Helpers ----------
+    // ---------------- Helpers ----------------
 
     private fun com.google.firebase.firestore.DocumentSnapshot.toBookEntityOrNull(): BookEntity? {
-        val idFromField = getLong("id")
-        val parsedFromDocId = runCatching { this.id.toLong() }.getOrNull()
-        val id = idFromField ?: parsedFromDocId ?: return null
+        val id = this.id // always available
 
         val title = getString("title") ?: return null
         val authors = getString("authors")
@@ -79,7 +72,7 @@ class FirebaseBookRepository(
             title = title,
             authors = authors,
             isbn = isbn,
-            cover = null,        // We do NOT read image bytes from Firestore
+            cover = null,          // we never store bytes in Firestore
             coverId = coverId,
             publisher = publisher,
             publishDate = publishDate,
@@ -98,11 +91,9 @@ class FirebaseBookRepository(
 
     private fun BookEntity.toFirestoreMap(): Map<String, Any?> =
         mapOf(
-            "id" to id,
             "title" to title,
             "authors" to authors,
             "isbn" to isbn,
-            // "cover" intentionally omitted — we never push ByteArray blobs to Firestore
             "cover_id" to coverId,
             "publisher" to publisher,
             "publish_date" to publishDate,

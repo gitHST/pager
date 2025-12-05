@@ -11,12 +11,14 @@ import kotlinx.coroutines.launch
 class QuoteViewModel(
     private val quoteRepository: IQuoteRepository
 ) : ViewModel() {
+
     private val _quotes = MutableStateFlow<List<QuoteEntity>>(emptyList())
     private val _allQuotes = MutableStateFlow<List<QuoteEntity>>(emptyList())
+
     val allQuotes: StateFlow<List<QuoteEntity>> = _allQuotes
     val quotes: StateFlow<List<QuoteEntity>> = _quotes
 
-    fun loadQuotesForBook(bookId: Long) {
+    fun loadQuotesForBook(bookId: String) {
         viewModelScope.launch {
             _quotes.value = quoteRepository.getQuotesByBookId(bookId)
         }

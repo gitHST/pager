@@ -60,8 +60,8 @@ import com.luke.pager.screens.addscreen.addcomponents.StarRatingBar
 
 @Composable
 fun ReviewScreen(
-    reviewId: Long,
-    reviews: Map<Long, ReviewEntity?>,
+    reviewId: String,
+    reviews: Map<String, ReviewEntity?>,
     reviewViewModel: ReviewViewModel,
     onDeleteSuccess: () -> Unit
 ) {

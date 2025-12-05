@@ -9,12 +9,13 @@ import com.luke.pager.data.entities.ReviewEntity
 
 @Dao
 interface ReviewDao {
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReview(review: ReviewEntity)
 
     @Query("UPDATE reviews SET review_text = :newText WHERE id = :reviewId")
     suspend fun updateReviewText(
-        reviewId: Long,
+        reviewId: String,
         newText: String
     )
 
@@ -22,17 +23,17 @@ interface ReviewDao {
     suspend fun getAllReviews(): List<ReviewEntity>
 
     @Query("SELECT book_id FROM reviews WHERE id = :reviewId")
-    suspend fun getBookIdByReviewId(reviewId: Long): Long?
+    suspend fun getBookIdByReviewId(reviewId: String): String?
 
     @Query("UPDATE reviews SET rating = :newRating WHERE id = :reviewId")
     suspend fun updateReviewRating(
-        reviewId: Long,
+        reviewId: String,
         newRating: Float
     )
 
     @Query("UPDATE reviews SET privacy = :newPrivacy WHERE id = :reviewId")
     suspend fun updateReviewPrivacy(
-        reviewId: Long,
+        reviewId: String,
         newPrivacy: Privacy
     )
 }

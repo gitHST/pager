@@ -1,7 +1,7 @@
 package unit.quotes
 
 import com.luke.pager.data.entities.BookEntity
-import com.luke.pager.screens.quotescreen.quotelist.DummyBook
+import com.luke.pager.screens.quotescreen.DummyBook
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test

@@ -180,6 +180,9 @@ dependencies {
     implementation(libs.smile)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.firestore)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.storage)
+
 
     ksp(libs.androidx.room.compiler)
 
