@@ -7,7 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,8 +68,14 @@ fun QuotesScreen(
     var isSwipeInProgress by remember { mutableStateOf(false) }
     var queuedDirection by remember { mutableIntStateOf(0) }
     val maxTabIndex = 1
-    val swipeThreshold = 50f
+
+    val swipeThreshold = 20f
     val swipeAnimationDurationMillis = 300
+
+    var totalDragX by remember { mutableFloatStateOf(0f) }
+    var totalDragY by remember { mutableFloatStateOf(0f) }
+    var hasCheckedAngle by remember { mutableStateOf(false) }
+    var swipeInvalidForThisGesture by remember { mutableStateOf(false) }
 
     fun performSwipe(direction: Int) {
         val targetIndex = (selectedTabIndex + direction).coerceIn(0, maxTabIndex)
@@ -118,15 +125,41 @@ fun QuotesScreen(
 
     Column(
         modifier = Modifier.pointerInput(selectedTabIndex, isSwipeInProgress, queuedDirection) {
-            detectHorizontalDragGestures { _, dragAmount ->
-                when {
-                    dragAmount > swipeThreshold && selectedTabIndex > 0 ->
-                        requestTabSwipe(-1)
+            detectDragGestures(
+                onDragStart = {
+                    totalDragX = 0f
+                    totalDragY = 0f
+                    hasCheckedAngle = false
+                    swipeInvalidForThisGesture = false
+                },
+                onDrag = { _, dragAmount ->
+                    if (swipeInvalidForThisGesture) return@detectDragGestures
 
-                    dragAmount < -swipeThreshold && selectedTabIndex < maxTabIndex ->
-                        requestTabSwipe(1)
+                    totalDragX += dragAmount.x
+                    totalDragY += dragAmount.y
+
+                    if (!hasCheckedAngle && kotlin.math.abs(totalDragX) >= swipeThreshold) {
+                        hasCheckedAngle = true
+
+                        val horizontalDominant =
+                            kotlin.math.abs(totalDragX) >= kotlin.math.abs(totalDragY)
+
+                        if (!horizontalDominant) {
+                            swipeInvalidForThisGesture = true
+                        } else {
+                            val direction = when {
+                                totalDragX > 0f && selectedTabIndex > 0 -> -1
+                                totalDragX < 0f && selectedTabIndex < maxTabIndex -> 1
+                                else -> 0
+                            }
+
+                            if (direction != 0) {
+                                requestTabSwipe(direction)
+                            }
+                        }
+                    }
                 }
-            }
+            )
         }
     ) {
         Title("Quotes")
@@ -247,13 +280,25 @@ data class DisplayBook(
 )
 
 data class DummyBook(val id: Long, val title: String) {
-    fun toBookEntity(): BookEntity = BookEntity(id = id, title = title, cover = null)
+    fun toBookEntity(): BookEntity = BookEntity(id = id, title = title, authors = null, cover = null)
 }
 
 fun createPlaceholderBitmap(): ImageBitmap {
-    val width = 120
-    val height = 180
+    val width = 300
+    val height = 450
     val bitmap = createBitmap(width, height)
-    bitmap.eraseColor(android.graphics.Color.LTGRAY)
+
+    for (x in 0 until width) {
+        for (y in 0 until height) {
+            val color =
+                if ((x / 10 + y / 10) % 2 == 0) {
+                    android.graphics.Color.LTGRAY
+                } else {
+                    android.graphics.Color.DKGRAY
+                }
+            bitmap.setPixel(x, y, color)
+        }
+    }
+
     return bitmap.asImageBitmap()
 }
