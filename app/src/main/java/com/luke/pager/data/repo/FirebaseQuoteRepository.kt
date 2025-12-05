@@ -7,77 +7,62 @@ import com.luke.pager.data.entities.QuoteEntity
 import kotlinx.coroutines.tasks.await
 
 class FirebaseQuoteRepository(
+    private val uid: String,
     private val firestore: FirebaseFirestore = Firebase.firestore
 ) : IQuoteRepository {
 
-    private val quotesCollection = firestore.collection("quotes")
+    private val quotesCollection =
+        firestore.collection("users")
+            .document(uid)
+            .collection("quotes")
 
-    override suspend fun getQuotesByBookId(bookId: Long): List<QuoteEntity> {
+    override suspend fun getQuotesByBookId(bookId: String): List<QuoteEntity> {
         val snapshot =
-            quotesCollection
-                .whereEqualTo("book_id", bookId)
-                .get()
-                .await()
+            quotesCollection.whereEqualTo("book_id", bookId).get().await()
 
         return snapshot.documents.mapNotNull { it.toQuoteEntityOrNull() }
     }
 
     override suspend fun insertQuote(quote: QuoteEntity) {
-        val id =
-            if (quote.id == 0L) {
-                System.currentTimeMillis()
-            } else {
-                quote.id
-            }
+        val docRef = quotesCollection.document() // auto ID
+        val id = docRef.id
 
-        val quoteForFirestore = quote.copy(id = id)
+        val quoteToSave = quote.copy(id = id)
 
-        quotesCollection
-            .document(id.toString())
-            .set(quoteForFirestore.toFirestoreMap())
-            .await()
+        docRef.set(quoteToSave.toFirestoreMap()).await()
     }
 
     override suspend fun getAllQuotes(): List<QuoteEntity> {
         val snapshot =
-            quotesCollection
-                .orderBy("date_added")
-                .get()
-                .await()
+            quotesCollection.orderBy("date_added").get().await()
 
         return snapshot.documents.mapNotNull { it.toQuoteEntityOrNull() }
     }
 
     override suspend fun updateQuote(quote: QuoteEntity) {
-        val id =
-            if (quote.id == 0L) {
-                insertQuote(quote)
-                return
-            } else {
-                quote.id
-            }
-
-        val quoteForFirestore = quote.copy(id = id)
+        if (quote.id.isBlank()) {
+            insertQuote(quote)
+            return
+        }
 
         quotesCollection
-            .document(id.toString())
-            .set(quoteForFirestore.toFirestoreMap())
+            .document(quote.id)
+            .set(quote.toFirestoreMap())
             .await()
     }
 
     override suspend fun deleteQuote(quote: QuoteEntity) {
-        val id = quote.id
-        if (id == 0L) return
+        if (quote.id.isBlank()) return
 
-        quotesCollection
-            .document(id.toString())
+        quotesCollection.document(quote.id)
             .delete()
             .await()
     }
 
+    // ---------------- Helpers ----------------
+
     private fun QuoteEntity.toFirestoreMap(): Map<String, Any?> =
         mapOf(
-            "id" to id,
             "book_id" to bookId,
             "quote_text" to quoteText,
             "page_number" to pageNumber,
@@ -85,14 +70,14 @@ class FirebaseQuoteRepository(
         )
 
     private fun com.google.firebase.firestore.DocumentSnapshot.toQuoteEntityOrNull(): QuoteEntity? {
-        val idLong = getLong("id") ?: runCatching { id.toLong() }.getOrNull()
-        val bookId = getLong("book_id") ?: return null
+        val id = this.id
+        val bookId = getString("book_id") ?: return null
         val quoteText = getString("quote_text") ?: return null
         val pageNumber = getLong("page_number")?.toInt()
         val dateAdded = getString("date_added")
 
         return QuoteEntity(
-            id = idLong ?: 0L,
+            id = id,
             bookId = bookId,
             quoteText = quoteText,
             pageNumber = pageNumber,

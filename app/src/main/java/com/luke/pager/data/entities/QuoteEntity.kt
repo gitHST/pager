@@ -17,10 +17,10 @@ import androidx.room.PrimaryKey
     ]
 )
 data class QuoteEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id: Long = 0,
+    @PrimaryKey
+    val id: String = "",          // Firestore auto ID
     @ColumnInfo(name = "book_id", index = true)
-    val bookId: Long,
+    val bookId: String,           // Firestore string reference to Book
     @ColumnInfo(name = "quote_text")
     val quoteText: String,
     @ColumnInfo(name = "page_number")

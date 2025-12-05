@@ -55,6 +55,8 @@ import com.luke.pager.data.entities.QuoteEntity
 import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.screens.components.HorizontalShadowDiv
+import com.luke.pager.screens.quotescreen.DisplayBook
+import com.luke.pager.screens.quotescreen.DummyBook
 import com.luke.pager.screens.quotescreen.addquote.AddQuoteModal
 import com.luke.pager.screens.quotescreen.carousel.Carousel
 import com.luke.pager.screens.quotescreen.carousel.byteArrayToImageBitmap
@@ -72,16 +74,25 @@ fun CarouselTab(
     val booksWithCovers = remember(bookList) {
         val realBooks = bookList.map { book ->
             val coverBitmap = book.cover?.let { byteArrayToImageBitmap(it) }
+
+            val coverUrl =
+                if (coverBitmap == null && book.coverId != null) {
+                    "https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg"
+                } else {
+                    null
+                }
+
             DisplayBook(
                 imageBitmap = coverBitmap ?: placeholderBitmap,
                 book = book,
                 isDummy = false,
-                hasCover = coverBitmap != null
+                hasCover = (coverBitmap != null || coverUrl != null),
+                coverUrl = coverUrl
             )
         }.toMutableList()
 
         val dummies = listOf(
-            DummyBook(-1, "Dummy Book 1")
+            DummyBook("-1", "Dummy Book 1")
         )
 
         dummies.forEach {
@@ -90,7 +101,8 @@ fun CarouselTab(
                     imageBitmap = placeholderBitmap,
                     book = it.toBookEntity(),
                     isDummy = true,
-                    hasCover = false
+                    hasCover = false,
+                    coverUrl = null
                 )
             )
         }
@@ -120,7 +132,8 @@ fun CarouselTab(
     val quotesListState = rememberLazyListState()
     val hasScrolledQuotes by remember {
         derivedStateOf {
-            quotesListState.firstVisibleItemIndex > 0 || quotesListState.firstVisibleItemScrollOffset > 0
+            quotesListState.firstVisibleItemIndex > 0 ||
+                    quotesListState.firstVisibleItemScrollOffset > 0
         }
     }
     val hasNotReachedEndOfQuotes by remember {
@@ -132,10 +145,11 @@ fun CarouselTab(
             } else {
                 val lastVisibleItem = visibleItems.last()
                 lastVisibleItem.index < totalItemsCount - 1 ||
-                    (
-                        lastVisibleItem.index == totalItemsCount - 1 &&
-                            lastVisibleItem.offset + lastVisibleItem.size > quotesListState.layoutInfo.viewportEndOffset
-                        )
+                        (
+                                lastVisibleItem.index == totalItemsCount - 1 &&
+                                        lastVisibleItem.offset + lastVisibleItem.size >
+                                        quotesListState.layoutInfo.viewportEndOffset
+                                )
             }
         }
     }
@@ -144,14 +158,13 @@ fun CarouselTab(
 
     val metaTextColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
 
-    var activeQuoteId by remember { mutableStateOf<Long?>(null) }
-
+    var activeQuoteId by remember { mutableStateOf<String?>(null) }
     var editingQuote by remember { mutableStateOf<QuoteEntity?>(null) }
 
     LaunchedEffect(listState.isScrollInProgress) {
         if (!listState.isScrollInProgress) {
             val nearestIndex = listState.firstVisibleItemIndex +
-                if (listState.firstVisibleItemScrollOffset > 150) 1 else 0
+                    if (listState.firstVisibleItemScrollOffset > 150) 1 else 0
 
             coroutineScope.launch {
                 listState.animateScrollToItem(nearestIndex)
@@ -213,8 +226,18 @@ fun CarouselTab(
                             exit = fadeOut(tween(100))
                         ) {
                             ExtendedFloatingActionButton(
-                                text = { Text("Add", style = MaterialTheme.typography.labelLarge) },
-                                icon = { Icon(Icons.Default.Add, contentDescription = "Add quote") },
+                                text = {
+                                    Text(
+                                        "Add",
+                                        style = MaterialTheme.typography.labelLarge
+                                    )
+                                },
+                                icon = {
+                                    Icon(
+                                        Icons.Default.Add,
+                                        contentDescription = "Add quote"
+                                    )
+                                },
                                 onClick = {
                                     uiStateViewModel.setFabExpanded(true)
                                     uiStateViewModel.setFullyCollapsed(false)
@@ -321,7 +344,8 @@ fun CarouselTab(
                                 .offset(x = (47).dp)
                         ) {
                             Icon(
-                                imageVector = if (isSortAscending) Icons.Default.South else Icons.Default.North,
+                                imageVector =
+                                    if (isSortAscending) Icons.Default.South else Icons.Default.North,
                                 contentDescription = "Toggle sort order",
                                 tint = Color.Gray
                             )

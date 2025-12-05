@@ -74,6 +74,14 @@ fun EditQuoteModal(
 
     BackHandler(enabled = visible) { onDismiss() }
 
+    // 🔹 Build coverUrl from coverId if needed
+    val coverUrl =
+        if (book.cover == null && book.coverId != null) {
+            "https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg"
+        } else {
+            null
+        }
+
     CenteredModalScaffold(
         onDismiss = onDismiss,
         overlayAlpha = overlayAlpha,
@@ -109,7 +117,8 @@ fun EditQuoteModal(
                         .heightIn(max = 150.dp)
                 ) {
                     BookCoverImage(
-                        coverData = book.cover
+                        coverData = book.cover,
+                        coverUrl = coverUrl
                     )
                 }
                 Column(

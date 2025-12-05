@@ -1,4 +1,4 @@
-package com.luke.pager.screens.quotescreen.quotelist
+package com.luke.pager.screens.quotescreen
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -49,7 +49,11 @@ import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.screens.components.NoBooksYetMessage
 import com.luke.pager.screens.components.Title
+import com.luke.pager.screens.quotescreen.quotelist.AllQuotesTab
+import com.luke.pager.screens.quotescreen.quotelist.CarouselTab
+import com.luke.pager.screens.quotescreen.quotelist.FabOverlay
 import kotlinx.coroutines.delay
+import kotlin.math.abs
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -138,11 +142,11 @@ fun QuotesScreen(
                     totalDragX += dragAmount.x
                     totalDragY += dragAmount.y
 
-                    if (!hasCheckedAngle && kotlin.math.abs(totalDragX) >= swipeThreshold) {
+                    if (!hasCheckedAngle && abs(totalDragX) >= swipeThreshold) {
                         hasCheckedAngle = true
 
                         val horizontalDominant =
-                            kotlin.math.abs(totalDragX) >= kotlin.math.abs(totalDragY)
+                            abs(totalDragX) >= abs(totalDragY)
 
                         if (!horizontalDominant) {
                             swipeInvalidForThisGesture = true
@@ -276,11 +280,17 @@ data class DisplayBook(
     val imageBitmap: ImageBitmap,
     val book: BookEntity,
     val isDummy: Boolean,
-    val hasCover: Boolean
+    val hasCover: Boolean,
+    val coverUrl: String? = null
 )
 
-data class DummyBook(val id: Long, val title: String) {
-    fun toBookEntity(): BookEntity = BookEntity(id = id, title = title, authors = null, cover = null)
+data class DummyBook(val id: String, val title: String) {
+    fun toBookEntity(): BookEntity = BookEntity(
+        id = id,
+        title = title,
+        authors = null,
+        cover = null
+    )
 }
 
 fun createPlaceholderBitmap(): ImageBitmap {

@@ -9,14 +9,15 @@ import kotlinx.coroutines.launch
 class ReviewViewModel(
     private val reviewRepository: IReviewRepository
 ) : ViewModel() {
-    fun deleteReviewAndBookById(reviewId: Long) {
+
+    fun deleteReviewAndBookById(reviewId: String) {
         viewModelScope.launch {
             reviewRepository.deleteReviewAndBookById(reviewId)
         }
     }
 
     fun updateReviewText(
-        reviewId: Long,
+        reviewId: String,
         newText: String
     ) {
         viewModelScope.launch {
@@ -25,7 +26,7 @@ class ReviewViewModel(
     }
 
     fun updateReviewRating(
-        reviewId: Long,
+        reviewId: String,
         newRating: Float
     ) {
         viewModelScope.launch {
@@ -34,7 +35,7 @@ class ReviewViewModel(
     }
 
     fun updateReviewPrivacy(
-        reviewId: Long,
+        reviewId: String,
         privacy: Privacy
     ) {
         viewModelScope.launch {

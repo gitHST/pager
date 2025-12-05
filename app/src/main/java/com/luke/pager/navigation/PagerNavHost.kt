@@ -27,7 +27,7 @@ import com.luke.pager.screens.ExploreScreen
 import com.luke.pager.screens.ReviewScreen
 import com.luke.pager.screens.addscreen.SearchAndResultsModal
 import com.luke.pager.screens.profile.SettingsScreen
-import com.luke.pager.screens.quotescreen.quotelist.QuotesScreen
+import com.luke.pager.screens.quotescreen.QuotesScreen
 import com.luke.pager.screens.quotescreen.scan.MultiPagePreviewModal
 import com.luke.pager.screens.quotescreen.scan.ScanScreen
 import com.luke.pager.screens.quotescreen.scan.takePhotoHandler
@@ -226,8 +226,10 @@ fun PagerNavHost(
         }
 
         composable("review_screen/{reviewId}") { backStackEntry ->
-            val reviewId = backStackEntry.arguments?.getString("reviewId")?.toLongOrNull() ?: 0L
+            val reviewId = backStackEntry.arguments?.getString("reviewId") ?: ""
+
             val reviews by bookViewModel.allReviews.collectAsState()
+
             ReviewScreen(
                 reviewId = reviewId,
                 reviews = reviews,

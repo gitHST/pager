@@ -21,7 +21,7 @@ fun SubmitQuoteHeader(
     onDismiss: () -> Unit,
     quoteText: String,
     pageNum: String,
-    bookId: Long,
+    bookId: String,
     quoteViewModel: QuoteViewModel,
     scrollState: ScrollState,
     modifier: Modifier = Modifier
@@ -41,13 +41,14 @@ fun SubmitQuoteHeader(
             val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
             val dateAdded = formatter.format(now)
 
-            val quoteEntity = QuoteEntity(
-                id = 0,
-                bookId = bookId,
-                quoteText = quoteText,
-                pageNumber = pageNum.toIntOrNull(),
-                dateAdded = dateAdded
-            )
+            val quoteEntity =
+                QuoteEntity(
+                    id = "", // Firestore/Room will assign a String ID
+                    bookId = bookId,
+                    quoteText = quoteText,
+                    pageNumber = pageNum.toIntOrNull(),
+                    dateAdded = dateAdded
+                )
 
             coroutineScope.launch {
                 quoteViewModel.addQuote(quoteEntity)

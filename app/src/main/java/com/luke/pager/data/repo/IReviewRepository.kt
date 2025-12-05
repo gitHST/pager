@@ -6,20 +6,10 @@ import com.luke.pager.data.entities.ReviewEntity
 interface IReviewRepository {
     suspend fun insertReview(review: ReviewEntity)
     suspend fun getAllReviews(): List<ReviewEntity>
-    suspend fun deleteReviewAndBookById(reviewId: Long)
 
-    suspend fun updateReviewText(
-        reviewId: Long,
-        newText: String
-    )
-
-    suspend fun updateReviewRating(
-        reviewId: Long,
-        newRating: Float
-    )
-
-    suspend fun updateReviewPrivacy(
-        reviewId: Long,
-        privacy: Privacy
-    )
+    // 🔥 all review IDs are now String
+    suspend fun deleteReviewAndBookById(reviewId: String)
+    suspend fun updateReviewText(reviewId: String, newText: String)
+    suspend fun updateReviewRating(reviewId: String, newRating: Float)
+    suspend fun updateReviewPrivacy(reviewId: String, privacy: Privacy)
 }

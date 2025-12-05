@@ -11,14 +11,12 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface BookDao {
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBook(book: BookEntity)
 
-    @Insert
-    suspend fun insertAndReturnId(book: BookEntity): Long
-
     @Query("SELECT * FROM books WHERE id = :id")
-    suspend fun getBookById(id: Long): BookEntity?
+    suspend fun getBookById(id: String): BookEntity?
 
     @Query("SELECT * FROM books")
     fun getAllBooks(): Flow<List<BookEntity>>
@@ -30,5 +28,5 @@ interface BookDao {
     suspend fun deleteBook(book: BookEntity)
 
     @Query("DELETE FROM books WHERE id = :bookId")
-    suspend fun deleteBookById(bookId: Long)
+    suspend fun deleteBookById(bookId: String)
 }

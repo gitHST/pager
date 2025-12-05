@@ -62,6 +62,14 @@ fun AddQuoteModal(
 
     BackHandler(enabled = visible) { onDismiss() }
 
+    // 🔹 Build coverUrl from coverId if needed
+    val coverUrl =
+        if (book.cover == null && book.coverId != null) {
+            "https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg"
+        } else {
+            null
+        }
+
     CenteredModalScaffold(
         overlayAlpha = overlayAlpha,
         onDismiss = onDismiss,
@@ -79,10 +87,10 @@ fun AddQuoteModal(
         Spacer(modifier = Modifier.height(16.dp))
         Column(
             modifier =
-            Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .animateContentSize()
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .animateContentSize()
         ) {
             Row(
                 modifier = Modifier
@@ -96,7 +104,8 @@ fun AddQuoteModal(
                         .heightIn(max = 150.dp)
                 ) {
                     BookCoverImage(
-                        coverData = book.cover
+                        coverData = book.cover,
+                        coverUrl = coverUrl
                     )
                 }
                 Column(

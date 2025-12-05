@@ -29,6 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.room.Room
+import com.luke.pager.auth.AuthManager
 import com.luke.pager.data.AppDatabase
 import com.luke.pager.data.repo.BookRepository
 import com.luke.pager.data.repo.FirebaseBookRepository
@@ -50,8 +51,8 @@ import kotlinx.coroutines.delay
 import java.io.File
 
 class MainActivity : ComponentActivity() {
+
     private companion object {
-        // use firebase or room
         private const val USE_FIREBASE = true
     }
 
@@ -70,36 +71,52 @@ class MainActivity : ComponentActivity() {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
 
-        val bookRepo: IBookRepository
-        val reviewRepo: IReviewRepository
-        val quoteRepo: IQuoteRepository
-
-        if (USE_FIREBASE) {/**/
-            bookRepo = FirebaseBookRepository()
-            reviewRepo = FirebaseReviewRepository()
-            quoteRepo = FirebaseQuoteRepository()
-        } else {
-            restoreDatabase()
-
-            val db =
-                Room.databaseBuilder(applicationContext, AppDatabase::class.java, "pager-db")
-                    .fallbackToDestructiveMigration(true)
-                    .build()
-
-            val bookDao = db.bookDao()
-            val reviewDao = db.reviewDao()
-            val quoteDao = db.quoteDao()
-
-            bookRepo = BookRepository(bookDao)
-            reviewRepo = ReviewRepository(reviewDao, bookDao)
-            quoteRepo = QuoteRepository(quoteDao)
-        }
-
-        val bookViewModel = BookViewModel(bookRepo, reviewRepo)
-        val reviewViewModel = ReviewViewModel(reviewRepo)
-        val quoteViewModel = QuoteViewModel(quoteRepo)
-
         setContent {
+            var ready by remember { mutableStateOf(false) }
+            var uid by remember { mutableStateOf("") }
+
+            // 🔥 AUTHENTICATION FIRST — ensures anonymous login before loading UI
+            LaunchedEffect(Unit) {
+                uid = AuthManager.ensureAnonymousUser()
+                ready = true
+            }
+
+            if (!ready) {
+                // Simple loading screen
+                Box(Modifier.fillMaxSize().background(Color.White)) {}
+                return@setContent
+            }
+
+            // Now that we have UID, create repositories
+            val bookRepo: IBookRepository
+            val reviewRepo: IReviewRepository
+            val quoteRepo: IQuoteRepository
+
+            if (USE_FIREBASE) {
+                bookRepo = FirebaseBookRepository(uid)     // 🔥 Modified in Step 2
+                reviewRepo = FirebaseReviewRepository(uid) // 🔥 Modified in Step 2
+                quoteRepo = FirebaseQuoteRepository(uid)   // 🔥 Modified in Step 2
+            } else {
+                restoreDatabase()
+
+                val db =
+                    Room.databaseBuilder(applicationContext, AppDatabase::class.java, "pager-db")
+                        .fallbackToDestructiveMigration(true)
+                        .build()
+
+                val bookDao = db.bookDao()
+                val reviewDao = db.reviewDao()
+                val quoteDao = db.quoteDao()
+
+                bookRepo = BookRepository(bookDao)
+                reviewRepo = ReviewRepository(reviewDao, bookDao)
+                quoteRepo = QuoteRepository(quoteDao)
+            }
+
+            val bookViewModel = BookViewModel(bookRepo, reviewRepo)
+            val reviewViewModel = ReviewViewModel(reviewRepo)
+            val quoteViewModel = QuoteViewModel(quoteRepo)
+
             PagerAppUI(bookViewModel, reviewViewModel, quoteViewModel)
         }
     }
