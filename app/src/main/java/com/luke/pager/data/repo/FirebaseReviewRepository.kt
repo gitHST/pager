@@ -40,21 +40,16 @@ class FirebaseReviewRepository(
     override suspend fun deleteReviewAndBookById(reviewId: Long) {
         val reviewDocId = reviewId.toString()
 
-        // 1. Get the review to find its bookId
         val reviewSnapshot = reviewsCollection.document(reviewDocId).get().await()
         val bookId = reviewSnapshot.getLong("book_id")
 
-        // 2. Delete the review itself
         reviewsCollection.document(reviewDocId).delete().await()
 
-        // 3. Delete the related book (and any quotes) if we know the bookId
         if (bookId != null) {
             val bookDocId = bookId.toString()
 
-            // Delete the book document
             booksCollection.document(bookDocId).delete().await()
 
-            // Delete all quotes that reference this book
             val quotesSnapshot =
                 quotesCollection.whereEqualTo("book_id", bookId).get().await()
             for (doc in quotesSnapshot.documents) {
@@ -93,7 +88,6 @@ class FirebaseReviewRepository(
             .await()
     }
 
-    // --- Mapping helpers ---
 
     private fun ReviewEntity.toFirestoreMap(): Map<String, Any?> =
         mapOf(

@@ -187,7 +187,6 @@ fun PagerNavHost(
             }
         }
     ) {
-        // 🔹 NEW: profile route wired to ProfileScreen
         composable("profile") {
             SettingsScreen(
                 navController = navController,
