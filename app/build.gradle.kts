@@ -4,16 +4,17 @@ plugins {
     alias(libs.plugins.google.ksp)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.jacoco)
 }
 
 android {
     namespace = "com.luke.pager"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.luke.pager"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 5
         versionName = "0.4.0"
 
@@ -22,7 +23,6 @@ android {
     }
 
     signingConfigs {
-        // Don't try to use Windows keystore path on CI (Linux)
         val isCi = System.getenv("CI") == "true"
 
         val releaseStoreFile = project.findProperty("RELEASE_STORE_FILE") as String?
@@ -93,12 +93,62 @@ android {
     }
 }
 
+jacoco {
+    toolVersion = "0.8.10"
+}
+
+tasks.withType<Test> {
+    useJUnit()
+    extensions.configure<JacocoTaskExtension> {
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
+    }
+}
+
 tasks.named("ktlintCheck") {
     group = "verification"
 }
 
 tasks.named("ktlintFormat") {
     group = "formatting"
+}
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    val fileFilter = listOf(
+        "**/R.class",
+        "**/R$*.class",
+        "**/BuildConfig.*",
+        "**/Manifest*.*",
+        "**/*Test*.*",
+        "android/**/*.*"
+    )
+
+    val buildDirFile = layout.buildDirectory.asFile.get()
+
+    val debugTree = fileTree(buildDirFile.resolve("intermediates/javac/debug")) {
+        exclude(fileFilter)
+    }
+
+    val kotlinDebugTree = fileTree(buildDirFile.resolve("tmp/kotlin-classes/debug")) {
+        exclude(fileFilter)
+    }
+
+    classDirectories.setFrom(files(debugTree, kotlinDebugTree))
+    sourceDirectories.setFrom(files("src/main/java", "src/main/kotlin"))
+    executionData.setFrom(
+        fileTree(buildDirFile) {
+            include(
+                "**/jacoco/testDebugUnitTest.exec",
+                "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec"
+            )
+        }
+    )
 }
 
 dependencies {
