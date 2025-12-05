@@ -3,12 +3,14 @@ package com.luke.pager.data.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.luke.pager.data.entities.QuoteEntity
-import com.luke.pager.data.repo.QuoteRepository
+import com.luke.pager.data.repo.IQuoteRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class QuoteViewModel(private val quoteRepository: QuoteRepository) : ViewModel() {
+class QuoteViewModel(
+    private val quoteRepository: IQuoteRepository
+) : ViewModel() {
     private val _quotes = MutableStateFlow<List<QuoteEntity>>(emptyList())
     private val _allQuotes = MutableStateFlow<List<QuoteEntity>>(emptyList())
     val allQuotes: StateFlow<List<QuoteEntity>> = _allQuotes

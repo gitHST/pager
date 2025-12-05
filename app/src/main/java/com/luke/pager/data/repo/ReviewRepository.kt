@@ -5,33 +5,39 @@ import com.luke.pager.data.dao.BookDao
 import com.luke.pager.data.dao.ReviewDao
 import com.luke.pager.data.entities.ReviewEntity
 
-class ReviewRepository(private val reviewDao: ReviewDao, private val bookDao: BookDao) {
-    suspend fun insertReview(review: ReviewEntity) = reviewDao.insertReview(review)
+class ReviewRepository(
+    private val reviewDao: ReviewDao,
+    private val bookDao: BookDao
+) : IReviewRepository {
 
-    suspend fun getAllReviews() = reviewDao.getAllReviews()
+    override suspend fun insertReview(review: ReviewEntity) =
+        reviewDao.insertReview(review)
 
-    suspend fun deleteReviewAndBookById(reviewId: Long) {
+    override suspend fun getAllReviews(): List<ReviewEntity> =
+        reviewDao.getAllReviews()
+
+    override suspend fun deleteReviewAndBookById(reviewId: Long) {
         val bookId = reviewDao.getBookIdByReviewId(reviewId)
         bookId?.let {
             bookDao.deleteBookById(it)
         }
     }
 
-    suspend fun updateReviewText(
+    override suspend fun updateReviewText(
         reviewId: Long,
         newText: String
     ) {
         reviewDao.updateReviewText(reviewId, newText)
     }
 
-    suspend fun updateReviewRating(
+    override suspend fun updateReviewRating(
         reviewId: Long,
         newRating: Float
     ) {
         reviewDao.updateReviewRating(reviewId, newRating)
     }
 
-    suspend fun updateReviewPrivacy(
+    override suspend fun updateReviewPrivacy(
         reviewId: Long,
         privacy: Privacy
     ) {
