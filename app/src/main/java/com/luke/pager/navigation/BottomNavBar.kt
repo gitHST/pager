@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -18,9 +19,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 @Composable
 fun BottomNavBar(navController: NavHostController) {
     val items = listOf(
-        NavItem("diary", "Diary", Icons.Filled.Book),
+        NavItem("profile", "Profile", Icons.Filled.Person),
         NavItem("plus", "Add", Icons.Filled.Add),
-        NavItem("quotes", "Quotes", Icons.Filled.FormatQuote)
+        NavItem("quotes", "Quotes", Icons.Filled.FormatQuote),
+        NavItem("diary", "Diary", Icons.Filled.Book),
     )
 
     NavigationBar {

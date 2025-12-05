@@ -148,8 +148,21 @@ fun PagerAppUI(
         val currentRoute = navBackStackEntry?.destination?.route
         val snackbarHostState = remember { SnackbarHostState() }
 
-        var animatedTargetColor by remember { mutableStateOf<Color?>(null) }
+        // Routes where we want to hide the bottom bar
+        val hideBottomBarRoutes = setOf(
+            "scan_screen",
+            "multi_page_preview",
+            "profile" // Settings screen
+        )
+        val shouldShowBottomBar = currentRoute !in hideBottomBarRoutes
 
+        // Single source of truth for transition duration
+        val transitionDurationMillis = 200
+
+        var animatedTargetColor by remember { mutableStateOf<Color?>(null) }
+        var bottomBarVisible by remember { mutableStateOf(true) }
+
+        // Background color transition
         LaunchedEffect(currentRoute) {
             if (animatedTargetColor == null) {
                 delay(1)
@@ -161,37 +174,47 @@ fun PagerAppUI(
                 }
         }
 
+        // Bottom bar show/hide is delayed by the same transition duration
+        LaunchedEffect(shouldShowBottomBar) {
+            delay(transitionDurationMillis.toLong())
+            bottomBarVisible = shouldShowBottomBar
+        }
+
         val animatedBackgroundColor by animateColorAsState(
             targetValue = animatedTargetColor ?: Color.Transparent,
-            animationSpec = tween(durationMillis = 200)
+            animationSpec = tween(durationMillis = transitionDurationMillis)
         )
 
         Box(
             modifier =
-            Modifier
-                .fillMaxSize()
-                .background(animatedBackgroundColor)
+                Modifier
+                    .fillMaxSize()
+                    .background(animatedBackgroundColor)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.clean_gray_paper),
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds,
                 modifier =
-                Modifier
-                    .fillMaxSize()
-                    .alpha(0.9f)
+                    Modifier
+                        .fillMaxSize()
+                        .alpha(0.9f)
             )
 
             Scaffold(
                 containerColor = Color.Transparent,
                 snackbarHost = { SnackbarHost(snackbarHostState) },
-                bottomBar = { BottomNavBar(navController) }
+                bottomBar = {
+                    if (bottomBarVisible) {
+                        BottomNavBar(navController)
+                    }
+                }
             ) { paddingValues ->
                 Box(
                     modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
                 ) {
                     PagerNavHost(
                         navController,

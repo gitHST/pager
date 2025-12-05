@@ -26,6 +26,7 @@ import com.luke.pager.screens.DiaryScreen
 import com.luke.pager.screens.ExploreScreen
 import com.luke.pager.screens.ReviewScreen
 import com.luke.pager.screens.addscreen.SearchAndResultsModal
+import com.luke.pager.screens.profile.SettingsScreen
 import com.luke.pager.screens.quotescreen.quotelist.QuotesScreen
 import com.luke.pager.screens.quotescreen.scan.MultiPagePreviewModal
 import com.luke.pager.screens.quotescreen.scan.ScanScreen
@@ -40,7 +41,7 @@ fun PagerNavHost(
     reviewViewModel: ReviewViewModel,
     quoteViewModel: QuoteViewModel
 ) {
-    val topLevelRoutes = listOf("diary", "plus", "quotes")
+    val topLevelRoutes = listOf("profile", "plus", "quotes", "diary")
 
     val currentRouteEntry by navController.currentBackStackEntryAsState()
 
@@ -186,6 +187,16 @@ fun PagerNavHost(
             }
         }
     ) {
+        // 🔹 NEW: profile route wired to ProfileScreen
+        composable("profile") {
+            SettingsScreen(
+                navController = navController,
+                bookViewModel = bookViewModel,
+                reviewViewModel = reviewViewModel,
+                quoteViewModel = quoteViewModel
+            )
+        }
+
         composable("activity") {
             ActivityScreen(bookViewModel)
         }
