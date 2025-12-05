@@ -1,4 +1,3 @@
-// MainActivity.kt
 package com.luke.pager
 
 import android.content.pm.ActivityInfo
@@ -47,15 +46,15 @@ import com.luke.pager.navigation.BottomNavBar
 import com.luke.pager.navigation.PagerNavHost
 import com.luke.pager.ui.theme.NiceBlue
 import com.luke.pager.ui.theme.PagerTheme
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import java.io.File
 
 class MainActivity : ComponentActivity() {
-    @OptIn(DelicateCoroutinesApi::class)
+    private companion object {
+        // use firebase or room
+        private const val USE_FIREBASE = true
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -71,57 +70,30 @@ class MainActivity : ComponentActivity() {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
 
-        // exportDatabase()
-        // restoreDatabase()
-        // /data/data/com.luke.pager/files/
+        val bookRepo: IBookRepository
+        val reviewRepo: IReviewRepository
+        val quoteRepo: IQuoteRepository
 
-        val db =
-            Room.databaseBuilder(applicationContext, AppDatabase::class.java, "pager-db")
-                .fallbackToDestructiveMigration(true)
-                .build()
-                .apply {
-                    GlobalScope.launch {
-                        // comment out this line to keep the database
-                        // clearAllTables()
-                        // seedDatabaseIfEmpty(this@apply)
-                    }
-                }
+        if (USE_FIREBASE) {/**/
+            bookRepo = FirebaseBookRepository()
+            reviewRepo = FirebaseReviewRepository()
+            quoteRepo = FirebaseQuoteRepository()
+        } else {
+            restoreDatabase()
 
-        val bookDao = db.bookDao()
-        val reviewDao = db.reviewDao()
-        val quoteDao = db.quoteDao()
+            val db =
+                Room.databaseBuilder(applicationContext, AppDatabase::class.java, "pager-db")
+                    .fallbackToDestructiveMigration(true)
+                    .build()
 
-        // Room-backed repositories (source of truth for migration)
-        val roomBookRepo: IBookRepository = BookRepository(bookDao)
-        val roomReviewRepo: IReviewRepository = ReviewRepository(reviewDao, bookDao)
-        val roomQuoteRepo: IQuoteRepository = QuoteRepository(quoteDao)
+            val bookDao = db.bookDao()
+            val reviewDao = db.reviewDao()
+            val quoteDao = db.quoteDao()
 
-        // Firebase-backed repositories (new target)
-        val firebaseBookRepo: IBookRepository = FirebaseBookRepository()
-        val firebaseReviewRepo: IReviewRepository = FirebaseReviewRepository()
-        val firebaseQuoteRepo: IQuoteRepository = FirebaseQuoteRepository()
-
-        // migrateLocalRoomToFirebase(
-        //     roomBookRepo = roomBookRepo,
-        //     roomReviewRepo = roomReviewRepo,
-        //     roomQuoteRepo = roomQuoteRepo,
-        //     firebaseBookRepo = firebaseBookRepo,
-        //     firebaseReviewRepo = firebaseReviewRepo,
-        //     firebaseQuoteRepo = firebaseQuoteRepo
-        // )
-
-
-        // Books:
-        // val bookRepo: IBookRepository = roomBookRepo
-        val bookRepo: IBookRepository = firebaseBookRepo
-
-        // Reviews:
-        // val reviewRepo: IReviewRepository = roomReviewRepo
-        val reviewRepo: IReviewRepository = firebaseReviewRepo
-
-        // Quotes:
-        // val quoteRepo: IQuoteRepository = roomQuoteRepo
-        val quoteRepo: IQuoteRepository = firebaseQuoteRepo
+            bookRepo = BookRepository(bookDao)
+            reviewRepo = ReviewRepository(reviewDao, bookDao)
+            quoteRepo = QuoteRepository(quoteDao)
+        }
 
         val bookViewModel = BookViewModel(bookRepo, reviewRepo)
         val reviewViewModel = ReviewViewModel(reviewRepo)
@@ -129,48 +101,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             PagerAppUI(bookViewModel, reviewViewModel, quoteViewModel)
-        }
-    }
-
-    @Suppress("unused")
-    @OptIn(DelicateCoroutinesApi::class)
-    private fun migrateLocalRoomToFirebase(
-        roomBookRepo: IBookRepository,
-        roomReviewRepo: IReviewRepository,
-        roomQuoteRepo: IQuoteRepository,
-        firebaseBookRepo: IBookRepository,
-        firebaseReviewRepo: IReviewRepository,
-        firebaseQuoteRepo: IQuoteRepository
-    ) {
-        GlobalScope.launch {
-            val prefs = getSharedPreferences("pager_prefs", MODE_PRIVATE)
-            val alreadyMigrated = prefs.getBoolean("firebase_migrated_v1", false)
-            if (alreadyMigrated) return@launch
-
-            try {
-                // Read everything from local Room
-                val localBooks = roomBookRepo.getAllBooks().first()
-                val localReviews = roomReviewRepo.getAllReviews()
-                val localQuotes = roomQuoteRepo.getAllQuotes()
-
-                // Push to Firebase
-                localBooks.forEach { firebaseBookRepo.insertAndReturnId(it) }
-                localReviews.forEach { firebaseReviewRepo.insertReview(it) }
-                localQuotes.forEach { firebaseQuoteRepo.insertQuote(it) }
-
-                prefs
-                    .edit()
-                    .putBoolean("firebase_migrated_v1", true)
-                    .apply()
-
-                println("✅ Firebase migration complete: " +
-                        "${localBooks.size} books, " +
-                        "${localReviews.size} reviews, " +
-                        "${localQuotes.size} quotes.")
-            } catch (e: Exception) {
-                e.printStackTrace()
-                println("❌ Firebase migration failed: ${e.message}")
-            }
         }
     }
 
@@ -192,7 +122,7 @@ class MainActivity : ComponentActivity() {
 
         dbFile.copyTo(backupDb, overwrite = true)
         if (walFile.exists()) walFile.copyTo(backupWal, overwrite = true)
-        if (shmFile.exists()) walFile.copyTo(backupShm, overwrite = true)
+        if (shmFile.exists()) shmFile.copyTo(backupShm, overwrite = true)
 
         println("✅ Full database export complete: ${backupDb.absolutePath}")
     }
@@ -231,21 +161,18 @@ fun PagerAppUI(
         val currentRoute = navBackStackEntry?.destination?.route
         val snackbarHostState = remember { SnackbarHostState() }
 
-        // Routes where we want to hide the bottom bar
         val hideBottomBarRoutes = setOf(
             "scan_screen",
             "multi_page_preview",
-            "profile" // Settings screen
+            "profile"
         )
         val shouldShowBottomBar = currentRoute !in hideBottomBarRoutes
 
-        // Single source of truth for transition duration
         val transitionDurationMillis = 200
 
         var animatedTargetColor by remember { mutableStateOf<Color?>(null) }
         var bottomBarVisible by remember { mutableStateOf(true) }
 
-        // Background color transition
         LaunchedEffect(currentRoute) {
             if (animatedTargetColor == null) {
                 delay(1)
@@ -257,7 +184,6 @@ fun PagerAppUI(
                 }
         }
 
-        // Bottom bar show/hide is delayed by the same transition duration
         LaunchedEffect(shouldShowBottomBar) {
             delay(transitionDurationMillis.toLong())
             bottomBarVisible = shouldShowBottomBar

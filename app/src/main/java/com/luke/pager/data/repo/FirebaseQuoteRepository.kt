@@ -51,7 +51,6 @@ class FirebaseQuoteRepository(
     override suspend fun updateQuote(quote: QuoteEntity) {
         val id =
             if (quote.id == 0L) {
-                // If no id yet, treat as insert
                 insertQuote(quote)
                 return
             } else {
@@ -75,8 +74,6 @@ class FirebaseQuoteRepository(
             .delete()
             .await()
     }
-
-    // --- Mapping helpers ---
 
     private fun QuoteEntity.toFirestoreMap(): Map<String, Any?> =
         mapOf(

@@ -41,7 +41,6 @@ fun SettingsScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        // Top header area: back button + centered title, matching DiaryScreen's title style
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -58,12 +57,9 @@ fun SettingsScreen(
                 )
             }
 
-            // This uses the same Title composable as DiaryScreen, so the title
-            // appears in exactly the same place / style.
             Title("Settings")
         }
 
-        // Content area, similar padding to DiaryScreen's list
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -85,7 +81,6 @@ fun SettingsScreen(
                 Switch(
                     checked = darkModeEnabled,
                     onCheckedChange = { checked ->
-                        // For now this only updates local state and doesn't affect the theme
                         darkModeEnabled = checked
                     }
                 )

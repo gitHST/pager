@@ -14,14 +14,11 @@ class FirebaseBookRepository(
     private val firestore: FirebaseFirestore = Firebase.firestore
 ) : IBookRepository {
 
-    // For now: flat "books" collection.
-    // Later you can move to users/{uid}/books when you add Firebase Auth.
     private val booksCollection = firestore.collection("books")
 
     override fun getAllBooks(): Flow<List<BookEntity>> = callbackFlow {
         val listener = booksCollection.addSnapshotListener { snapshot, error ->
             if (error != null) {
-                // You might want to log this or send an error state elsewhere.
                 return@addSnapshotListener
             }
             if (snapshot == null) return@addSnapshotListener
@@ -37,9 +34,6 @@ class FirebaseBookRepository(
     }
 
     override suspend fun insertAndReturnId(book: BookEntity): Long {
-        // Simple ID strategy:
-        // - if id == 0L, generate one from currentTimeMillis()
-        // - otherwise respect existing id
         val id = if (book.id == 0L) {
             System.currentTimeMillis()
         } else {
@@ -49,13 +43,10 @@ class FirebaseBookRepository(
         val docRef = booksCollection.document(id.toString())
         val toSave = book.copy(id = id)
 
-        // We map the entity to a Firestore map (no ByteArray cover).
         docRef.set(toSave.toFirestoreMap()).await()
 
         return id
     }
-
-    // --- Helpers ---
 
     private fun com.google.firebase.firestore.DocumentSnapshot.toBookEntityOrNull(): BookEntity? {
         val idFromField = getLong("id")
@@ -78,14 +69,12 @@ class FirebaseBookRepository(
         val genres = getString("genres")
         val dateAdded = getString("date_added")
 
-        // NOTE: cover is ByteArray? in Room, but we do NOT store it in Firestore.
-        // You’ll typically move that to Firebase Storage and store a URL later.
         return BookEntity(
             id = id,
             title = title,
             authors = authors,
             isbn = isbn,
-            cover = null, // no cover bytes from Firestore (yet)
+            cover = null,
             publisher = publisher,
             publishDate = publishDate,
             language = language,
