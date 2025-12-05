@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.entities.ReviewEntity
-import com.luke.pager.data.repo.BookRepository
-import com.luke.pager.data.repo.ReviewRepository
+import com.luke.pager.data.repo.IBookRepository
+import com.luke.pager.data.repo.IReviewRepository
 import com.luke.pager.network.OpenLibraryBook
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,8 +19,8 @@ import kotlinx.coroutines.withContext
 import java.net.URL
 
 class BookViewModel(
-    private val bookRepository: BookRepository,
-    private val reviewRepository: ReviewRepository
+    private val bookRepository: IBookRepository,
+    private val reviewRepository: IReviewRepository
 ) : ViewModel() {
 
     private val _books = MutableStateFlow<List<BookEntity>>(emptyList())

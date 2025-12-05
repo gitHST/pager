@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.jacoco)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -177,6 +178,8 @@ dependencies {
     implementation(libs.mlkit.text.recognition)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.smile)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.firestore)
 
     ksp(libs.androidx.room.compiler)
 
@@ -191,4 +194,5 @@ dependencies {
 
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
 }

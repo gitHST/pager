@@ -1,0 +1,11 @@
+package com.luke.pager.data.repo
+
+import com.luke.pager.data.entities.QuoteEntity
+
+interface IQuoteRepository {
+    suspend fun getQuotesByBookId(bookId: Long): List<QuoteEntity>
+    suspend fun insertQuote(quote: QuoteEntity)
+    suspend fun getAllQuotes(): List<QuoteEntity>
+    suspend fun updateQuote(quote: QuoteEntity)
+    suspend fun deleteQuote(quote: QuoteEntity)
+}

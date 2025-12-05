@@ -3,10 +3,12 @@ package com.luke.pager.data.viewmodel
 import Privacy
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.luke.pager.data.repo.ReviewRepository
+import com.luke.pager.data.repo.IReviewRepository
 import kotlinx.coroutines.launch
 
-class ReviewViewModel(private val reviewRepository: ReviewRepository) : ViewModel() {
+class ReviewViewModel(
+    private val reviewRepository: IReviewRepository
+) : ViewModel() {
     fun deleteReviewAndBookById(reviewId: Long) {
         viewModelScope.launch {
             reviewRepository.deleteReviewAndBookById(reviewId)
