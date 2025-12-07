@@ -74,7 +74,6 @@ fun EditQuoteModal(
 
     BackHandler(enabled = visible) { onDismiss() }
 
-    // 🔹 Build coverUrl from coverId if needed
     val coverUrl =
         if (book.cover == null && book.coverId != null) {
             "https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg"

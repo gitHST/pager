@@ -11,13 +11,13 @@ class DummyBookTest {
     @Test
     fun `toBookEntity maps id and title and sets cover null`() {
         val dummy = DummyBook(
-            id = -1L,
+            id = "-1",
             title = "Dummy Book 1"
         )
 
         val entity: BookEntity = dummy.toBookEntity()
 
-        assertEquals(-1L, entity.id)
+        assertEquals("-1", entity.id)
         assertEquals("Dummy Book 1", entity.title)
         assertNull(entity.cover)
     }

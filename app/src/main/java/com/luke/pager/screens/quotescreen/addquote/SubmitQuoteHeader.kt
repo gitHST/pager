@@ -43,7 +43,7 @@ fun SubmitQuoteHeader(
 
             val quoteEntity =
                 QuoteEntity(
-                    id = "", // Firestore/Room will assign a String ID
+                    id = "",
                     bookId = bookId,
                     quoteText = quoteText,
                     pageNumber = pageNum.toIntOrNull(),

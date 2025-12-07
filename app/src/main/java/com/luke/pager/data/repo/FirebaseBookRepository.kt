@@ -14,7 +14,6 @@ class FirebaseBookRepository(
     private val firestore: FirebaseFirestore = Firebase.firestore
 ) : IBookRepository {
 
-    // Per-user Firestore path
     private val booksCollection =
         firestore.collection("users")
             .document(uid)
@@ -34,7 +33,6 @@ class FirebaseBookRepository(
     }
 
     override suspend fun insertAndReturnId(book: BookEntity): String {
-        // Firestore auto-ID
         val docRef = booksCollection.document()
         val id = docRef.id
 
@@ -45,10 +43,9 @@ class FirebaseBookRepository(
         return id
     }
 
-    // ---------------- Helpers ----------------
 
     private fun com.google.firebase.firestore.DocumentSnapshot.toBookEntityOrNull(): BookEntity? {
-        val id = this.id // always available
+        val id = this.id
 
         val title = getString("title") ?: return null
         val authors = getString("authors")
@@ -72,7 +69,7 @@ class FirebaseBookRepository(
             title = title,
             authors = authors,
             isbn = isbn,
-            cover = null,          // we never store bytes in Firestore
+            cover = null,
             coverId = coverId,
             publisher = publisher,
             publishDate = publishDate,

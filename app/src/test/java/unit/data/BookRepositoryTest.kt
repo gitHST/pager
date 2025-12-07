@@ -1,48 +1,89 @@
 package unit.data
 
-import com.luke.pager.data.dao.BookDao
 import com.luke.pager.data.entities.BookEntity
-import com.luke.pager.data.repo.BookRepository
+import com.luke.pager.data.entities.ReviewEntity
+import com.luke.pager.data.repo.IBookRepository
+import com.luke.pager.data.repo.IReviewRepository
+import com.luke.pager.data.viewmodel.BookViewModel
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import unit.MainDispatcherRule
 
 class BookRepositoryTest {
 
-    private lateinit var bookDao: BookDao
-    private lateinit var bookRepository: BookRepository
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
+
+    private lateinit var bookRepository: IBookRepository
+    private lateinit var reviewRepository: IReviewRepository
+    private lateinit var bookViewModel: BookViewModel
 
     @Before
     fun setUp() {
-        bookDao = mockk()
-        bookRepository = BookRepository(bookDao)
+        bookRepository = mockk()
+        reviewRepository = mockk()
+        bookViewModel = BookViewModel(bookRepository, reviewRepository)
     }
 
     @Test
-    fun `insertAndReturnId should call DAO method`() = runTest {
-        val book = BookEntity(title = "Test Book")
-        coEvery { bookDao.insertAndReturnId(book) } returns 1L
+    fun `insertAndReturnId should delegate to repository and return id`() = runTest {
+        val book = BookEntity(
+            id = "",
+            title = "Test Book"
+        )
+        val generatedId = "generated-book-id"
 
-        val result = bookRepository.insertAndReturnId(book)
+        coEvery { bookRepository.insertAndReturnId(book) } returns generatedId
 
-        assertEquals(1L, result)
-        coVerify { bookDao.insertAndReturnId(book) }
+        val result = bookViewModel.insertAndReturnId(book)
+
+        assertEquals(generatedId, result)
+        coVerify { bookRepository.insertAndReturnId(book) }
     }
 
     @Test
-    fun `getAllBooks should return flow from DAO`() = runTest {
-        val books = listOf(BookEntity(title = "Book1"))
-        coEvery { bookDao.getAllBooks() } returns flowOf(books)
+    fun `loadBooks should collect flow from repository into books state`() = runTest {
+        val books = listOf(
+            BookEntity(
+                id = "1",
+                title = "Book 1"
+            )
+        )
 
-        val flow = bookRepository.getAllBooks()
-        flow.collect { result ->
-            assertEquals(books, result)
-        }
-        coVerify { bookDao.getAllBooks() }
+        every { bookRepository.getAllBooks() } returns flowOf(books)
+
+        bookViewModel.loadBooks()
+
+        // UnconfinedTestDispatcher runs launches immediately
+        assertEquals(books, bookViewModel.books.value)
+    }
+
+    @Test
+    fun `loadAllReviews should populate allReviews map keyed by bookId`() = runTest {
+        val reviews = listOf(
+            ReviewEntity(
+                id = "r1",
+                bookId = "b1"
+            ),
+            ReviewEntity(
+                id = "r2",
+                bookId = "b2"
+            )
+        )
+
+        coEvery { reviewRepository.getAllReviews() } returns reviews
+
+        bookViewModel.loadAllReviews()
+
+        val expected = reviews.associateBy { it.bookId }
+        assertEquals(expected, bookViewModel.allReviews.value)
     }
 }

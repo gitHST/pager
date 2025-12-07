@@ -74,11 +74,11 @@ suspend fun searchBooksSmart(rawQuery: String): SearchResult {
 
 fun String.normalizeTitle(): String {
     return this.lowercase()
-        .replace(Regex("""^["'“”‘’]+|["'“”‘’]+$"""), "") // remove leading/trailing quotes
-        .replace(Regex("""\s*\(.*?\)"""), "") // remove parentheses and content
-        .replace(Regex(""":.*$"""), "") // remove subtitles after colon
-        .replace(Regex("""-.*$"""), "") // remove subtitles after dash
-        .replace(Regex("""\s+"""), " ") // collapse whitespace
+        .replace(Regex("""^["'“”‘’]+|["'“”‘’]+$"""), "")
+        .replace(Regex("""\s*\(.*?\)"""), "")
+        .replace(Regex(""":.*$"""), "")
+        .replace(Regex("""-.*$"""), "")
+        .replace(Regex("""\s+"""), " ")
         .trim()
 }
 

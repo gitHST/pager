@@ -7,7 +7,6 @@ interface IReviewRepository {
     suspend fun insertReview(review: ReviewEntity)
     suspend fun getAllReviews(): List<ReviewEntity>
 
-    // 🔥 all review IDs are now String
     suspend fun deleteReviewAndBookById(reviewId: String)
     suspend fun updateReviewText(reviewId: String, newText: String)
     suspend fun updateReviewRating(reviewId: String, newRating: Float)

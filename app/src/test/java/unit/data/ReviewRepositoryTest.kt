@@ -1,47 +1,75 @@
 package unit.data
 
-import com.luke.pager.data.dao.BookDao
-import com.luke.pager.data.dao.ReviewDao
-import com.luke.pager.data.entities.ReviewEntity
-import com.luke.pager.data.repo.ReviewRepository
+import Privacy
+import com.luke.pager.data.repo.IReviewRepository
+import com.luke.pager.data.viewmodel.ReviewViewModel
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import unit.MainDispatcherRule
 
 class ReviewRepositoryTest {
 
-    private lateinit var reviewDao: ReviewDao
-    private lateinit var bookDao: BookDao
-    private lateinit var reviewRepository: ReviewRepository
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
+
+    private lateinit var reviewRepository: IReviewRepository
+    private lateinit var reviewViewModel: ReviewViewModel
 
     @Before
     fun setUp() {
-        reviewDao = mockk()
-        bookDao = mockk()
-        reviewRepository = ReviewRepository(reviewDao, bookDao)
+        reviewRepository = mockk()
+        reviewViewModel = ReviewViewModel(reviewRepository)
     }
 
     @Test
-    fun `insertReview should call DAO`() = runTest {
-        val review = ReviewEntity(bookId = 1L)
-        coEvery { reviewDao.insertReview(review) } returns Unit
+    fun `deleteReviewAndBookById should delegate to repository`() = runTest {
+        val reviewId = "review-1"
 
-        reviewRepository.insertReview(review)
+        coEvery { reviewRepository.deleteReviewAndBookById(reviewId) } returns Unit
 
-        coVerify { reviewDao.insertReview(review) }
+        reviewViewModel.deleteReviewAndBookById(reviewId)
+
+        coVerify { reviewRepository.deleteReviewAndBookById(reviewId) }
     }
 
     @Test
-    fun `deleteReviewAndBookById should delete associated book`() = runTest {
-        coEvery { reviewDao.getBookIdByReviewId(1L) } returns 5L
-        coEvery { bookDao.deleteBookById(5L) } returns Unit
+    fun `updateReviewText should delegate to repository`() = runTest {
+        val reviewId = "review-1"
+        val newText = "Updated review text"
 
-        reviewRepository.deleteReviewAndBookById(1L)
+        coEvery { reviewRepository.updateReviewText(reviewId, newText) } returns Unit
 
-        coVerify { reviewDao.getBookIdByReviewId(1L) }
-        coVerify { bookDao.deleteBookById(5L) }
+        reviewViewModel.updateReviewText(reviewId, newText)
+
+        coVerify { reviewRepository.updateReviewText(reviewId, newText) }
+    }
+
+    @Test
+    fun `updateReviewRating should delegate to repository`() = runTest {
+        val reviewId = "review-1"
+        val newRating = 4.5f
+
+        coEvery { reviewRepository.updateReviewRating(reviewId, newRating) } returns Unit
+
+        reviewViewModel.updateReviewRating(reviewId, newRating)
+
+        coVerify { reviewRepository.updateReviewRating(reviewId, newRating) }
+    }
+
+    @Test
+    fun `updateReviewPrivacy should delegate to repository`() = runTest {
+        val reviewId = "review-1"
+        val newPrivacy = Privacy.PUBLIC
+
+        coEvery { reviewRepository.updateReviewPrivacy(reviewId, newPrivacy) } returns Unit
+
+        reviewViewModel.updateReviewPrivacy(reviewId, newPrivacy)
+
+        coVerify { reviewRepository.updateReviewPrivacy(reviewId, newPrivacy) }
     }
 }

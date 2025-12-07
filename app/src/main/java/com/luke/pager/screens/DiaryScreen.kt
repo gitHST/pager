@@ -123,7 +123,6 @@ fun BookItem(
 ) {
     val trimAmount = 37
 
-    // 🔹 Build coverUrl from coverId if we don't have local bytes
     val coverUrl =
         if (book.cover == null && book.coverId != null) {
             "https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg"
@@ -206,7 +205,7 @@ fun BookItem(
                 }
 
                 if (review?.rating != null) {
-                    val rating = review.rating.toFloat()
+                    val rating = review.rating
                     val starSize = 16.dp
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(modifier = Modifier.width(90.dp)) {

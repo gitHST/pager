@@ -4,7 +4,6 @@ import com.luke.pager.data.entities.QuoteEntity
 
 interface IQuoteRepository {
 
-    // 🔥 bookId is now String
     suspend fun getQuotesByBookId(bookId: String): List<QuoteEntity>
 
     suspend fun insertQuote(quote: QuoteEntity)

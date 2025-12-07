@@ -19,7 +19,7 @@ import org.junit.Test
 class ReviewScreenTest {
 
     private lateinit var reviewViewModel: ReviewViewModel
-    private val reviewId = 1L
+    private val reviewId = "review-1"
     private val onDeleteSuccess: () -> Unit = mockk(relaxed = true)
 
     @Before
@@ -66,13 +66,13 @@ class ReviewScreenTest {
     @Test
     fun `null rating defaults to zero and empty review text defaults to empty string`() = runTest {
         val review = ReviewEntity(
-            id = 1,
-            bookId = 1L,
+            id = "1",
+            bookId = "book-1",
             rating = null,
             reviewText = null
         )
 
-        val defaultRating = review.rating?.toFloat() ?: 0f
+        val defaultRating = review.rating ?: 0f
         val defaultText = review.reviewText.orEmpty()
 
         assert(defaultRating == 0f)
