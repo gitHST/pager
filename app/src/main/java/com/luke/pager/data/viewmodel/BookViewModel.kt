@@ -55,7 +55,7 @@ class BookViewModel(
     fun loadAllReviews() {
         viewModelScope.launch {
             val reviews = reviewRepository.getAllReviews()
-            _allReviews.value = reviews.associateBy { it.bookId } // bookId is String
+            _allReviews.value = reviews.associateBy { it.bookId }
         }
     }
 
@@ -76,7 +76,6 @@ class BookViewModel(
         viewModelScope.launch {
             val book =
                 BookEntity(
-                    // id is left as default "", FirebaseBookRepository will replace it
                     title = openBook.title,
                     authors = openBook.authorName?.joinToString(),
                     openlibraryKey = openBook.key,
@@ -84,14 +83,12 @@ class BookViewModel(
                     coverId = openBook.coverIndex
                 )
 
-            // Firestore auto-ID from repository (string)
             val bookId: String = insertAndReturnId(book)
 
             val sanitizedReviewText = reviewText.takeIf { it.isNotBlank() }
 
             val review =
                 ReviewEntity(
-                    // id left as default "", FirebaseReviewRepository will assign auto-ID
                     bookId = bookId,
                     rating = rating,
                     reviewText = sanitizedReviewText,

@@ -20,22 +20,22 @@ class QuoteSortingTest {
     @Test
     fun `sortQuotesByDateAdded sorts ascending by date string`() {
         val q1 = QuoteEntity(
-            id = 1L,
-            bookId = 1L,
+            id = "1",
+            bookId = "book-1",
             quoteText = "Oldest",
             pageNumber = null,
             dateAdded = "2025-01-01 10:00:00"
         )
         val q2 = QuoteEntity(
-            id = 2L,
-            bookId = 1L,
+            id = "2",
+            bookId = "book-1",
             quoteText = "Middle",
             pageNumber = null,
             dateAdded = "2025-01-02 09:00:00"
         )
         val q3 = QuoteEntity(
-            id = 3L,
-            bookId = 1L,
+            id = "3",
+            bookId = "book-1",
             quoteText = "Newest",
             pageNumber = null,
             dateAdded = "2025-01-03 08:00:00"
@@ -45,28 +45,28 @@ class QuoteSortingTest {
 
         val sorted = sortQuotesByDateAdded(unsorted, ascending = true)
 
-        assertEquals(listOf(q1, q2, q3).map { it.id }, sorted.map { it.id })
+        assertEquals(listOf("1", "2", "3"), sorted.map { it.id })
     }
 
     @Test
     fun `sortQuotesByDateAdded sorts descending by date string`() {
         val q1 = QuoteEntity(
-            id = 1L,
-            bookId = 1L,
+            id = "1",
+            bookId = "book-1",
             quoteText = "Oldest",
             pageNumber = null,
             dateAdded = "2025-01-01 10:00:00"
         )
         val q2 = QuoteEntity(
-            id = 2L,
-            bookId = 1L,
+            id = "2",
+            bookId = "book-1",
             quoteText = "Middle",
             pageNumber = null,
             dateAdded = "2025-01-02 09:00:00"
         )
         val q3 = QuoteEntity(
-            id = 3L,
-            bookId = 1L,
+            id = "3",
+            bookId = "book-1",
             quoteText = "Newest",
             pageNumber = null,
             dateAdded = "2025-01-03 08:00:00"
@@ -76,6 +76,6 @@ class QuoteSortingTest {
 
         val sorted = sortQuotesByDateAdded(unsorted, ascending = false)
 
-        assertEquals(listOf(q3, q2, q1).map { it.id }, sorted.map { it.id })
+        assertEquals(listOf("3", "2", "1"), sorted.map { it.id })
     }
 }

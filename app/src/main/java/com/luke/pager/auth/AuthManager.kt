@@ -9,10 +9,8 @@ object AuthManager {
     suspend fun ensureAnonymousUser(): String {
         val auth = Firebase.auth
 
-        // If user already exists, return uid
         auth.currentUser?.let { return it.uid }
 
-        // Else sign in anonymously
         auth.signInAnonymously().await()
 
         return auth.currentUser!!.uid

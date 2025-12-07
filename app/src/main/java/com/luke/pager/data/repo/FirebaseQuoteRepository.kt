@@ -24,7 +24,7 @@ class FirebaseQuoteRepository(
     }
 
     override suspend fun insertQuote(quote: QuoteEntity) {
-        val docRef = quotesCollection.document() // auto ID
+        val docRef = quotesCollection.document()
         val id = docRef.id
 
         val quoteToSave = quote.copy(id = id)
@@ -59,7 +59,6 @@ class FirebaseQuoteRepository(
             .await()
     }
 
-    // ---------------- Helpers ----------------
 
     private fun QuoteEntity.toFirestoreMap(): Map<String, Any?> =
         mapOf(

@@ -166,8 +166,6 @@ dependencies {
     implementation(libs.google.android.material)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.javapoet)
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
     implementation(libs.compose.google.fonts)
     implementation(libs.compose.animation)
     implementation(libs.retrofit)
@@ -183,8 +181,6 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.storage)
 
-
-    ksp(libs.androidx.room.compiler)
 
     testImplementation(libs.mockk)
     testImplementation(libs.junit)
