@@ -35,7 +35,6 @@ fun SubmitQuoteHeader(
         rightButtonText = " Submit quote ",
         isRightButtonLoading = isSubmitting,
         onRightClick = {
-            isSubmitting = true
 
             val now = Date()
             val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
