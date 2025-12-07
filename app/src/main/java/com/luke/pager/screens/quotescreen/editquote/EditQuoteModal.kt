@@ -220,11 +220,10 @@ fun EditQuoteModal(
         }
         if (showDeleteConfirm) {
             AlertDialog(
-                onDismissRequest = { showDeleteConfirm = false },
+                onDismissRequest = { },
                 confirmButton = {
                     Button(
                         onClick = {
-                            showDeleteConfirm = false
                             quoteViewModel.deleteQuote(quote)
                             onDismiss()
                         },
@@ -238,7 +237,7 @@ fun EditQuoteModal(
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showDeleteConfirm = false }) {
+                    TextButton(onClick = { }) {
                         Text("Cancel", style = MaterialTheme.typography.bodyMedium)
                     }
                 },
