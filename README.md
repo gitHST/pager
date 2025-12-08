@@ -62,6 +62,9 @@ Pager is an all in one android app for browsing and reviewing books and sharing 
 ### `Version 0.5.0 "Binding"`
 - General
   - Tablet support
+- Firebase
+  - Move db to firebase
+  - Users can use anon auth and later create an account
 - Settings
   - Will add a settings page
   - The ability to set preferences
