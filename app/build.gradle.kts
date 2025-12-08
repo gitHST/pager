@@ -174,7 +174,6 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.mlkit.text.recognition)
     implementation(libs.kotlinx.coroutines.play.services)
-    implementation(libs.smile)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)
