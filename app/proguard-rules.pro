@@ -2,18 +2,19 @@
 -keepattributes Signature
 -keepattributes *Annotation*
 
-# Keep all data classes and Retrofit interfaces
+# Keep your own network data classes and Retrofit interfaces
+# (adjust package paths if your models/APIs live elsewhere)
 -keep class com.luke.pager.network.** { *; }
 
-# Keep Gson internals
--keep class com.google.gson.** { *; }
+# If you use Gson's TypeToken, keep that specific class
+-keep class com.google.gson.reflect.TypeToken
 
 # Keep Retrofit HTTP annotations and method signatures
--keepclassmembers class * {
+-keepclassmembers class com.luke.pager.network.** {
     @retrofit2.http.* <methods>;
 }
 
-# Keep SerializedName annotations (if used)
--keepclassmembers class * {
+# Keep SerializedName-annotated fields on your network models
+-keepclassmembers class com.luke.pager.network.** {
     @com.google.gson.annotations.SerializedName <fields>;
 }

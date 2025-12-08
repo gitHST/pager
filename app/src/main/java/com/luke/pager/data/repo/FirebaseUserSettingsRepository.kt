@@ -34,7 +34,6 @@ class FirebaseUserSettingsRepository(
                     val mode = modeString?.toThemeModeOrNull() ?: ThemeMode.SYSTEM
                     trySend(mode)
                 } else {
-                    // No settings yet → default to SYSTEM
                     trySend(ThemeMode.SYSTEM)
                 }
             }
@@ -43,7 +42,6 @@ class FirebaseUserSettingsRepository(
         }
 
     override suspend fun setThemeMode(mode: ThemeMode) {
-        // Firestore offline persistence will cache this locally on the device.
         settingsDocument.set(
             mapOf(
                 "theme_mode" to mode.name
