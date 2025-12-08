@@ -11,21 +11,26 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.luke.pager.auth.AuthManager
@@ -70,8 +75,23 @@ class MainActivity : ComponentActivity() {
                 ready = true
             }
 
+            // While we're just getting an auth user, show a centered loader
             if (!ready) {
-                Box(Modifier.fillMaxSize().background(Color.White)) {}
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
                 return@setContent
             }
 
@@ -116,6 +136,16 @@ fun PagerAppUI(
 
         var animatedTargetColor by remember { mutableStateOf<Color?>(null) }
         var bottomBarVisible by remember { mutableStateOf(true) }
+
+        // Kick off initial data loads when the app starts
+        LaunchedEffect(Unit) {
+            bookViewModel.loadBooks()
+            bookViewModel.loadAllReviews()
+            quoteViewModel.loadAllQuotes()
+        }
+
+        // Observe initial loading state from the books ViewModel
+        val isInitialLoading by bookViewModel.isInitialLoading.collectAsState()
 
         LaunchedEffect(currentRoute) {
             if (animatedTargetColor == null) {
@@ -175,6 +205,25 @@ fun PagerAppUI(
                         reviewViewModel,
                         quoteViewModel
                     )
+                }
+            }
+
+            // Full-screen loading overlay using the same styling pattern as SearchAndResultsModal
+            if (isInitialLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0x66000000)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
             }
         }

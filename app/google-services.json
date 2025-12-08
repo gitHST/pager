@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "585973716122",
+    "project_id": "pagerbook",
+    "storage_bucket": "pagerbook.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:585973716122:android:344b63b28c5ce8b20fbb23",
+        "android_client_info": {
+          "package_name": "com.luke.pager"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIXu-IgldL8Ss5ulitSKkQRG8BcUjFt3Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
