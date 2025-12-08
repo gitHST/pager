@@ -27,12 +27,24 @@ class FirebaseReviewRepository(
             .document(uid)
             .collection("quotes")
 
+    private val globalBooksCollection = firestore.collection("books")
+
     override suspend fun insertReview(review: ReviewEntity) {
         val docRef = reviewsCollection.document()
         val id = docRef.id
 
         val reviewToSave = review.copy(id = id)
         docRef.set(reviewToSave.toFirestoreMap()).await()
+
+        reviewToSave.bookKey?.let { bookKey ->
+            val globalReviewRef =
+                globalBooksCollection
+                    .document(bookKey)
+                    .collection("reviews")
+                    .document(id)
+
+            globalReviewRef.set(reviewToSave.toGlobalReviewMap(uid)).await()
+        }
     }
 
     override suspend fun getAllReviews(): List<ReviewEntity> {
@@ -43,38 +55,110 @@ class FirebaseReviewRepository(
     override suspend fun deleteReviewAndBookById(reviewId: String) {
         val reviewDoc = reviewsCollection.document(reviewId).get().await()
         val bookId = reviewDoc.getString("book_id") ?: return
+        val bookKey = reviewDoc.getString("book_key")
 
         reviewsCollection.document(reviewId).delete().await()
 
-        booksCollection.document(bookId).delete().await()
+        if (bookKey != null) {
+            globalBooksCollection
+                .document(bookKey)
+                .collection("reviews")
+                .document(reviewId)
+                .delete()
+                .await()
+        }
 
-        val quoteSnapshot =
-            quotesCollection.whereEqualTo("book_id", bookId).get().await()
-        for (q in quoteSnapshot.documents) q.reference.delete().await()
+        val remainingReviewsSnapshot =
+            reviewsCollection
+                .whereEqualTo("book_id", bookId)
+                .get()
+                .await()
+
+        if (remainingReviewsSnapshot.isEmpty) {
+            booksCollection.document(bookId).delete().await()
+
+            val quoteSnapshot =
+                quotesCollection
+                    .whereEqualTo("book_id", bookId)
+                    .get()
+                    .await()
+
+            for (q in quoteSnapshot.documents) {
+                q.reference.delete().await()
+            }
+        }
     }
 
     override suspend fun updateReviewText(reviewId: String, newText: String) {
         reviewsCollection.document(reviewId)
             .update("review_text", newText)
             .await()
+
+        val reviewDoc = reviewsCollection.document(reviewId).get().await()
+        val bookKey = reviewDoc.getString("book_key")
+        if (bookKey != null) {
+            globalBooksCollection
+                .document(bookKey)
+                .collection("reviews")
+                .document(reviewId)
+                .update("review_text", newText)
+                .await()
+        }
     }
 
     override suspend fun updateReviewRating(reviewId: String, newRating: Float) {
         reviewsCollection.document(reviewId)
             .update("rating", newRating)
             .await()
+
+        val reviewDoc = reviewsCollection.document(reviewId).get().await()
+        val bookKey = reviewDoc.getString("book_key")
+        if (bookKey != null) {
+            globalBooksCollection
+                .document(bookKey)
+                .collection("reviews")
+                .document(reviewId)
+                .update("rating", newRating)
+                .await()
+        }
     }
 
     override suspend fun updateReviewPrivacy(reviewId: String, privacy: Privacy) {
         reviewsCollection.document(reviewId)
             .update("privacy", privacy.name)
             .await()
-    }
 
+        val reviewDoc = reviewsCollection.document(reviewId).get().await()
+        val bookKey = reviewDoc.getString("book_key")
+        if (bookKey != null) {
+            globalBooksCollection
+                .document(bookKey)
+                .collection("reviews")
+                .document(reviewId)
+                .update("privacy", privacy.name)
+                .await()
+        }
+    }
 
     private fun ReviewEntity.toFirestoreMap(): Map<String, Any?> =
         mapOf(
             "book_id" to bookId,
+            "book_key" to bookKey,
+            "date_started_reading" to dateStartedReading,
+            "date_finished_reading" to dateFinishedReading,
+            "date_reviewed" to dateReviewed,
+            "rating" to rating,
+            "review_text" to reviewText,
+            "tags" to tags,
+            "privacy" to privacy.name,
+            "has_spoilers" to hasSpoilers
+        )
+
+    private fun ReviewEntity.toGlobalReviewMap(userId: String): Map<String, Any?> =
+        mapOf(
+            "uid" to userId,
+            "book_id" to bookId,
+            "book_key" to bookKey,
             "date_started_reading" to dateStartedReading,
             "date_finished_reading" to dateFinishedReading,
             "date_reviewed" to dateReviewed,
@@ -88,6 +172,7 @@ class FirebaseReviewRepository(
     private fun com.google.firebase.firestore.DocumentSnapshot.toReviewEntityOrNull(): ReviewEntity? {
         val id = this.id
         val bookId = getString("book_id") ?: return null
+        val bookKey = getString("book_key")
         val dateStartedReading = getString("date_started_reading")
         val dateFinishedReading = getString("date_finished_reading")
         val dateReviewed = getString("date_reviewed")
@@ -103,6 +188,7 @@ class FirebaseReviewRepository(
         return ReviewEntity(
             id = id,
             bookId = bookId,
+            bookKey = bookKey,
             dateStartedReading = dateStartedReading,
             dateFinishedReading = dateFinishedReading,
             dateReviewed = dateReviewed,

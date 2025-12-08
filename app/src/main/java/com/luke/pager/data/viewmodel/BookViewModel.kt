@@ -26,7 +26,6 @@ class BookViewModel(
     private val _allReviews = MutableStateFlow<Map<String, ReviewEntity?>>(emptyMap())
     val allReviews: StateFlow<Map<String, ReviewEntity?>> get() = _allReviews
 
-    // New: tracks whether the initial Firestore load is still in progress
     private val _isInitialLoading = MutableStateFlow(true)
     val isInitialLoading: StateFlow<Boolean> get() = _isInitialLoading
 
@@ -52,7 +51,6 @@ class BookViewModel(
         viewModelScope.launch {
             bookRepository.getAllBooks().collect { books ->
                 _books.value = books
-                // First emission (from cache or network) means we're no longer "boot loading"
                 _isInitialLoading.value = false
             }
         }
@@ -68,7 +66,7 @@ class BookViewModel(
     /**
      * Create a new Book + Review pair for an OpenLibrary result.
      * - Book gets a Firestore auto ID (string)
-     * - Review uses that ID as bookId
+     * - Review uses that ID as bookId, and OpenLibrary key as bookKey for social features.
      */
     fun submitReview(
         openBook: OpenLibraryBook,
@@ -89,13 +87,16 @@ class BookViewModel(
                     coverId = openBook.coverIndex
                 )
 
-            val bookId = bookRepository.insertAndReturnId(book)
+            val bookId: String = insertAndReturnId(book)
+
+            val sanitizedReviewText = reviewText.takeIf { it.isNotBlank() }
 
             val review =
                 ReviewEntity(
                     bookId = bookId,
+                    bookKey = openBook.key,
                     rating = rating,
-                    reviewText = reviewText,
+                    reviewText = sanitizedReviewText,
                     dateReviewed = dateReviewed,
                     privacy = privacy,
                     hasSpoilers = hasSpoilers

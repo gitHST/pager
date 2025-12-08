@@ -5,6 +5,7 @@ import Privacy
 data class ReviewEntity(
     val id: String = "",
     val bookId: String,
+    val bookKey: String? = null,
     val dateStartedReading: String? = null,
     val dateFinishedReading: String? = null,
     val dateReviewed: String? = null,

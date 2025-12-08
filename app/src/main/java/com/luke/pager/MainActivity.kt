@@ -75,7 +75,6 @@ class MainActivity : ComponentActivity() {
                 ready = true
             }
 
-            // While we're just getting an auth user, show a centered loader
             if (!ready) {
                 Box(
                     modifier = Modifier
@@ -137,14 +136,12 @@ fun PagerAppUI(
         var animatedTargetColor by remember { mutableStateOf<Color?>(null) }
         var bottomBarVisible by remember { mutableStateOf(true) }
 
-        // Kick off initial data loads when the app starts
         LaunchedEffect(Unit) {
             bookViewModel.loadBooks()
             bookViewModel.loadAllReviews()
             quoteViewModel.loadAllQuotes()
         }
 
-        // Observe initial loading state from the books ViewModel
         val isInitialLoading by bookViewModel.isInitialLoading.collectAsState()
 
         LaunchedEffect(currentRoute) {
@@ -208,7 +205,6 @@ fun PagerAppUI(
                 }
             }
 
-            // Full-screen loading overlay using the same styling pattern as SearchAndResultsModal
             if (isInitialLoading) {
                 Box(
                     modifier = Modifier
