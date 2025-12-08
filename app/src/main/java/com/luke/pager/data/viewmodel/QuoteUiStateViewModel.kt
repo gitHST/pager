@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class QuoteUiStateViewModel : ViewModel() {
-
     private val _showQuoteModal = MutableStateFlow(false)
     val showQuoteModal = _showQuoteModal.asStateFlow()
 

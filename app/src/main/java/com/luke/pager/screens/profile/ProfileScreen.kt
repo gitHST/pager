@@ -9,6 +9,6 @@ import com.luke.pager.data.viewmodel.ReviewViewModel
 fun ProfileScreen(
     bookViewModel: BookViewModel,
     reviewViewModel: ReviewViewModel,
-    quoteViewModel: QuoteViewModel
+    quoteViewModel: QuoteViewModel,
 ) {
 }

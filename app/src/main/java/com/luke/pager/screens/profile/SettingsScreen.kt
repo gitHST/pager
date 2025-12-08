@@ -46,13 +46,14 @@ fun SettingsScreen(
     reviewViewModel: ReviewViewModel,
     quoteViewModel: QuoteViewModel,
     themeMode: ThemeMode,
-    onThemeModeChange: (ThemeMode) -> Unit
+    onThemeModeChange: (ThemeMode) -> Unit,
 ) {
-    val themeOptions = listOf(
-        ThemeMode.LIGHT to "Light",
-        ThemeMode.DARK to "Dark",
-        ThemeMode.SYSTEM to "System default"
-    )
+    val themeOptions =
+        listOf(
+            ThemeMode.LIGHT to "Light",
+            ThemeMode.DARK to "Dark",
+            ThemeMode.SYSTEM to "System default",
+        )
 
     var expanded by remember { mutableStateOf(false) }
 
@@ -60,23 +61,26 @@ fun SettingsScreen(
         themeOptions.firstOrNull { it.first == themeMode }?.second ?: "System default"
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier =
+            Modifier
+                .fillMaxSize(),
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier =
+                Modifier
+                    .fillMaxWidth(),
         ) {
             IconButton(
                 onClick = { navController.popBackStack() },
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(start = 8.dp, top = 12.dp)
+                modifier =
+                    Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(start = 8.dp, top = 12.dp),
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.onBackground
+                    tint = MaterialTheme.colorScheme.onBackground,
                 )
             }
 
@@ -84,52 +88,54 @@ fun SettingsScreen(
         }
 
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.Start
+            horizontalAlignment = Alignment.Start,
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
                     text = "Theme",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = MaterialTheme.colorScheme.onBackground,
                 )
 
                 ExposedDropdownMenuBox(
                     expanded = expanded,
-                    onExpandedChange = { expanded = it }
+                    onExpandedChange = { expanded = it },
                 ) {
                     Box(
-                        modifier = Modifier
-                            .menuAnchor(
-                                type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
-                                enabled = true
-                            )
-                            .fillMaxWidth(0.55f)
-                            .height(40.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.surface)
-                            .clickable { expanded = true }
-                            .padding(horizontal = 12.dp),
-                        contentAlignment = Alignment.CenterStart
+                        modifier =
+                            Modifier
+                                .menuAnchor(
+                                    type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
+                                    enabled = true,
+                                ).fillMaxWidth(0.55f)
+                                .height(40.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.surface)
+                                .clickable { expanded = true }
+                                .padding(horizontal = 12.dp),
+                        contentAlignment = Alignment.CenterStart,
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
                             Text(
                                 text = selectedLabel,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.onSurface,
                             )
 
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
@@ -138,7 +144,7 @@ fun SettingsScreen(
 
                     ExposedDropdownMenu(
                         expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                        onDismissRequest = { expanded = false },
                     ) {
                         themeOptions.forEach { (mode, label) ->
                             DropdownMenuItem(
@@ -146,7 +152,7 @@ fun SettingsScreen(
                                 onClick = {
                                     onThemeModeChange(mode)
                                     expanded = false
-                                }
+                                },
                             )
                         }
                     }

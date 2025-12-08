@@ -13,15 +13,16 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun Title(title: String) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 12.dp),
-        contentAlignment = Alignment.TopCenter
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 12.dp),
+        contentAlignment = Alignment.TopCenter,
     ) {
         Text(
             text = title,
             fontSize = MaterialTheme.typography.titleLarge.fontSize,
-            color = MaterialTheme.colorScheme.onBackground
+            color = MaterialTheme.colorScheme.onBackground,
         )
     }
 }

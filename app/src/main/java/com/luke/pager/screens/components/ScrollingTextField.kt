@@ -35,7 +35,7 @@ fun ScrollingTextField(
     scrollState: ScrollState,
     containerHeight: Int,
     existingSpaceTaken: Int,
-    insideText: String
+    insideText: String,
 ) {
     val coroutineScope = rememberCoroutineScope()
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
@@ -54,28 +54,28 @@ fun ScrollingTextField(
             }
         },
         modifier =
-        Modifier
-            .fillMaxWidth()
-            .heightIn(min = minHeightDp - existingSpaceTaken.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
-            .padding(16.dp),
+            Modifier
+                .fillMaxWidth()
+                .heightIn(min = minHeightDp - existingSpaceTaken.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+                .padding(16.dp),
         textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         singleLine = false,
         maxLines = Int.MAX_VALUE,
         onTextLayout = { textLayoutResult = it },
         keyboardOptions =
-        KeyboardOptions.Default.copy(
-            imeAction = ImeAction.Default,
-            keyboardType = KeyboardType.Text
-        ),
+            KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Default,
+                keyboardType = KeyboardType.Text,
+            ),
         decorationBox = { innerTextField ->
             if (text.isEmpty()) {
                 Text(insideText, style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
             }
             innerTextField()
-        }
+        },
     )
 }

@@ -22,7 +22,7 @@ fun Carousel(
     books: List<DisplayBook>,
     listState: androidx.compose.foundation.lazy.LazyListState,
     itemWidthPx: Float,
-    scale: Float
+    scale: Float,
 ) {
     if (books.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -34,30 +34,32 @@ fun Carousel(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.spacedBy((-30 * scale).dp),
-            contentPadding = PaddingValues(
-                start = 32.dp * scale,
-                end = itemWidthDp * 2,
-                top = 64.dp * scale,
-                bottom = 64.dp * scale
-            )
+            contentPadding =
+                PaddingValues(
+                    start = 32.dp * scale,
+                    end = itemWidthDp * 2,
+                    top = 64.dp * scale,
+                    bottom = 64.dp * scale,
+                ),
         ) {
             val firstVisibleItemIndex = listState.firstVisibleItemIndex
             val firstVisibleItemScrollOffset = listState.firstVisibleItemScrollOffset
 
             itemsIndexed(
                 books,
-                key = { _, item -> item.book.id }
+                key = { _, item -> item.book.id },
             ) { index, item ->
                 val rawDistance = index - firstVisibleItemIndex
                 val continuousDistance =
                     rawDistance - (firstVisibleItemScrollOffset / itemWidthPx)
 
                 Box(
-                    modifier = Modifier
-                        .height((160 * scale).dp)
-                        .fillParentMaxHeight()
-                        .zIndex(-continuousDistance),
-                    contentAlignment = Alignment.Center
+                    modifier =
+                        Modifier
+                            .height((160 * scale).dp)
+                            .fillParentMaxHeight()
+                            .zIndex(-continuousDistance),
+                    contentAlignment = Alignment.Center,
                 ) {
                     CarouselItemContinuous(
                         imageBitmap = item.imageBitmap,
@@ -65,7 +67,7 @@ fun Carousel(
                         isDummy = item.isDummy,
                         hasCover = item.hasCover,
                         coverUrl = item.coverUrl,
-                        scale = scale
+                        scale = scale,
                     )
                 }
             }

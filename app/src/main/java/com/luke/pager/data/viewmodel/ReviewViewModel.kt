@@ -7,9 +7,8 @@ import com.luke.pager.data.repo.IReviewRepository
 import kotlinx.coroutines.launch
 
 class ReviewViewModel(
-    private val reviewRepository: IReviewRepository
+    private val reviewRepository: IReviewRepository,
 ) : ViewModel() {
-
     fun deleteReviewAndBookById(reviewId: String) {
         viewModelScope.launch {
             reviewRepository.deleteReviewAndBookById(reviewId)
@@ -18,7 +17,7 @@ class ReviewViewModel(
 
     fun updateReviewText(
         reviewId: String,
-        newText: String
+        newText: String,
     ) {
         viewModelScope.launch {
             reviewRepository.updateReviewText(reviewId, newText)
@@ -27,7 +26,7 @@ class ReviewViewModel(
 
     fun updateReviewRating(
         reviewId: String,
-        newRating: Float
+        newRating: Float,
     ) {
         viewModelScope.launch {
             reviewRepository.updateReviewRating(reviewId, newRating)
@@ -36,7 +35,7 @@ class ReviewViewModel(
 
     fun updateReviewPrivacy(
         reviewId: String,
-        privacy: Privacy
+        privacy: Privacy,
     ) {
         viewModelScope.launch {
             reviewRepository.updateReviewPrivacy(reviewId, privacy)

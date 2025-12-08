@@ -26,20 +26,21 @@ fun ScanImageWithOverlay(
     toggledClusters: Set<Int> = emptySet(),
     globalClusterOrder: List<Pair<Int, Int>> = emptyList(),
     pageIndex: Int = 0,
-    onClusterClick: ((Int) -> Unit)? = null
+    onClusterClick: ((Int) -> Unit)? = null,
 ) {
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .aspectRatio(bitmap.width.toFloat() / bitmap.height.toFloat())
-            .padding(padding.dp),
-        contentAlignment = Alignment.Center
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .aspectRatio(bitmap.width.toFloat() / bitmap.height.toFloat())
+                .padding(padding.dp),
+        contentAlignment = Alignment.Center,
     ) {
         Image(
             bitmap = bitmap.asImageBitmap(),
             contentDescription = "Scanned page image",
             contentScale = ContentScale.Fit,
-            modifier = Modifier.matchParentSize()
+            modifier = Modifier.matchParentSize(),
         )
 
         ScanOutlineCanvas(
@@ -51,7 +52,7 @@ fun ScanImageWithOverlay(
             outlineLevel = outlineLevel,
             toggledClusters = toggledClusters,
             globalClusterOrder = globalClusterOrder,
-            onClusterClick = onClusterClick
+            onClusterClick = onClusterClick,
         )
     }
 }

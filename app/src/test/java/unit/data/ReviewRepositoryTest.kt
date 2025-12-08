@@ -13,7 +13,6 @@ import org.junit.Test
 import unit.MainDispatcherRule
 
 class ReviewRepositoryTest {
-
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
@@ -27,49 +26,53 @@ class ReviewRepositoryTest {
     }
 
     @Test
-    fun `deleteReviewAndBookById should delegate to repository`() = runTest {
-        val reviewId = "review-1"
+    fun `deleteReviewAndBookById should delegate to repository`() =
+        runTest {
+            val reviewId = "review-1"
 
-        coEvery { reviewRepository.deleteReviewAndBookById(reviewId) } returns Unit
+            coEvery { reviewRepository.deleteReviewAndBookById(reviewId) } returns Unit
 
-        reviewViewModel.deleteReviewAndBookById(reviewId)
+            reviewViewModel.deleteReviewAndBookById(reviewId)
 
-        coVerify { reviewRepository.deleteReviewAndBookById(reviewId) }
-    }
-
-    @Test
-    fun `updateReviewText should delegate to repository`() = runTest {
-        val reviewId = "review-1"
-        val newText = "Updated review text"
-
-        coEvery { reviewRepository.updateReviewText(reviewId, newText) } returns Unit
-
-        reviewViewModel.updateReviewText(reviewId, newText)
-
-        coVerify { reviewRepository.updateReviewText(reviewId, newText) }
-    }
+            coVerify { reviewRepository.deleteReviewAndBookById(reviewId) }
+        }
 
     @Test
-    fun `updateReviewRating should delegate to repository`() = runTest {
-        val reviewId = "review-1"
-        val newRating = 4.5f
+    fun `updateReviewText should delegate to repository`() =
+        runTest {
+            val reviewId = "review-1"
+            val newText = "Updated review text"
 
-        coEvery { reviewRepository.updateReviewRating(reviewId, newRating) } returns Unit
+            coEvery { reviewRepository.updateReviewText(reviewId, newText) } returns Unit
 
-        reviewViewModel.updateReviewRating(reviewId, newRating)
+            reviewViewModel.updateReviewText(reviewId, newText)
 
-        coVerify { reviewRepository.updateReviewRating(reviewId, newRating) }
-    }
+            coVerify { reviewRepository.updateReviewText(reviewId, newText) }
+        }
 
     @Test
-    fun `updateReviewPrivacy should delegate to repository`() = runTest {
-        val reviewId = "review-1"
-        val newPrivacy = Privacy.PUBLIC
+    fun `updateReviewRating should delegate to repository`() =
+        runTest {
+            val reviewId = "review-1"
+            val newRating = 4.5f
 
-        coEvery { reviewRepository.updateReviewPrivacy(reviewId, newPrivacy) } returns Unit
+            coEvery { reviewRepository.updateReviewRating(reviewId, newRating) } returns Unit
 
-        reviewViewModel.updateReviewPrivacy(reviewId, newPrivacy)
+            reviewViewModel.updateReviewRating(reviewId, newRating)
 
-        coVerify { reviewRepository.updateReviewPrivacy(reviewId, newPrivacy) }
-    }
+            coVerify { reviewRepository.updateReviewRating(reviewId, newRating) }
+        }
+
+    @Test
+    fun `updateReviewPrivacy should delegate to repository`() =
+        runTest {
+            val reviewId = "review-1"
+            val newPrivacy = Privacy.PUBLIC
+
+            coEvery { reviewRepository.updateReviewPrivacy(reviewId, newPrivacy) } returns Unit
+
+            reviewViewModel.updateReviewPrivacy(reviewId, newPrivacy)
+
+            coVerify { reviewRepository.updateReviewPrivacy(reviewId, newPrivacy) }
+        }
 }

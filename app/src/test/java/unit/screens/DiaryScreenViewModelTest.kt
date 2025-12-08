@@ -10,7 +10,6 @@ import org.junit.Before
 import org.junit.Test
 
 class DiaryScreenViewModelTest {
-
     private lateinit var bookViewModel: BookViewModel
 
     @Before
@@ -24,11 +23,12 @@ class DiaryScreenViewModelTest {
     }
 
     @Test
-    fun `calls loadBooks and loadAllReviews on DiaryScreen init`() = runTest {
-        bookViewModel.loadBooks()
-        bookViewModel.loadAllReviews()
+    fun `calls loadBooks and loadAllReviews on DiaryScreen init`() =
+        runTest {
+            bookViewModel.loadBooks()
+            bookViewModel.loadAllReviews()
 
-        verify { bookViewModel.loadBooks() }
-        verify { bookViewModel.loadAllReviews() }
-    }
+            verify { bookViewModel.loadBooks() }
+            verify { bookViewModel.loadAllReviews() }
+        }
 }

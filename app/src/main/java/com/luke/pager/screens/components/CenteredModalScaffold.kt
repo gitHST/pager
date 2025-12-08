@@ -36,54 +36,59 @@ fun CenteredModalScaffold(
     modifier: Modifier = Modifier,
     maxWidth: Float = 0.9f,
     topPadding: Dp = 0.dp,
-    height: Dp = with(LocalDensity.current) {
-        LocalWindowInfo.current.containerSize.height.toDp() / 1.5f
-    },
-    background: Pair<Color, Shape> = Pair(
-        MaterialTheme.colorScheme.surface,
-        RoundedCornerShape(24.dp)
-    ),
+    height: Dp =
+        with(LocalDensity.current) {
+            LocalWindowInfo.current.containerSize.height
+                .toDp() / 1.5f
+        },
+    background: Pair<Color, Shape> =
+        Pair(
+            MaterialTheme.colorScheme.surface,
+            RoundedCornerShape(24.dp),
+        ),
     sidesPadding: Dp = 24.dp,
     verticalPadding: Dp = 16.dp,
     enterFade: Int = 300,
     exitFade: Int = 300,
     visible: Boolean,
-    content: @Composable (ScrollState) -> Unit
+    content: @Composable (ScrollState) -> Unit,
 ) {
     val scrollState = rememberScrollState()
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn(animationSpec = tween(enterFade)),
-        exit = fadeOut(animationSpec = tween(exitFade))
+        exit = fadeOut(animationSpec = tween(exitFade)),
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = overlayAlpha))
-                    .clickable(
-                        onClick = onDismiss,
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    )
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = overlayAlpha))
+                        .clickable(
+                            onClick = onDismiss,
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                        ),
             )
             Box(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .then(modifier)
+                modifier =
+                    Modifier
+                        .align(Alignment.Center)
+                        .then(modifier),
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth(maxWidth)
-                        .padding(top = topPadding)
-                        .height(height)
-                        .background(
-                            color = background.first,
-                            shape = background.second
-                        )
-                        .padding(horizontal = sidesPadding, vertical = verticalPadding)
-                        .clickable(enabled = false) {}
-                        .animateContentSize()
+                    modifier =
+                        Modifier
+                            .fillMaxWidth(maxWidth)
+                            .padding(top = topPadding)
+                            .height(height)
+                            .background(
+                                color = background.first,
+                                shape = background.second,
+                            ).padding(horizontal = sidesPadding, vertical = verticalPadding)
+                            .clickable(enabled = false) {}
+                            .animateContentSize(),
                 ) {
                     content(scrollState)
                 }

@@ -39,7 +39,7 @@ private const val HANDLE_TOUCH_RADIUS_DP = 36f
 fun draggableTextSelection(
     fullText: String,
     modifier: Modifier = Modifier,
-    onMagnifierStateChange: (MagnifierState) -> Unit = {}
+    onMagnifierStateChange: (MagnifierState) -> Unit = {},
 ): TextSelectionResult {
     var startCursorIndex by remember { mutableIntStateOf(0) }
     var endCursorIndex by remember { mutableIntStateOf(fullText.length) }
@@ -54,120 +54,128 @@ fun draggableTextSelection(
     val selectionColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
     val handleColor = MaterialTheme.colorScheme.primary
 
-    val highlightedText = remember(startCursorIndex, endCursorIndex, fullText, selectionColor) {
-        buildAnnotatedString {
-            append(fullText)
-            addStyle(
-                style = SpanStyle(background = selectionColor),
-                start = startCursorIndex.coerceAtMost(endCursorIndex),
-                end = startCursorIndex.coerceAtLeast(endCursorIndex)
-            )
+    val highlightedText =
+        remember(startCursorIndex, endCursorIndex, fullText, selectionColor) {
+            buildAnnotatedString {
+                append(fullText)
+                addStyle(
+                    style = SpanStyle(background = selectionColor),
+                    start = startCursorIndex.coerceAtMost(endCursorIndex),
+                    end = startCursorIndex.coerceAtLeast(endCursorIndex),
+                )
+            }
         }
-    }
 
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .pointerInput(Unit) {
-                awaitEachGesture {
-                    val down = awaitFirstDown()
-                    val layout = textLayoutResult ?: return@awaitEachGesture
+        modifier =
+            modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .pointerInput(Unit) {
+                    awaitEachGesture {
+                        val down = awaitFirstDown()
+                        val layout = textLayoutResult ?: return@awaitEachGesture
 
-                    fun handlePosFor(index: Int, isStart: Boolean): Offset {
-                        val rect = layout.getCursorRect(index.coerceIn(0, fullText.length))
-                        val midY = (rect.top + rect.bottom) / 2f
-                        return if (isStart) {
-                            Offset(rect.left, midY)
-                        } else {
-                            Offset(rect.right, midY)
-                        }
-                    }
-
-                    val startPos = handlePosFor(startCursorIndex, isStart = true)
-                    val endPos = handlePosFor(endCursorIndex, isStart = false)
-
-                    val dxStart = down.position.x - startPos.x
-                    val dyStart = down.position.y - startPos.y
-                    val dxEnd = down.position.x - endPos.x
-                    val dyEnd = down.position.y - endPos.y
-
-                    activeHandle = when {
-                        hypot(dxStart, dyStart) <= handleTouchRadiusPx -> Handle.START
-                        hypot(dxEnd, dyEnd) <= handleTouchRadiusPx -> Handle.END
-                        else -> null
-                    }
-
-                    if (activeHandle == null) {
-                        onMagnifierStateChange(MagnifierState(isActive = false))
-                        return@awaitEachGesture
-                    }
-
-                    fun updateMagnifier() {
-                        val startIsLeading = startCursorIndex <= endCursorIndex
-                        val endIsLeading = !startIsLeading
-
-                        val (rawAnchor, caretIndex, isLeading) = when (activeHandle) {
-                            Handle.START -> {
-                                Triple(
-                                    handlePosFor(startCursorIndex, isStart = true),
-                                    startCursorIndex,
-                                    startIsLeading
-                                )
+                        fun handlePosFor(
+                            index: Int,
+                            isStart: Boolean,
+                        ): Offset {
+                            val rect = layout.getCursorRect(index.coerceIn(0, fullText.length))
+                            val midY = (rect.top + rect.bottom) / 2f
+                            return if (isStart) {
+                                Offset(rect.left, midY)
+                            } else {
+                                Offset(rect.right, midY)
                             }
-
-                            Handle.END -> {
-                                Triple(
-                                    handlePosFor(endCursorIndex, isStart = false),
-                                    endCursorIndex,
-                                    endIsLeading
-                                )
-                            }
-
-                            null -> Triple(null, null, true)
                         }
 
-                        val adjustedAnchor = rawAnchor?.copy(
-                            y = rawAnchor.y - scrollState.value.toFloat()
-                        )
+                        val startPos = handlePosFor(startCursorIndex, isStart = true)
+                        val endPos = handlePosFor(endCursorIndex, isStart = false)
 
-                        onMagnifierStateChange(
-                            MagnifierState(
-                                anchor = adjustedAnchor,
-                                caretIndex = caretIndex,
-                                isLeadingHandle = isLeading,
-                                isActive = adjustedAnchor != null && caretIndex != null
+                        val dxStart = down.position.x - startPos.x
+                        val dyStart = down.position.y - startPos.y
+                        val dxEnd = down.position.x - endPos.x
+                        val dyEnd = down.position.y - endPos.y
+
+                        activeHandle =
+                            when {
+                                hypot(dxStart, dyStart) <= handleTouchRadiusPx -> Handle.START
+                                hypot(dxEnd, dyEnd) <= handleTouchRadiusPx -> Handle.END
+                                else -> null
+                            }
+
+                        if (activeHandle == null) {
+                            onMagnifierStateChange(MagnifierState(isActive = false))
+                            return@awaitEachGesture
+                        }
+
+                        fun updateMagnifier() {
+                            val startIsLeading = startCursorIndex <= endCursorIndex
+                            val endIsLeading = !startIsLeading
+
+                            val (rawAnchor, caretIndex, isLeading) =
+                                when (activeHandle) {
+                                    Handle.START -> {
+                                        Triple(
+                                            handlePosFor(startCursorIndex, isStart = true),
+                                            startCursorIndex,
+                                            startIsLeading,
+                                        )
+                                    }
+
+                                    Handle.END -> {
+                                        Triple(
+                                            handlePosFor(endCursorIndex, isStart = false),
+                                            endCursorIndex,
+                                            endIsLeading,
+                                        )
+                                    }
+                                    null -> Triple(null, null, true)
+                                }
+
+                            val adjustedAnchor =
+                                rawAnchor?.copy(
+                                    y = rawAnchor.y - scrollState.value.toFloat(),
+                                )
+
+                            onMagnifierStateChange(
+                                MagnifierState(
+                                    anchor = adjustedAnchor,
+                                    caretIndex = caretIndex,
+                                    isLeadingHandle = isLeading,
+                                    isActive = adjustedAnchor != null && caretIndex != null,
+                                ),
                             )
-                        )
-                    }
-
-                    updateMagnifier()
-
-                    drag(down.id) { change ->
-                        if (change.positionChange() != Offset.Zero) change.consume()
-                        val offsetIndex = layout.getOffsetForPosition(change.position)
-                        if (activeHandle == Handle.START) {
-                            startCursorIndex = offsetIndex.coerceIn(0, fullText.length)
-                        } else {
-                            endCursorIndex = offsetIndex.coerceIn(0, fullText.length)
                         }
-                        updateMagnifier()
-                    }
 
-                    activeHandle = null
-                    onMagnifierStateChange(MagnifierState(isActive = false))
-                }
-            }
+                        updateMagnifier()
+
+                        drag(down.id) { change ->
+                            if (change.positionChange() != Offset.Zero) change.consume()
+                            val offsetIndex = layout.getOffsetForPosition(change.position)
+                            if (activeHandle == Handle.START) {
+                                startCursorIndex = offsetIndex.coerceIn(0, fullText.length)
+                            } else {
+                                endCursorIndex = offsetIndex.coerceIn(0, fullText.length)
+                            }
+                            updateMagnifier()
+                        }
+
+                        activeHandle = null
+                        onMagnifierStateChange(MagnifierState(isActive = false))
+                    }
+                },
     ) {
         Text(
             text = highlightedText,
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontSize = 18.sp,
-                color = textColor
-            ),
+            style =
+                MaterialTheme.typography.bodyLarge.copy(
+                    fontSize = 18.sp,
+                    color = textColor,
+                ),
             maxLines = Int.MAX_VALUE,
             overflow = TextOverflow.Clip,
-            onTextLayout = { result -> textLayoutResult = result }
+            onTextLayout = { result -> textLayoutResult = result },
         )
 
         textLayoutResult?.let { layout ->
@@ -187,36 +195,41 @@ fun draggableTextSelection(
                 val r = 24f
                 val nib = r
 
-                fun drawHandle(anchor: Offset, isLeading: Boolean) {
-                    val circleCenter = if (isLeading) {
-                        Offset(anchor.x - r, anchor.y)
-                    } else {
-                        Offset(anchor.x + r, anchor.y)
-                    }
+                fun drawHandle(
+                    anchor: Offset,
+                    isLeading: Boolean,
+                ) {
+                    val circleCenter =
+                        if (isLeading) {
+                            Offset(anchor.x - r, anchor.y)
+                        } else {
+                            Offset(anchor.x + r, anchor.y)
+                        }
 
                     drawCircle(
                         color = handleColor,
                         radius = r,
-                        center = circleCenter
+                        center = circleCenter,
                     )
 
-                    val nibTopLeft = if (isLeading) {
-                        Offset(circleCenter.x, circleCenter.y)
-                    } else {
-                        Offset(circleCenter.x - nib, circleCenter.y)
-                    }
+                    val nibTopLeft =
+                        if (isLeading) {
+                            Offset(circleCenter.x, circleCenter.y)
+                        } else {
+                            Offset(circleCenter.x - nib, circleCenter.y)
+                        }
 
                     drawRect(
                         color = handleColor,
                         topLeft = nibTopLeft,
-                        size = Size(nib, nib)
+                        size = Size(nib, nib),
                     )
 
                     drawCircle(
                         color = Color.Black.copy(alpha = 0.15f),
                         radius = r,
                         center = circleCenter,
-                        style = Stroke(width = 2f)
+                        style = Stroke(width = 2f),
                     )
                 }
 

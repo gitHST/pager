@@ -34,50 +34,50 @@ fun DualActionHeader(
     isRightButtonLoading: Boolean,
     onRightClick: () -> Unit,
     scrollState: androidx.compose.foundation.ScrollState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val targetBorderColor =
         if (scrollState.value > 0) MaterialTheme.colorScheme.outline else Color.Transparent
     val animatedBorderColor by animateColorAsState(
         targetValue = targetBorderColor,
-        animationSpec = tween(durationMillis = 300)
+        animationSpec = tween(durationMillis = 300),
     )
 
     Row(
         modifier = modifier.zIndex(2f).fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Box(
             modifier =
-            Modifier
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surface)
-                .border(1.dp, animatedBorderColor, RoundedCornerShape(16.dp))
-                .clickable(onClick = onLeftClick)
-                .padding(horizontal = 6.dp, vertical = 6.dp)
+                Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(1.dp, animatedBorderColor, RoundedCornerShape(16.dp))
+                    .clickable(onClick = onLeftClick)
+                    .padding(horizontal = 6.dp, vertical = 6.dp),
         ) {
             Text(
                 text = leftButtonText,
                 color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
             )
         }
 
         Box(
             modifier =
-            Modifier
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surface)
-                .border(1.dp, animatedBorderColor, RoundedCornerShape(16.dp))
-                .clickable(enabled = !isRightButtonLoading, onClick = onRightClick)
-                .padding(horizontal = 6.dp, vertical = 6.dp)
+                Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(1.dp, animatedBorderColor, RoundedCornerShape(16.dp))
+                    .clickable(enabled = !isRightButtonLoading, onClick = onRightClick)
+                    .padding(horizontal = 6.dp, vertical = 6.dp),
         ) {
             if (isRightButtonLoading) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     CircularProgressIndicator(
                         color = MaterialTheme.colorScheme.primary,
                         strokeWidth = 2.dp,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(16.dp),
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Submitting...", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyMedium)
@@ -86,7 +86,7 @@ fun DualActionHeader(
                 Text(
                     text = rightButtonText,
                     color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             }
         }

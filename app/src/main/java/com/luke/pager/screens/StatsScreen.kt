@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.sp
 fun StatsScreen() {
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Text(text = "Stats Screen", fontSize = 24.sp)
     }

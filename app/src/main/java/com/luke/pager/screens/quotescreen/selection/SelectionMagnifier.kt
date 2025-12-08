@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.sp
 fun SelectionMagnifier(
     fullText: String,
     magnifierState: MagnifierState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val anchor = magnifierState.anchor
     val caretIndex = magnifierState.caretIndex
@@ -54,17 +54,20 @@ fun SelectionMagnifier(
     val magnifierCenterX = anchor.x
     val magnifierCenterY = anchor.y - verticalOffsetPx
 
-    val offsetXdp = with(density) {
-        magnifierCenterX.toDp() - magnifierRadiusDp
-    }
-    val offsetYdp = with(density) {
-        magnifierCenterY.toDp() - magnifierRadiusDp
-    }
+    val offsetXdp =
+        with(density) {
+            magnifierCenterX.toDp() - magnifierRadiusDp
+        }
+    val offsetYdp =
+        with(density) {
+            magnifierCenterY.toDp() - magnifierRadiusDp
+        }
 
-    val magnifierTextStyle = TextStyle(
-        fontSize = 20.sp,
-        color = MaterialTheme.colorScheme.onSurface
-    )
+    val magnifierTextStyle =
+        TextStyle(
+            fontSize = 20.sp,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
     val markerStrokeWidthPx = with(density) { 2.dp.toPx() }
 
     val highlightColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
@@ -72,24 +75,26 @@ fun SelectionMagnifier(
 
     Box(
         modifier = modifier,
-        contentAlignment = Alignment.TopStart
+        contentAlignment = Alignment.TopStart,
     ) {
         Surface(
-            modifier = Modifier
-                .offset(x = offsetXdp, y = offsetYdp)
-                .width(120.dp)
-                .height(48.dp),
+            modifier =
+                Modifier
+                    .offset(x = offsetXdp, y = offsetYdp)
+                    .width(120.dp)
+                    .height(48.dp),
             shape = RoundedCornerShape(percent = 50),
             shadowElevation = 8.dp,
             tonalElevation = 4.dp,
-            color = MaterialTheme.colorScheme.surface
+            color = MaterialTheme.colorScheme.surface,
         ) {
             Canvas(modifier = Modifier.fillMaxSize()) {
-                val layoutResult = textMeasurer.measure(
-                    text = AnnotatedString(snippet),
-                    style = magnifierTextStyle,
-                    maxLines = 1
-                )
+                val layoutResult =
+                    textMeasurer.measure(
+                        text = AnnotatedString(snippet),
+                        style = magnifierTextStyle,
+                        maxLines = 1,
+                    )
 
                 val caretInSnippet = (caretIndex - baseStart).coerceIn(0, snippet.length)
                 val caretRectInSnippet = layoutResult.getCursorRect(caretInSnippet)
@@ -98,10 +103,11 @@ fun SelectionMagnifier(
                 val centerX = size.width / 2f
                 val centerY = size.height / 2f
 
-                val textTopLeft = Offset(
-                    x = centerX - caretX,
-                    y = centerY - layoutResult.size.height / 2f
-                )
+                val textTopLeft =
+                    Offset(
+                        x = centerX - caretX,
+                        y = centerY - layoutResult.size.height / 2f,
+                    )
 
                 val isLeadingHandle = magnifierState.isLeadingHandle
                 val highlightStartIndex: Int
@@ -115,12 +121,14 @@ fun SelectionMagnifier(
                     highlightEndIndex = caretInSnippet
                 }
 
-                val startRect = layoutResult.getCursorRect(
-                    highlightStartIndex.coerceIn(0, snippet.length)
-                )
-                val endRect = layoutResult.getCursorRect(
-                    highlightEndIndex.coerceIn(0, snippet.length)
-                )
+                val startRect =
+                    layoutResult.getCursorRect(
+                        highlightStartIndex.coerceIn(0, snippet.length),
+                    )
+                val endRect =
+                    layoutResult.getCursorRect(
+                        highlightEndIndex.coerceIn(0, snippet.length),
+                    )
 
                 val highlightLeftX = minOf(startRect.left, endRect.left)
                 val highlightRightX = maxOf(startRect.left, endRect.left)
@@ -133,15 +141,16 @@ fun SelectionMagnifier(
                 drawRect(
                     color = highlightColor,
                     topLeft = Offset(highlightLeft, highlightTop),
-                    size = Size(
-                        width = (highlightRight - highlightLeft),
-                        height = (highlightBottom - highlightTop)
-                    )
+                    size =
+                        Size(
+                            width = (highlightRight - highlightLeft),
+                            height = (highlightBottom - highlightTop),
+                        ),
                 )
 
                 drawText(
                     textLayoutResult = layoutResult,
-                    topLeft = textTopLeft
+                    topLeft = textTopLeft,
                 )
 
                 val lineTop = Offset(centerX, centerY - layoutResult.size.height.toFloat())
@@ -151,7 +160,7 @@ fun SelectionMagnifier(
                     color = handleColor,
                     start = lineTop,
                     end = lineBottom,
-                    strokeWidth = markerStrokeWidthPx
+                    strokeWidth = markerStrokeWidthPx,
                 )
             }
         }

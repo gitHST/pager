@@ -17,7 +17,7 @@ fun DatePickerPopup(
     showDialog: Boolean,
     datePickerState: DatePickerState,
     onDismiss: () -> Unit,
-    onDateSelected: (LocalDate) -> Unit
+    onDateSelected: (LocalDate) -> Unit,
 ) {
     if (!showDialog) return
 
@@ -27,7 +27,8 @@ fun DatePickerPopup(
             TextButton(onClick = {
                 datePickerState.selectedDateMillis?.let { millis ->
                     val date =
-                        Instant.ofEpochMilli(millis)
+                        Instant
+                            .ofEpochMilli(millis)
                             .atZone(ZoneId.systemDefault())
                             .toLocalDate()
                     onDateSelected(date)
@@ -41,7 +42,7 @@ fun DatePickerPopup(
             TextButton(onClick = onDismiss) {
                 Text("Cancel")
             }
-        }
+        },
     ) {
         DatePicker(state = datePickerState)
     }

@@ -22,40 +22,40 @@ fun PrivacyDateSpoilersRow(
     spoilers: Boolean,
     onDateClick: () -> Unit,
     onLockToggle: (Privacy) -> Unit,
-    onSpoilerToggle: (Boolean) -> Unit
+    onSpoilerToggle: (Boolean) -> Unit,
 ) {
     var currentSpoilerIconIndex by remember { mutableIntStateOf(0) }
 
     Row(
         modifier =
-        Modifier
-            .fillMaxWidth()
-            .height(75.dp),
-        verticalAlignment = Alignment.CenterVertically
+            Modifier
+                .fillMaxWidth()
+                .height(75.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier =
-            Modifier
-                .weight(1f),
-            contentAlignment = Alignment.Center
+                Modifier
+                    .weight(1f),
+            contentAlignment = Alignment.Center,
         ) {
             PrivacyToggle(privacy, onLockToggle)
         }
 
         Box(
             modifier =
-            Modifier
-                .weight(1f),
-            contentAlignment = Alignment.Center
+                Modifier
+                    .weight(1f),
+            contentAlignment = Alignment.Center,
         ) {
             DatePickerDisplay(selectedDate, onDateClick)
         }
 
         Box(
             modifier =
-            Modifier
-                .weight(1f),
-            contentAlignment = Alignment.Center
+                Modifier
+                    .weight(1f),
+            contentAlignment = Alignment.Center,
         ) {
             SpoilerToggle(spoilers, currentSpoilerIconIndex) { newSpoilers, newIconIndex ->
                 onSpoilerToggle(newSpoilers)

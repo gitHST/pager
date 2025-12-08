@@ -12,41 +12,43 @@ import kotlinx.coroutines.tasks.await
 
 class FirebaseUserSettingsRepository(
     uid: String,
-    firestore: FirebaseFirestore = Firebase.firestore
+    firestore: FirebaseFirestore = Firebase.firestore,
 ) : IUserSettingsRepository {
-
     private val settingsDocument: DocumentReference =
-        firestore.collection("users")
+        firestore
+            .collection("users")
             .document(uid)
             .collection("settings")
             .document("app")
 
     override val themeModeFlow: Flow<ThemeMode> =
         callbackFlow {
-            val listener = settingsDocument.addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    trySend(ThemeMode.SYSTEM)
-                    return@addSnapshotListener
-                }
+            val listener =
+                settingsDocument.addSnapshotListener { snapshot, error ->
+                    if (error != null) {
+                        trySend(ThemeMode.SYSTEM)
+                        return@addSnapshotListener
+                    }
 
-                if (snapshot != null && snapshot.exists()) {
-                    val modeString = snapshot.getString("theme_mode")
-                    val mode = modeString?.toThemeModeOrNull() ?: ThemeMode.SYSTEM
-                    trySend(mode)
-                } else {
-                    trySend(ThemeMode.SYSTEM)
+                    if (snapshot != null && snapshot.exists()) {
+                        val modeString = snapshot.getString("theme_mode")
+                        val mode = modeString?.toThemeModeOrNull() ?: ThemeMode.SYSTEM
+                        trySend(mode)
+                    } else {
+                        trySend(ThemeMode.SYSTEM)
+                    }
                 }
-            }
 
             awaitClose { listener.remove() }
         }
 
     override suspend fun setThemeMode(mode: ThemeMode) {
-        settingsDocument.set(
-            mapOf(
-                "theme_mode" to mode.name
-            )
-        ).await()
+        settingsDocument
+            .set(
+                mapOf(
+                    "theme_mode" to mode.name,
+                ),
+            ).await()
     }
 }
 

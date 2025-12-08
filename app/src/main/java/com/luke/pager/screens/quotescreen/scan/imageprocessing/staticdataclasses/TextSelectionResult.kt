@@ -2,5 +2,5 @@ package com.luke.pager.screens.quotescreen.scan.imageprocessing.staticdataclasse
 
 data class TextSelectionResult(
     val startIndex: Int,
-    val endIndex: Int
+    val endIndex: Int,
 )

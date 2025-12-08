@@ -20,19 +20,19 @@ data class ClusterResult(
     val imageHeight: Int,
     val rotatedBitmap: Bitmap,
     val allClusters: List<List<Text.TextBlock>>,
-    val clusterDistances: List<ClusterDistanceDebug>
+    val clusterDistances: List<ClusterDistanceDebug>,
 )
 
 data class ClusterDistanceDebug(
     val clusterA: Int,
     val clusterB: Int,
-    val distance: Float
+    val distance: Float,
 )
 
 suspend fun processImageAndCluster(
     context: Context,
     uri: Uri,
-    minPts: Int = 1
+    minPts: Int = 1,
 ): ClusterResult {
     val bitmapStream = context.contentResolver.openInputStream(uri)
     val bitmap = BitmapFactory.decodeStream(bitmapStream)
@@ -43,33 +43,36 @@ suspend fun processImageAndCluster(
     val result = recognizer.process(tempImage).await()
     val textBlocks = result.textBlocks
 
-    val angles = textBlocks.mapNotNull { block ->
-        val corners = block.cornerPoints
-        if (corners != null && corners.size >= 2) {
-            val p0 = corners[0]
-            val p1 = corners[1]
-            val dx = (p1.x - p0.x).toFloat()
-            val dy = (p1.y - p0.y).toFloat()
-            Math.toDegrees(atan2(dy, dx).toDouble())
-        } else {
-            null
+    val angles =
+        textBlocks.mapNotNull { block ->
+            val corners = block.cornerPoints
+            if (corners != null && corners.size >= 2) {
+                val p0 = corners[0]
+                val p1 = corners[1]
+                val dx = (p1.x - p0.x).toFloat()
+                val dy = (p1.y - p0.y).toFloat()
+                Math.toDegrees(atan2(dy, dx).toDouble())
+            } else {
+                null
+            }
         }
-    }
 
     val avgAngle = if (angles.isNotEmpty()) angles.average() else 0.0
 
-    val rotationDegrees = when {
-        avgAngle in -45.0..45.0 -> 0
-        avgAngle in 45.0..135.0 -> -90
-        avgAngle in -135.0..-45.0 -> 90
-        else -> 180
-    }
+    val rotationDegrees =
+        when {
+            avgAngle in -45.0..45.0 -> 0
+            avgAngle in 45.0..135.0 -> -90
+            avgAngle in -135.0..-45.0 -> 90
+            else -> 180
+        }
 
-    val correctedBitmap = if (rotationDegrees != 0) {
-        rotateBitmap(bitmap, rotationDegrees.toFloat())
-    } else {
-        bitmap
-    }
+    val correctedBitmap =
+        if (rotationDegrees != 0) {
+            rotateBitmap(bitmap, rotationDegrees.toFloat())
+        } else {
+            bitmap
+        }
 
     val finalImage = InputImage.fromBitmap(correctedBitmap, 0)
     val finalResult = recognizer.process(finalImage).await()
@@ -122,11 +125,14 @@ suspend fun processImageAndCluster(
         imageHeight = imageHeight,
         rotatedBitmap = correctedBitmap,
         allClusters = textClusters,
-        clusterDistances = debugDistances
+        clusterDistances = debugDistances,
     )
 }
 
-fun rotateBitmap(bitmap: Bitmap, degrees: Float): Bitmap {
+fun rotateBitmap(
+    bitmap: Bitmap,
+    degrees: Float,
+): Bitmap {
     val matrix = Matrix()
     matrix.postRotate(degrees)
     return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
@@ -158,18 +164,19 @@ fun <T> mergeOverlappingClusters(clusters: List<Collection<T>>): List<Set<T>> {
 }
 
 fun estimateMedianLineHeight(blocks: List<Text.TextBlock>): Float {
-    val lineHeights = blocks.flatMap { block ->
-        block.lines.mapNotNull { line ->
-            val points = line.cornerPoints
-            if (points != null && points.size >= 4) {
-                val dy = (points[3].y - points[0].y).toFloat()
-                val dx = (points[3].x - points[0].x).toFloat()
-                sqrt(dx * dx + dy * dy)
-            } else {
-                line.boundingBox?.height()?.toFloat()
+    val lineHeights =
+        blocks.flatMap { block ->
+            block.lines.mapNotNull { line ->
+                val points = line.cornerPoints
+                if (points != null && points.size >= 4) {
+                    val dy = (points[3].y - points[0].y).toFloat()
+                    val dx = (points[3].x - points[0].x).toFloat()
+                    sqrt(dx * dx + dy * dy)
+                } else {
+                    line.boundingBox?.height()?.toFloat()
+                }
             }
         }
-    }
 
     return if (lineHeights.isNotEmpty()) {
         lineHeights.sorted()[lineHeights.size / 2]

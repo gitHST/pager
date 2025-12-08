@@ -8,11 +8,11 @@ import kotlinx.coroutines.tasks.await
 
 class FirebaseQuoteRepository(
     uid: String,
-    firestore: FirebaseFirestore = Firebase.firestore
+    firestore: FirebaseFirestore = Firebase.firestore,
 ) : IQuoteRepository {
-
     private val quotesCollection =
-        firestore.collection("users")
+        firestore
+            .collection("users")
             .document(uid)
             .collection("quotes")
 
@@ -54,18 +54,18 @@ class FirebaseQuoteRepository(
     override suspend fun deleteQuote(quote: QuoteEntity) {
         if (quote.id.isBlank()) return
 
-        quotesCollection.document(quote.id)
+        quotesCollection
+            .document(quote.id)
             .delete()
             .await()
     }
-
 
     private fun QuoteEntity.toFirestoreMap(): Map<String, Any?> =
         mapOf(
             "book_id" to bookId,
             "quote_text" to quoteText,
             "page_number" to pageNumber,
-            "date_added" to dateAdded
+            "date_added" to dateAdded,
         )
 
     private fun com.google.firebase.firestore.DocumentSnapshot.toQuoteEntityOrNull(): QuoteEntity? {
@@ -80,7 +80,7 @@ class FirebaseQuoteRepository(
             bookId = bookId,
             quoteText = quoteText,
             pageNumber = pageNumber,
-            dateAdded = dateAdded
+            dateAdded = dateAdded,
         )
     }
 }

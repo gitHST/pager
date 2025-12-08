@@ -41,18 +41,19 @@ import com.luke.pager.screens.components.HorizontalShadowDiv
 fun AllQuotesTab(
     quotes: List<QuoteEntity>,
     bookList: List<BookEntity>,
-    uiStateViewModel: QuoteUiStateViewModel
+    uiStateViewModel: QuoteUiStateViewModel,
 ) {
     val isSortAscendingState = uiStateViewModel.isSortAscending.collectAsState()
     val isSortAscending = isSortAscendingState.value
 
-    val sortedQuotes = remember(quotes, isSortAscending) {
-        if (isSortAscending) {
-            quotes.sortedBy { it.dateAdded }
-        } else {
-            quotes.sortedByDescending { it.dateAdded }
+    val sortedQuotes =
+        remember(quotes, isSortAscending) {
+            if (isSortAscending) {
+                quotes.sortedBy { it.dateAdded }
+            } else {
+                quotes.sortedByDescending { it.dateAdded }
+            }
         }
-    }
 
     val scrollState = rememberScrollState()
 
@@ -68,9 +69,10 @@ fun AllQuotesTab(
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(start = 30.dp, end = 40.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(start = 30.dp, end = 40.dp),
     ) {
         if (sortedQuotes.isEmpty()) {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -78,7 +80,7 @@ fun AllQuotesTab(
                     "No quotes yet",
                     fontSize = 18.sp,
                     fontStyle = FontStyle.Italic,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                 )
             }
         } else {
@@ -87,16 +89,18 @@ fun AllQuotesTab(
                     hideLine = true,
                     visible = hasScrolled,
                     shadowFacingUp = false,
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .offset(y = 0.dp)
+                    modifier =
+                        Modifier
+                            .align(Alignment.TopCenter)
+                            .offset(y = 0.dp),
                 )
 
                 Column(
-                    modifier = Modifier
-                        .verticalScroll(scrollState)
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    modifier =
+                        Modifier
+                            .verticalScroll(scrollState)
+                            .fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -110,13 +114,13 @@ fun AllQuotesTab(
                                 text = quote.quoteText,
                                 fontSize = 16.sp,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onBackground
+                                color = MaterialTheme.colorScheme.onBackground,
                             )
                             Spacer(modifier = Modifier.height(10.dp))
 
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Text(
                                     text = "- $authors, $year",
@@ -125,15 +129,16 @@ fun AllQuotesTab(
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onBackground,
                                     maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    overflow = TextOverflow.Ellipsis,
                                 )
                                 quote.pageNumber?.let { page ->
                                     Text(
                                         text = "p.$page",
                                         fontSize = 14.sp,
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-                                        )
+                                        style =
+                                            MaterialTheme.typography.bodySmall.copy(
+                                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                                            ),
                                     )
                                 }
                             }
@@ -146,9 +151,9 @@ fun AllQuotesTab(
                                         .height(1.dp)
                                         .background(
                                             MaterialTheme.colorScheme.onBackground.copy(
-                                                alpha = 0.2f
-                                            )
-                                        )
+                                                alpha = 0.2f,
+                                            ),
+                                        ),
                                 )
                             } else {
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -161,20 +166,21 @@ fun AllQuotesTab(
                     hideLine = true,
                     shadowFacingUp = true,
                     visible = hasNotReachedEnd,
-                    modifier = Modifier.align(Alignment.BottomCenter)
+                    modifier = Modifier.align(Alignment.BottomCenter),
                 )
 
                 IconButton(
                     onClick = { uiStateViewModel.toggleSortOrder() },
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(4.dp)
-                        .offset(x = 45.dp, y = 8.dp)
+                    modifier =
+                        Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(4.dp)
+                            .offset(x = 45.dp, y = 8.dp),
                 ) {
                     Icon(
                         imageVector = if (isSortAscending) Icons.Default.South else Icons.Default.North,
                         contentDescription = "Toggle sort order",
-                        tint = Color.Gray
+                        tint = Color.Gray,
                     )
                 }
             }

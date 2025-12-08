@@ -61,7 +61,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -69,7 +68,7 @@ class MainActivity : ComponentActivity() {
             resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK
         val isLargeScreen =
             screenLayout == Configuration.SCREENLAYOUT_SIZE_LARGE ||
-                    screenLayout == Configuration.SCREENLAYOUT_SIZE_XLARGE
+                screenLayout == Configuration.SCREENLAYOUT_SIZE_XLARGE
         val isFoldableOrTablet = isLargeScreen || isDeviceFoldable()
 
         if (!isFoldableOrTablet) {
@@ -88,16 +87,18 @@ class MainActivity : ComponentActivity() {
 
             if (!ready) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.White),
-                    contentAlignment = Alignment.Center
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .background(Color.White),
+                    contentAlignment = Alignment.Center,
                 ) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                        contentAlignment = Alignment.Center,
                     ) {
                         CircularProgressIndicator()
                     }
@@ -129,10 +130,11 @@ class MainActivity : ComponentActivity() {
                 CompositionLocalProvider(LocalUseDarkTheme provides systemIsDark) {
                     PagerTheme(useDarkTheme = systemIsDark) {
                         Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(if (systemIsDark) BackgroundDark else BackgroundLight),
-                            contentAlignment = Alignment.Center
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .background(if (systemIsDark) BackgroundDark else BackgroundLight),
+                            contentAlignment = Alignment.Center,
                         ) {
                             CircularProgressIndicator()
                         }
@@ -150,7 +152,7 @@ class MainActivity : ComponentActivity() {
                         coroutineScope.launch {
                             settingsRepository.setThemeMode(mode)
                         }
-                    }
+                    },
                 )
             }
         }
@@ -168,7 +170,7 @@ fun PagerAppUI(
     reviewViewModel: ReviewViewModel,
     quoteViewModel: QuoteViewModel,
     themeMode: ThemeMode,
-    onThemeModeChange: (ThemeMode) -> Unit
+    onThemeModeChange: (ThemeMode) -> Unit,
 ) {
     val systemIsDark = isSystemInDarkTheme()
     val useDarkTheme =
@@ -185,11 +187,12 @@ fun PagerAppUI(
             val currentRoute = navBackStackEntry?.destination?.route
             val snackbarHostState = remember { SnackbarHostState() }
 
-            val hideBottomBarRoutes = setOf(
-                "scan_screen",
-                "multi_page_preview",
-                "profile"
-            )
+            val hideBottomBarRoutes =
+                setOf(
+                    "scan_screen",
+                    "multi_page_preview",
+                    "profile",
+                )
             val shouldShowBottomBar = currentRoute !in hideBottomBarRoutes
 
             val transitionDurationMillis = 100
@@ -209,12 +212,14 @@ fun PagerAppUI(
 
             val isInitialLoading by bookViewModel.isInitialLoading.collectAsState()
 
-            fun backgroundColorFor(route: String?, dark: Boolean): Color {
-                return when (route) {
+            fun backgroundColorFor(
+                route: String?,
+                dark: Boolean,
+            ): Color =
+                when (route) {
                     "plus" -> if (dark) PlusBackgroundDark else PlusBackgroundLight
                     else -> if (dark) BackgroundDark else BackgroundLight
                 }
-            }
 
             LaunchedEffect(currentRoute, useDarkTheme) {
                 if (animatedTargetColor == null) {
@@ -251,14 +256,14 @@ fun PagerAppUI(
 
             val animatedBackgroundColor by animateColorAsState(
                 targetValue = animatedTargetColor ?: Color.Transparent,
-                animationSpec = tween(durationMillis = transitionDurationMillis)
+                animationSpec = tween(durationMillis = transitionDurationMillis),
             )
 
             Box(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .background(animatedBackgroundColor)
+                        .background(animatedBackgroundColor),
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.clean_gray_paper),
@@ -267,7 +272,7 @@ fun PagerAppUI(
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .alpha(textureAlpha)
+                            .alpha(textureAlpha),
                 )
 
                 Scaffold(
@@ -277,13 +282,13 @@ fun PagerAppUI(
                         if (bottomBarVisible) {
                             BottomNavBar(navController)
                         }
-                    }
+                    },
                 ) { paddingValues ->
                     Box(
                         modifier =
                             Modifier
                                 .fillMaxSize()
-                                .padding(paddingValues)
+                                .padding(paddingValues),
                     ) {
                         PagerNavHost(
                             navController = navController,
@@ -291,23 +296,25 @@ fun PagerAppUI(
                             reviewViewModel = reviewViewModel,
                             quoteViewModel = quoteViewModel,
                             themeMode = themeMode,
-                            onThemeModeChange = onThemeModeChange
+                            onThemeModeChange = onThemeModeChange,
                         )
                     }
                 }
 
                 if (isInitialLoading) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color(0x66000000)),
-                        contentAlignment = Alignment.Center
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .background(Color(0x66000000)),
+                        contentAlignment = Alignment.Center,
                     ) {
                         Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                            contentAlignment = Alignment.Center,
                         ) {
                             CircularProgressIndicator()
                         }

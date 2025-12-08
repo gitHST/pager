@@ -28,11 +28,12 @@ import draggableTextSelection
 fun QuoteSelectionScreen(
     fullText: String,
     onCancel: () -> Unit,
-    onDone: (selectedText: String) -> Unit
+    onDone: (selectedText: String) -> Unit,
 ) {
-    val cleanedFullText = remember(fullText) {
-        fullText.replace(Regex("\\s*\\n+\\s*"), " ").trim()
-    }
+    val cleanedFullText =
+        remember(fullText) {
+            fullText.replace(Regex("\\s*\\n+\\s*"), " ").trim()
+        }
 
     var startCursorIndex by remember { mutableIntStateOf(0) }
     var endCursorIndex by remember { mutableIntStateOf(cleanedFullText.length) }
@@ -41,33 +42,36 @@ fun QuoteSelectionScreen(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color.Transparent
+        color = Color.Transparent,
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
             ) {
                 Text(
                     text = "Select Quote",
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 16.dp),
                 )
 
                 Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
                 ) {
-                    val selectionResult = draggableTextSelection(
-                        fullText = cleanedFullText,
-                        modifier = Modifier.fillMaxSize(),
-                        onMagnifierStateChange = { state ->
-                            magnifierState = state
-                        }
-                    )
+                    val selectionResult =
+                        draggableTextSelection(
+                            fullText = cleanedFullText,
+                            modifier = Modifier.fillMaxSize(),
+                            onMagnifierStateChange = { state ->
+                                magnifierState = state
+                            },
+                        )
 
                     startCursorIndex = selectionResult.startIndex
                     endCursorIndex = selectionResult.endIndex
@@ -77,7 +81,7 @@ fun QuoteSelectionScreen(
 
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Button(onClick = onCancel) {
                         Text("Cancel")
@@ -87,10 +91,11 @@ fun QuoteSelectionScreen(
                         val start = startCursorIndex.coerceAtMost(endCursorIndex)
                         val end = startCursorIndex.coerceAtLeast(endCursorIndex)
 
-                        val selectedText = fullText.substring(
-                            start.coerceIn(0, fullText.length),
-                            end.coerceIn(0, fullText.length)
-                        )
+                        val selectedText =
+                            fullText.substring(
+                                start.coerceIn(0, fullText.length),
+                                end.coerceIn(0, fullText.length),
+                            )
                         onDone(selectedText)
                     }) {
                         Text("Done")
@@ -101,7 +106,7 @@ fun QuoteSelectionScreen(
             SelectionMagnifier(
                 fullText = cleanedFullText,
                 magnifierState = magnifierState,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
             )
         }
     }

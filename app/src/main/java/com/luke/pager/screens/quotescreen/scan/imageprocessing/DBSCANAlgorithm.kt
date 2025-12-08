@@ -7,13 +7,13 @@ import kotlin.math.sqrt
 data class DBSCANBlockBox(
     val block: Text.TextBlock,
     val rect: Rect,
-    val lineRects: List<Rect>
+    val lineRects: List<Rect>,
 )
 
 fun dbscan2D(
     boxes: List<DBSCANBlockBox>,
     eps: Float,
-    minPts: Int
+    minPts: Int,
 ): Pair<List<List<DBSCANBlockBox>>, List<DBSCANBlockBox>> {
     val visited = mutableSetOf<DBSCANBlockBox>()
     val noise = mutableListOf<DBSCANBlockBox>()
@@ -23,9 +23,10 @@ fun dbscan2D(
         if (visited.contains(box)) continue
         visited.add(box)
 
-        val neighbors = boxes.filter { other ->
-            minDistanceBetweenLines(box, other) <= eps
-        }
+        val neighbors =
+            boxes.filter { other ->
+                minDistanceBetweenLines(box, other) <= eps
+            }
 
         if (neighbors.size < minPts) {
             noise.add(box)
@@ -46,7 +47,7 @@ private fun expandCluster2D(
     boxes: List<DBSCANBlockBox>,
     visited: MutableSet<DBSCANBlockBox>,
     eps: Float,
-    minPts: Int
+    minPts: Int,
 ) {
     cluster.add(box)
 
@@ -55,9 +56,10 @@ private fun expandCluster2D(
         val current = queue.removeFirst()
         if (!visited.contains(current)) {
             visited.add(current)
-            val currentNeighbors = boxes.filter { other ->
-                minDistanceBetweenLines(box, other) <= eps
-            }
+            val currentNeighbors =
+                boxes.filter { other ->
+                    minDistanceBetweenLines(box, other) <= eps
+                }
             if (currentNeighbors.size >= minPts) {
                 queue.addAll(currentNeighbors)
             }
@@ -68,14 +70,20 @@ private fun expandCluster2D(
     }
 }
 
-private fun distanceBetweenRectangles(r1: Rect, r2: Rect): Float {
+private fun distanceBetweenRectangles(
+    r1: Rect,
+    r2: Rect,
+): Float {
     val dx = maxOf(0, maxOf(r1.left, r2.left) - minOf(r1.right, r2.right))
     val dy = maxOf(0, maxOf(r1.top, r2.top) - minOf(r1.bottom, r2.bottom))
 
     return sqrt((dx * dx + dy * dy).toFloat())
 }
 
-private fun minDistanceBetweenLines(box1: DBSCANBlockBox, box2: DBSCANBlockBox): Float {
+private fun minDistanceBetweenLines(
+    box1: DBSCANBlockBox,
+    box2: DBSCANBlockBox,
+): Float {
     var minDistance = Float.MAX_VALUE
     for (r1 in box1.lineRects) {
         for (r2 in box2.lineRects) {
@@ -90,7 +98,7 @@ private fun minDistanceBetweenLines(box1: DBSCANBlockBox, box2: DBSCANBlockBox):
 
 fun minDistanceBetweenClusters(
     cluster1: List<DBSCANBlockBox>,
-    cluster2: List<DBSCANBlockBox>
+    cluster2: List<DBSCANBlockBox>,
 ): Float {
     var minDistance = Float.MAX_VALUE
     for (box1 in cluster1) {

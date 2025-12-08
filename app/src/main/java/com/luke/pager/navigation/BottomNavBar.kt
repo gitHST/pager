@@ -18,16 +18,17 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 
 @Composable
 fun BottomNavBar(navController: NavHostController) {
-    val items = listOf(
-        NavItem("profile", "Profile", Icons.Filled.Person),
-        NavItem("plus", "Add", Icons.Filled.Add),
-        NavItem("quotes", "Quotes", Icons.Filled.FormatQuote),
-        NavItem("diary", "Diary", Icons.Filled.Book),
-    )
+    val items =
+        listOf(
+            NavItem("profile", "Profile", Icons.Filled.Person),
+            NavItem("plus", "Add", Icons.Filled.Add),
+            NavItem("quotes", "Quotes", Icons.Filled.FormatQuote),
+            NavItem("diary", "Diary", Icons.Filled.Book),
+        )
 
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
-        contentColor = MaterialTheme.colorScheme.onSurface
+        contentColor = MaterialTheme.colorScheme.onSurface,
     ) {
         val currentRoute by navController.currentBackStackEntryAsState()
         items.forEach { item ->
@@ -40,17 +41,19 @@ fun BottomNavBar(navController: NavHostController) {
                     }
                 },
                 icon = { Icon(item.icon, contentDescription = item.label) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.onSurface,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    indicatorColor = MaterialTheme.colorScheme.surfaceVariant
-                )
+                colors =
+                    NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.onSurface,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        indicatorColor = MaterialTheme.colorScheme.surfaceVariant,
+                    ),
             )
         }
     }
 }
+
 data class NavItem(
     val route: String,
     val label: String,
-    val icon: ImageVector
+    val icon: ImageVector,
 )

@@ -9,21 +9,23 @@ import kotlinx.coroutines.tasks.await
 
 class FirebaseReviewRepository(
     private val uid: String,
-    firestore: FirebaseFirestore = Firebase.firestore
+    firestore: FirebaseFirestore = Firebase.firestore,
 ) : IReviewRepository {
-
     private val reviewsCollection =
-        firestore.collection("users")
+        firestore
+            .collection("users")
             .document(uid)
             .collection("reviews")
 
     private val booksCollection =
-        firestore.collection("users")
+        firestore
+            .collection("users")
             .document(uid)
             .collection("books")
 
     private val quotesCollection =
-        firestore.collection("users")
+        firestore
+            .collection("users")
             .document(uid)
             .collection("quotes")
 
@@ -89,8 +91,12 @@ class FirebaseReviewRepository(
         }
     }
 
-    override suspend fun updateReviewText(reviewId: String, newText: String) {
-        reviewsCollection.document(reviewId)
+    override suspend fun updateReviewText(
+        reviewId: String,
+        newText: String,
+    ) {
+        reviewsCollection
+            .document(reviewId)
             .update("review_text", newText)
             .await()
 
@@ -106,8 +112,12 @@ class FirebaseReviewRepository(
         }
     }
 
-    override suspend fun updateReviewRating(reviewId: String, newRating: Float) {
-        reviewsCollection.document(reviewId)
+    override suspend fun updateReviewRating(
+        reviewId: String,
+        newRating: Float,
+    ) {
+        reviewsCollection
+            .document(reviewId)
             .update("rating", newRating)
             .await()
 
@@ -123,8 +133,12 @@ class FirebaseReviewRepository(
         }
     }
 
-    override suspend fun updateReviewPrivacy(reviewId: String, privacy: Privacy) {
-        reviewsCollection.document(reviewId)
+    override suspend fun updateReviewPrivacy(
+        reviewId: String,
+        privacy: Privacy,
+    ) {
+        reviewsCollection
+            .document(reviewId)
             .update("privacy", privacy.name)
             .await()
 
@@ -151,7 +165,7 @@ class FirebaseReviewRepository(
             "review_text" to reviewText,
             "tags" to tags,
             "privacy" to privacy.name,
-            "has_spoilers" to hasSpoilers
+            "has_spoilers" to hasSpoilers,
         )
 
     private fun ReviewEntity.toGlobalReviewMap(userId: String): Map<String, Any?> =
@@ -166,7 +180,7 @@ class FirebaseReviewRepository(
             "review_text" to reviewText,
             "tags" to tags,
             "privacy" to privacy.name,
-            "has_spoilers" to hasSpoilers
+            "has_spoilers" to hasSpoilers,
         )
 
     private fun com.google.firebase.firestore.DocumentSnapshot.toReviewEntityOrNull(): ReviewEntity? {
@@ -182,8 +196,9 @@ class FirebaseReviewRepository(
         val privacyName = getString("privacy")
         val hasSpoilers = getBoolean("has_spoilers") ?: false
 
-        val privacy = runCatching { Privacy.valueOf(privacyName ?: "") }
-            .getOrDefault(Privacy.PUBLIC)
+        val privacy =
+            runCatching { Privacy.valueOf(privacyName ?: "") }
+                .getOrDefault(Privacy.PUBLIC)
 
         return ReviewEntity(
             id = id,
@@ -196,7 +211,7 @@ class FirebaseReviewRepository(
             reviewText = reviewText,
             tags = tags,
             privacy = privacy,
-            hasSpoilers = hasSpoilers
+            hasSpoilers = hasSpoilers,
         )
     }
 }

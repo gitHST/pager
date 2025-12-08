@@ -9,5 +9,5 @@ data class ScanPage(
     val rotatedBitmap: Bitmap,
     val allClusters: List<List<Text.TextBlock>>,
     val imageWidth: Int,
-    val imageHeight: Int
+    val imageHeight: Int,
 )

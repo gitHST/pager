@@ -39,7 +39,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun FabOverlay(
     uiStateViewModel: QuoteUiStateViewModel,
-    photoLauncher: () -> Unit
+    photoLauncher: () -> Unit,
 ) {
     val isExpanded by uiStateViewModel.isFabExpanded.collectAsState()
     val showActions by uiStateViewModel.showFabActions.collectAsState()
@@ -67,10 +67,11 @@ fun FabOverlay(
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.BottomEnd
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+        contentAlignment = Alignment.BottomEnd,
     ) {
         if (isExpanded && !showQuoteModal) {
             Box(
@@ -81,35 +82,35 @@ fun FabOverlay(
                             uiStateViewModel.setFabExpanded(false)
                             uiStateViewModel.setShowFabActions(false)
                         }
-                    }
+                    },
             )
         }
 
         Column(
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(8.dp),
         ) {
             AnimatedVisibility(
                 visible = showActions && !showQuoteModal,
                 enter = slideInHorizontally { it } + fadeIn(),
-                exit = slideOutHorizontally { it } + fadeOut()
+                exit = slideOutHorizontally { it } + fadeOut(),
             ) {
                 Column(
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding(16.dp),
                 ) {
                     ExtendedFabItem(
                         text = "Write",
-                        icon = Icons.Default.FormatQuote
+                        icon = Icons.Default.FormatQuote,
                     ) {
                         uiStateViewModel.setShowQuoteModal(true)
                         uiStateViewModel.setFabExpanded(false)
                     }
                     ExtendedFabItem(
                         text = "Scan",
-                        icon = Icons.Default.CameraAlt
+                        icon = Icons.Default.CameraAlt,
                     ) {
                         uiStateViewModel.setFabExpanded(false)
                         uiStateViewModel.setShowFabActions(false)
@@ -128,9 +129,10 @@ fun FabOverlay(
             confirmButton = {
                 TextButton(onClick = {
                     showPermissionDeniedDialog = false
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = "package:${context.packageName}".toUri()
-                    }
+                    val intent =
+                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = "package:${context.packageName}".toUri()
+                        }
                     context.startActivity(intent)
                 }) {
                     Text("Open Settings")
@@ -142,7 +144,7 @@ fun FabOverlay(
                 }) {
                     Text("Cancel")
                 }
-            }
+            },
         )
     }
 }
