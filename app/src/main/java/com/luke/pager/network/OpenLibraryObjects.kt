@@ -3,7 +3,7 @@ package com.luke.pager.network
 import com.google.gson.annotations.SerializedName
 
 data class OpenLibrarySearchResponse(
-    val docs: List<OpenLibraryBook>
+    val docs: List<OpenLibraryBook>,
 )
 
 data class OpenLibraryBook(
@@ -14,5 +14,5 @@ data class OpenLibraryBook(
     @SerializedName("cover_i")
     val coverIndex: Int?,
     @SerializedName("first_publish_year")
-    val firstPublishYear: Int?
+    val firstPublishYear: Int?,
 )

@@ -13,5 +13,5 @@ data class ReviewEntity(
     val reviewText: String? = null,
     val tags: String? = null,
     val privacy: Privacy = Privacy.PUBLIC,
-    val hasSpoilers: Boolean = false
+    val hasSpoilers: Boolean = false,
 )

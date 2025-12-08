@@ -21,7 +21,7 @@ fun EditQuoteHeader(
     pageNum: String,
     quoteViewModel: QuoteViewModel,
     scrollState: ScrollState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     var isSubmitting by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
@@ -39,10 +39,11 @@ fun EditQuoteHeader(
             if (isSubmitting) return@DualActionHeader
             isSubmitting = true
 
-            val updatedQuote = quote.copy(
-                quoteText = quoteText,
-                pageNumber = pageNum.toIntOrNull()
-            )
+            val updatedQuote =
+                quote.copy(
+                    quoteText = quoteText,
+                    pageNumber = pageNum.toIntOrNull(),
+                )
 
             coroutineScope.launch {
                 quoteViewModel.updateQuote(updatedQuote)
@@ -51,6 +52,6 @@ fun EditQuoteHeader(
             }
         },
         scrollState = scrollState,
-        modifier = modifier
+        modifier = modifier,
     )
 }

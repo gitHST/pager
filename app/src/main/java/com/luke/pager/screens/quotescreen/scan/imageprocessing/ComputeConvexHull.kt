@@ -7,9 +7,11 @@ fun computeConvexHull(points: List<Point>): List<Point> {
 
     val sorted = points.sortedWith(compareBy({ it.x }, { it.y }))
 
-    fun cross(o: Point, a: Point, b: Point): Int {
-        return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x)
-    }
+    fun cross(
+        o: Point,
+        a: Point,
+        b: Point,
+    ): Int = (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x)
 
     val lower = mutableListOf<Point>()
     for (p in sorted) {

@@ -54,7 +54,7 @@ fun EditQuoteModal(
     overlayAlpha: Float = 0.5f,
     book: BookEntity,
     quote: QuoteEntity,
-    visible: Boolean
+    visible: Boolean,
 ) {
     val windowInfo = LocalWindowInfo.current
     val density = LocalDensity.current
@@ -62,11 +62,12 @@ fun EditQuoteModal(
     val modalHeight = screenHeight / 1.5f
     val containerHeightPx = with(density) { modalHeight.toPx().toInt() }
 
-    val cleanedPrefilledText = quote.quoteText
-        .replace("\n", " ")
-        .replace("\r", " ")
-        .replace(Regex("\\s+"), " ")
-        .trim()
+    val cleanedPrefilledText =
+        quote.quoteText
+            .replace("\n", " ")
+            .replace("\r", " ")
+            .replace(Regex("\\s+"), " ")
+            .trim()
 
     var quoteText by remember(visible, cleanedPrefilledText) { mutableStateOf(cleanedPrefilledText) }
     var pageNumber by remember(visible) { mutableStateOf(quote.pageNumber?.toString() ?: "") }
@@ -84,7 +85,7 @@ fun EditQuoteModal(
     CenteredModalScaffold(
         onDismiss = onDismiss,
         overlayAlpha = overlayAlpha,
-        visible = visible
+        visible = visible,
     ) { scrollState ->
 
         EditQuoteHeader(
@@ -93,51 +94,55 @@ fun EditQuoteModal(
             quoteText = quoteText,
             pageNum = pageNumber,
             quoteViewModel = quoteViewModel,
-            scrollState = scrollState
+            scrollState = scrollState,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .animateContentSize()
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .animateContentSize(),
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
-                    modifier = Modifier
-                        .width(100.dp)
-                        .heightIn(max = 150.dp)
+                    modifier =
+                        Modifier
+                            .width(100.dp)
+                            .heightIn(max = 150.dp),
                 ) {
                     BookCoverImage(
                         coverData = book.cover,
-                        coverUrl = coverUrl
+                        coverUrl = coverUrl,
                     )
                 }
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = 8.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(end = 8.dp),
                     verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.Start
+                    horizontalAlignment = Alignment.Start,
                 ) {
                     Text(
                         text = book.title,
                         style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
 
                     book.authors?.let {
                         Text(
                             text = it,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onBackground
+                            color = MaterialTheme.colorScheme.onBackground,
                         )
                     }
                     book.firstPublishDate?.let {
@@ -145,7 +150,7 @@ fun EditQuoteModal(
                             text = book.firstPublishDate,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            modifier = Modifier.padding(bottom = 8.dp),
                         )
                     }
                 }
@@ -160,7 +165,7 @@ fun EditQuoteModal(
                     scrollState = scrollState,
                     containerHeight = containerHeightPx,
                     existingSpaceTaken = 295,
-                    insideText = "Quote..."
+                    insideText = "Quote...",
                 )
             }
 
@@ -168,7 +173,7 @@ fun EditQuoteModal(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 TextField(
                     value = pageNumber,
@@ -177,8 +182,9 @@ fun EditQuoteModal(
                             pageNumber = newValue
                         }
                     },
-                    modifier = Modifier
-                        .width(120.dp),
+                    modifier =
+                        Modifier
+                            .width(120.dp),
                     textStyle = MaterialTheme.typography.bodyMedium,
                     singleLine = true,
                     placeholder = { Text("_") },
@@ -186,37 +192,39 @@ fun EditQuoteModal(
                         Text(
                             text = "Page:",
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(start = 4.dp)
+                            modifier = Modifier.padding(start = 4.dp),
                         )
                     },
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent
-                    )
+                    colors =
+                        TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                        ),
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
 
                 Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
-                        ) {
-                            showDeleteConfirm = true
-                        },
-                    contentAlignment = Alignment.Center
+                    modifier =
+                        Modifier
+                            .size(32.dp)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                            ) {
+                                showDeleteConfirm = true
+                            },
+                    contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = "Delete quote",
                         tint = MaterialTheme.colorScheme.error.copy(alpha = 0.85f),
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(20.dp),
                     )
                 }
             }
@@ -230,11 +238,12 @@ fun EditQuoteModal(
                             quoteViewModel.deleteQuote(quote)
                             onDismiss()
                         },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error,
-                            contentColor = MaterialTheme.colorScheme.onError
-                        ),
-                        shape = RoundedCornerShape(20.dp)
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError,
+                            ),
+                        shape = RoundedCornerShape(20.dp),
                     ) {
                         Text("Delete", style = MaterialTheme.typography.bodyMedium)
                     }
@@ -250,9 +259,9 @@ fun EditQuoteModal(
                 text = {
                     Text(
                         "Delete this quote?",
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
                     )
-                }
+                },
             )
         }
     }

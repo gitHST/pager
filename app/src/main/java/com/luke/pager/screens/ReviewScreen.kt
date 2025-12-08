@@ -62,7 +62,7 @@ fun ReviewScreen(
     reviewId: String,
     reviews: Map<String, ReviewEntity?>,
     reviewViewModel: ReviewViewModel,
-    onDeleteSuccess: () -> Unit
+    onDeleteSuccess: () -> Unit,
 ) {
     val review = reviews[reviewId]
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -82,7 +82,7 @@ fun ReviewScreen(
         val textStyle =
             MaterialTheme.typography.bodyMedium.copy(
                 color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Start
+                textAlign = TextAlign.Start,
             )
 
         LaunchedEffect(isEditing) {
@@ -104,7 +104,7 @@ fun ReviewScreen(
                     Modifier
                         .fillMaxSize()
                         .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Box(
                     modifier =
@@ -112,12 +112,12 @@ fun ReviewScreen(
                             .fillMaxWidth()
                             .height(56.dp)
                             .padding(bottom = 16.dp),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         text = "Review",
                         fontSize = 24.sp,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
 
                     if (!isEditing) {
@@ -126,7 +126,7 @@ fun ReviewScreen(
                                 Icon(
                                     imageVector = Icons.Default.MoreVert,
                                     contentDescription = "More options",
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = MaterialTheme.colorScheme.primary,
                                 )
                             }
 
@@ -138,9 +138,9 @@ fun ReviewScreen(
                                         .padding(top = 0.dp)
                                         .background(
                                             MaterialTheme.colorScheme.surface,
-                                            RoundedCornerShape(16.dp)
+                                            RoundedCornerShape(16.dp),
                                         ),
-                                shape = RoundedCornerShape(16.dp)
+                                shape = RoundedCornerShape(16.dp),
                             ) {
                                 DropdownMenuItem(
                                     text = { Text("Edit", style = MaterialTheme.typography.labelLarge) },
@@ -152,9 +152,9 @@ fun ReviewScreen(
                                     leadingIcon = {
                                         Icon(
                                             imageVector = Icons.Default.Edit,
-                                            contentDescription = "Edit"
+                                            contentDescription = "Edit",
                                         )
-                                    }
+                                    },
                                 )
                                 DropdownMenuItem(
                                     text = { Text("Delete", style = MaterialTheme.typography.labelLarge) },
@@ -165,9 +165,9 @@ fun ReviewScreen(
                                     leadingIcon = {
                                         Icon(
                                             imageVector = Icons.Default.Delete,
-                                            contentDescription = "Delete"
+                                            contentDescription = "Delete",
                                         )
-                                    }
+                                    },
                                 )
                             }
                         }
@@ -179,7 +179,7 @@ fun ReviewScreen(
                     Text(
                         "Finished reading on: $dateOnly",
                         fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
                 }
 
@@ -190,7 +190,7 @@ fun ReviewScreen(
                         hasRated = true,
                         onRatingChange = { newRating: Float -> localRating = newRating },
                         onUserInteracted = {},
-                        starScale = 1.0f
+                        starScale = 1.0f,
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 } else {
@@ -204,9 +204,9 @@ fun ReviewScreen(
 
                         Box(
                             modifier =
-                            Modifier
-                                .fillMaxWidth(starRowWidthFraction)
-                                .height(starSize)
+                                Modifier
+                                    .fillMaxWidth(starRowWidthFraction)
+                                    .height(starSize),
                         ) {
                             Row(modifier = Modifier.matchParentSize()) {
                                 for (i in 1..5) {
@@ -218,16 +218,16 @@ fun ReviewScreen(
                                         }
                                     Box(
                                         modifier =
-                                        Modifier
-                                            .weight(1f)
-                                            .fillMaxHeight(),
-                                        contentAlignment = Alignment.Center
+                                            Modifier
+                                                .weight(1f)
+                                                .fillMaxHeight(),
+                                        contentAlignment = Alignment.Center,
                                     ) {
                                         Icon(
                                             icon,
                                             contentDescription = null,
                                             tint = MaterialTheme.colorScheme.tertiary,
-                                            modifier = Modifier.height(starSize)
+                                            modifier = Modifier.height(starSize),
                                         )
                                     }
                                 }
@@ -239,10 +239,10 @@ fun ReviewScreen(
                 if (isEditing) {
                     Row(
                         modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(75.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly
+                            Modifier
+                                .fillMaxWidth()
+                                .height(75.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
                     ) {
                         Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                             PrivacyToggle(privacy = localPrivacy, onLockToggle = { localPrivacy = it })
@@ -254,7 +254,7 @@ fun ReviewScreen(
                                 onSpoilerToggle = { newSpoilers, newIconIndex ->
                                     localSpoilers = newSpoilers
                                     currentSpoilerIconIndex = newIconIndex
-                                }
+                                },
                             )
                         }
                     }
@@ -272,10 +272,10 @@ fun ReviewScreen(
                             onValueChange = { editedText = it },
                             textStyle = textStyle,
                             modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .focusRequester(focusRequester),
-                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
+                                Modifier
+                                    .fillMaxWidth()
+                                    .focusRequester(focusRequester),
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                         )
                     }
                 } else {
@@ -285,7 +285,7 @@ fun ReviewScreen(
                             fontSize = 16.sp,
                             modifier = Modifier.fillMaxWidth(),
                             style = textStyle,
-                            fontStyle = if (localReviewText.isBlank()) FontStyle.Italic else FontStyle.Normal
+                            fontStyle = if (localReviewText.isBlank()) FontStyle.Italic else FontStyle.Normal,
                         )
                     }
                 }
@@ -294,10 +294,10 @@ fun ReviewScreen(
             if (isEditing) {
                 Row(
                     modifier =
-                    Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Button(onClick = {
                         reviewViewModel.updateReviewText(reviewId, editedText.text)
@@ -329,11 +329,11 @@ fun ReviewScreen(
                                 onDeleteSuccess()
                             },
                             colors =
-                            ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error,
-                                contentColor = MaterialTheme.colorScheme.onError
-                            ),
-                            shape = RoundedCornerShape(20.dp)
+                                ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.error,
+                                    contentColor = MaterialTheme.colorScheme.onError,
+                                ),
+                            shape = RoundedCornerShape(20.dp),
                         ) {
                             Text("Delete", style = MaterialTheme.typography.bodyMedium)
                         }
@@ -344,7 +344,7 @@ fun ReviewScreen(
                         }
                     },
                     title = { Text("Delete review", style = MaterialTheme.typography.titleLarge) },
-                    text = { Text("Delete this review?", style = MaterialTheme.typography.bodyMedium) }
+                    text = { Text("Delete this review?", style = MaterialTheme.typography.bodyMedium) },
                 )
             }
         }

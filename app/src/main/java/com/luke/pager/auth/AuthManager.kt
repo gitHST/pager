@@ -5,7 +5,6 @@ import com.google.firebase.auth.auth
 import kotlinx.coroutines.tasks.await
 
 object AuthManager {
-
     suspend fun ensureAnonymousUser(): String {
         val auth = Firebase.auth
 

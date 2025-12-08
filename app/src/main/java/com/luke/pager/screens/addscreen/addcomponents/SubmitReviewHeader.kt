@@ -33,7 +33,7 @@ fun SubmitReviewHeader(
     bookViewModel: BookViewModel,
     navController: NavHostController,
     scrollState: androidx.compose.foundation.ScrollState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     var isSubmitting by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
@@ -68,6 +68,6 @@ fun SubmitReviewHeader(
             }
         },
         scrollState = scrollState,
-        modifier = modifier
+        modifier = modifier,
     )
 }

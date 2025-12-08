@@ -17,25 +17,25 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun DatePickerDisplay(
     selectedDate: LocalDate,
-    onDateClick: () -> Unit
+    onDateClick: () -> Unit,
 ) {
     val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = "  Read on...",
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
             text = selectedDate.format(formatter),
             modifier =
-            Modifier
-                .clickable { onDateClick() }
-                .padding(6.dp)
-                .fillMaxWidth(),
+                Modifier
+                    .clickable { onDateClick() }
+                    .padding(6.dp)
+                    .fillMaxWidth(),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.primary,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
     }
 }

@@ -8,13 +8,13 @@ import java.util.Calendar
 import java.util.Locale
 
 class DateUtilsTest {
-
     @Test
     fun `returns formatted month and year if date is older`() {
         val inputDate = "2023-04-25 10:00:00"
-        val expectedFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(
-            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(inputDate)!!
-        )
+        val expectedFormat =
+            SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(
+                SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(inputDate)!!,
+            )
         assertEquals(expectedFormat, getDateWithoutTime(inputDate))
     }
 

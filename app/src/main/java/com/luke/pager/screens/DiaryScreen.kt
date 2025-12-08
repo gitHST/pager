@@ -54,7 +54,7 @@ import java.util.Locale
 @Composable
 fun DiaryScreen(
     navController: NavController,
-    bookViewModel: BookViewModel
+    bookViewModel: BookViewModel,
 ) {
     val books by bookViewModel.books.collectAsState()
     val reviews by bookViewModel.allReviews.collectAsState()
@@ -87,7 +87,7 @@ fun DiaryScreen(
                     Modifier
                         .fillMaxSize()
                         .padding(start = 16.dp, end = 16.dp, top = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 groupedBooks.forEach { (date, bookPairs) ->
                     item {
@@ -95,7 +95,7 @@ fun DiaryScreen(
                             text = date,
                             fontSize = 18.sp,
                             modifier = Modifier.padding(bottom = 8.dp),
-                            color = MaterialTheme.colorScheme.onBackground
+                            color = MaterialTheme.colorScheme.onBackground,
                         )
                     }
                     items(bookPairs) { (book, review) ->
@@ -104,7 +104,7 @@ fun DiaryScreen(
                             review = review,
                             onReviewClick = {
                                 navController.navigate("review_screen/${book.id}")
-                            }
+                            },
                         )
                     }
                 }
@@ -120,7 +120,7 @@ fun DiaryScreen(
 fun BookItem(
     book: BookEntity,
     review: ReviewEntity?,
-    onReviewClick: () -> Unit
+    onReviewClick: () -> Unit,
 ) {
     val trimAmount = 37
 
@@ -137,19 +137,19 @@ fun BookItem(
                 .fillMaxWidth()
                 .clickable(
                     indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
+                    interactionSource = remember { MutableInteractionSource() },
                 ) { onReviewClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = RoundedCornerShape(28.dp)
+        shape = RoundedCornerShape(28.dp),
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             BookCoverImage(
                 coverData = book.cover,
-                coverUrl = coverUrl
+                coverUrl = coverUrl,
             )
             Spacer(modifier = Modifier.width(12.dp))
 
@@ -160,7 +160,7 @@ fun BookItem(
                         text = "By ${book.authors}",
                         fontSize = 14.sp,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
 
@@ -173,7 +173,7 @@ fun BookItem(
                 val isPlaceholder = reviewText == null
 
                 Row(
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (review != null) {
                         val privacyIcon =
@@ -187,7 +187,7 @@ fun BookItem(
                             imageVector = privacyIcon,
                             contentDescription = "Privacy Icon",
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp),
                         )
                     }
 
@@ -200,8 +200,8 @@ fun BookItem(
                         style =
                             MaterialTheme.typography.bodyMedium.copy(
                                 color = MaterialTheme.colorScheme.onSurface,
-                                fontStyle = if (isPlaceholder) FontStyle.Italic else FontStyle.Normal
-                            )
+                                fontStyle = if (isPlaceholder) FontStyle.Italic else FontStyle.Normal,
+                            ),
                     )
                 }
 
@@ -222,13 +222,13 @@ fun BookItem(
                                     Modifier
                                         .weight(1f)
                                         .fillMaxHeight(),
-                                contentAlignment = Alignment.Center
+                                contentAlignment = Alignment.Center,
                             ) {
                                 Icon(
                                     icon,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.tertiary,
-                                    modifier = Modifier.height(starSize)
+                                    modifier = Modifier.height(starSize),
                                 )
                             }
                         }

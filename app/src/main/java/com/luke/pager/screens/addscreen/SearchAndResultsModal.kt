@@ -73,7 +73,7 @@ fun SearchAndResultsModal(
     onDismiss: () -> Unit,
     bookViewModel: BookViewModel,
     navController: NavHostController,
-    searchBooks: suspend (String) -> SearchResult = ::searchBooksSmart
+    searchBooks: suspend (String) -> SearchResult = ::searchBooksSmart,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
@@ -146,44 +146,47 @@ fun SearchAndResultsModal(
     Title("Review")
     Scaffold(
         containerColor = Color.Transparent,
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { paddingValues ->
         Box(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .clickable(
-                    onClick = onDismiss,
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                )
-        ) {
-            Box(
-                modifier = Modifier
+            modifier =
+                Modifier
+                    .padding(paddingValues)
                     .fillMaxSize()
                     .clickable(
+                        onClick = onDismiss,
                         indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) { onDismiss() }
+                        interactionSource = remember { MutableInteractionSource() },
+                    ),
+        ) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                        ) { onDismiss() },
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth(0.9f)
-                        .align(Alignment.TopCenter)
-                        .padding(top = animatedTopPadding)
-                        .heightIn(max = animatedMaxHeight)
-                        .wrapContentHeight()
-                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
-                        .padding(horizontal = 24.dp, vertical = 0.dp)
-                        .onGloballyPositioned { coordinates ->
-                            containerHeight = coordinates.size.height
-                        }
+                    modifier =
+                        Modifier
+                            .fillMaxWidth(0.9f)
+                            .align(Alignment.TopCenter)
+                            .padding(top = animatedTopPadding)
+                            .heightIn(max = animatedMaxHeight)
+                            .wrapContentHeight()
+                            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
+                            .padding(horizontal = 24.dp, vertical = 0.dp)
+                            .onGloballyPositioned { coordinates ->
+                                containerHeight = coordinates.size.height
+                            },
                 ) {
                     AnimatedContent(
                         targetState = selectedBook,
                         transitionSpec = {
                             fadeIn(animationSpec = tween(200)).togetherWith(fadeOut(animationSpec = tween(200)))
-                        }
+                        },
                     ) { book ->
                         if (book != null) {
                             ReviewBook(
@@ -191,7 +194,7 @@ fun SearchAndResultsModal(
                                 onBack = { selectedBook = null },
                                 bookViewModel = bookViewModel,
                                 navController = navController,
-                                containerHeight = containerHeight
+                                containerHeight = containerHeight,
                             )
                         } else {
                             @Suppress("DEPRECATION")
@@ -210,22 +213,24 @@ fun SearchAndResultsModal(
                                     }
                                 },
                                 placeholder = { Text("Search books...") },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .offset(y = (-4).dp),
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .offset(y = (-4).dp),
                                 windowInsets = WindowInsets(0.dp),
                                 colors =
-                                SearchBarDefaults.colors(
-                                    containerColor = Color.Transparent,
-                                    dividerColor = Color.Transparent
-                                )
+                                    SearchBarDefaults.colors(
+                                        containerColor = Color.Transparent,
+                                        dividerColor = Color.Transparent,
+                                    ),
                             ) {
                                 if (isLoading) {
                                     Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(16.dp),
-                                        contentAlignment = Alignment.Center
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
+                                        contentAlignment = Alignment.Center,
                                     ) {
                                         CircularProgressIndicator()
                                     }
@@ -234,15 +239,16 @@ fun SearchAndResultsModal(
                                         if (books.isEmpty() && !isLoading && searchQuery.isNotBlank()) {
                                             item {
                                                 Box(
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .padding(24.dp),
-                                                    contentAlignment = Alignment.Center
+                                                    modifier =
+                                                        Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(24.dp),
+                                                    contentAlignment = Alignment.Center,
                                                 ) {
                                                     Text(
                                                         text = "No results found",
                                                         style = MaterialTheme.typography.bodyMedium,
-                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                                     )
                                                 }
                                             }
@@ -265,24 +271,26 @@ fun SearchAndResultsModal(
 @Composable
 fun BookRowUIClickable(
     book: OpenLibraryBook,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Column {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onClick() }
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clickable { onClick() }
+                    .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = Modifier
-                    .width(80.dp)
-                    .height(120.dp),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .width(80.dp)
+                        .height(120.dp),
+                contentAlignment = Alignment.Center,
             ) {
                 BookCoverImage(
-                    coverUrl = book.coverIndex?.let { "https://covers.openlibrary.org/b/id/$it-M.jpg" }
+                    coverUrl = book.coverIndex?.let { "https://covers.openlibrary.org/b/id/$it-M.jpg" },
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
@@ -296,7 +304,7 @@ fun BookRowUIClickable(
                     Text(
                         it.toString(),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }

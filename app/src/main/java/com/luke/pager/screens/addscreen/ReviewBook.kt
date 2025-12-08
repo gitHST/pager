@@ -40,7 +40,7 @@ fun ReviewBook(
     onBack: () -> Unit,
     bookViewModel: BookViewModel,
     navController: NavHostController,
-    containerHeight: Int
+    containerHeight: Int,
 ) {
     var rating by remember { mutableFloatStateOf(0f) }
     var spoilers by remember { mutableStateOf(false) }
@@ -51,7 +51,7 @@ fun ReviewBook(
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState =
         rememberDatePickerState(
-            initialSelectedDateMillis = selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            initialSelectedDateMillis = selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
         )
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -69,18 +69,18 @@ fun ReviewBook(
             navController = navController,
             scrollState = scrollState,
             modifier =
-            Modifier
-                .align(Alignment.TopCenter)
-                .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 8.dp)
+                Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp, horizontal = 8.dp),
         )
 
         Column(
             modifier =
-            Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .animateContentSize()
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .animateContentSize(),
         ) {
             Spacer(Modifier.height(48.dp))
             BookRowUIClickable(book = book, onClick = {})
@@ -91,7 +91,7 @@ fun ReviewBook(
                 showDialog = showDatePicker,
                 datePickerState = datePickerState,
                 onDismiss = { showDatePicker = false },
-                onDateSelected = { selectedDate = it }
+                onDateSelected = { selectedDate = it },
             )
             PrivacyDateSpoilersRow(
                 selectedDate,
@@ -99,7 +99,7 @@ fun ReviewBook(
                 spoilers,
                 onDateClick = { showDatePicker = true },
                 onLockToggle = { privacy = it },
-                onSpoilerToggle = { spoilers = it }
+                onSpoilerToggle = { spoilers = it },
             )
             Spacer(Modifier.height(12.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {

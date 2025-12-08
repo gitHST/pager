@@ -17,9 +17,8 @@ import kotlinx.coroutines.launch
 
 class BookViewModel(
     private val bookRepository: IBookRepository,
-    private val reviewRepository: IReviewRepository
+    private val reviewRepository: IReviewRepository,
 ) : ViewModel() {
-
     private val _books = MutableStateFlow<List<BookEntity>>(emptyList())
     val books: StateFlow<List<BookEntity>> get() = _books
 
@@ -37,15 +36,13 @@ class BookViewModel(
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
-            initialValue = emptyList()
+            initialValue = emptyList(),
         )
 
     /**
      * Insert a book and return its Firestore auto-generated string ID.
      */
-    suspend fun insertAndReturnId(book: BookEntity): String {
-        return bookRepository.insertAndReturnId(book)
-    }
+    suspend fun insertAndReturnId(book: BookEntity): String = bookRepository.insertAndReturnId(book)
 
     fun loadBooks() {
         viewModelScope.launch {
@@ -75,7 +72,7 @@ class BookViewModel(
         dateReviewed: String,
         privacy: Privacy,
         hasSpoilers: Boolean,
-        onSuccess: () -> Unit
+        onSuccess: () -> Unit,
     ) {
         viewModelScope.launch {
             val book =
@@ -84,7 +81,7 @@ class BookViewModel(
                     authors = openBook.authorName?.joinToString(),
                     openlibraryKey = openBook.key,
                     firstPublishDate = openBook.firstPublishYear?.toString(),
-                    coverId = openBook.coverIndex
+                    coverId = openBook.coverIndex,
                 )
 
             val bookId: String = insertAndReturnId(book)
@@ -99,7 +96,7 @@ class BookViewModel(
                     reviewText = sanitizedReviewText,
                     dateReviewed = dateReviewed,
                     privacy = privacy,
-                    hasSpoilers = hasSpoilers
+                    hasSpoilers = hasSpoilers,
                 )
 
             reviewRepository.insertReview(review)

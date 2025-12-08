@@ -27,7 +27,7 @@ private val LightColorScheme =
         onSurface = PrimaryDark,
         surfaceTint = Color.White,
         error = Color(0xFFB00020),
-        onError = Color.White
+        onError = Color.White,
     )
 
 private val DarkColorScheme =
@@ -50,18 +50,19 @@ private val DarkColorScheme =
         onSurface = OnPrimaryDark,
         surfaceTint = Color.Black,
         error = Color(0xFFCF6679),
-        onError = Color.Black
+        onError = Color.Black,
     )
+
 @Composable
 fun PagerTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val colorScheme = if (useDarkTheme) DarkColorScheme else LightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
-        content = content
+        content = content,
     )
 }

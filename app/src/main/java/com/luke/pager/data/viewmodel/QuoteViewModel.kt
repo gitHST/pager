@@ -9,9 +9,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class QuoteViewModel(
-    private val quoteRepository: IQuoteRepository
+    private val quoteRepository: IQuoteRepository,
 ) : ViewModel() {
-
     private val _quotes = MutableStateFlow<List<QuoteEntity>>(emptyList())
     private val _allQuotes = MutableStateFlow<List<QuoteEntity>>(emptyList())
 

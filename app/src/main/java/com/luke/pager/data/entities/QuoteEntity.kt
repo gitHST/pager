@@ -5,5 +5,5 @@ data class QuoteEntity(
     val bookId: String,
     val quoteText: String,
     val pageNumber: Int? = null,
-    val dateAdded: String? = null
+    val dateAdded: String? = null,
 )

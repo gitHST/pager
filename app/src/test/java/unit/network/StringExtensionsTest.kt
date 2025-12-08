@@ -6,7 +6,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class StringExtensionsTest {
-
     @Test
     fun `normalizeTitle removes quotes and subtitles`() {
         val input = "\"The Great Adventure: A Journey (Special Edition)\""

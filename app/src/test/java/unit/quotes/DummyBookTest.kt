@@ -7,13 +7,13 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class DummyBookTest {
-
     @Test
     fun `toBookEntity maps id and title and sets cover null`() {
-        val dummy = DummyBook(
-            id = "-1",
-            title = "Dummy Book 1"
-        )
+        val dummy =
+            DummyBook(
+                id = "-1",
+                title = "Dummy Book 1",
+            )
 
         val entity: BookEntity = dummy.toBookEntity()
 

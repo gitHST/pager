@@ -5,7 +5,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object OpenLibraryService {
     val api: OpenLibraryApi by lazy {
-        Retrofit.Builder()
+        Retrofit
+            .Builder()
             .baseUrl("https://openlibrary.org/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()

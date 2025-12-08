@@ -24,7 +24,7 @@ fun SubmitQuoteHeader(
     bookId: String,
     quoteViewModel: QuoteViewModel,
     scrollState: ScrollState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     var isSubmitting by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
@@ -35,7 +35,6 @@ fun SubmitQuoteHeader(
         rightButtonText = " Submit quote ",
         isRightButtonLoading = isSubmitting,
         onRightClick = {
-
             val now = Date()
             val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
             val dateAdded = formatter.format(now)
@@ -46,7 +45,7 @@ fun SubmitQuoteHeader(
                     bookId = bookId,
                     quoteText = quoteText,
                     pageNumber = pageNum.toIntOrNull(),
-                    dateAdded = dateAdded
+                    dateAdded = dateAdded,
                 )
 
             coroutineScope.launch {
@@ -55,6 +54,6 @@ fun SubmitQuoteHeader(
             }
         },
         scrollState = scrollState,
-        modifier = modifier
+        modifier = modifier,
     )
 }

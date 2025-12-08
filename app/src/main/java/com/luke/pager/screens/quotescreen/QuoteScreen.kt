@@ -43,6 +43,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.graphics.createBitmap
+import androidx.core.graphics.set
 import com.luke.pager.data.entities.BookEntity
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
@@ -61,7 +62,7 @@ fun QuotesScreen(
     bookViewModel: BookViewModel,
     quoteViewModel: QuoteViewModel,
     uiStateViewModel: QuoteUiStateViewModel,
-    photoLauncher: () -> Unit
+    photoLauncher: () -> Unit,
 ) {
     val bookList by bookViewModel.booksSortedByReviewDate.collectAsState()
     val quotes by quoteViewModel.quotes.collectAsState()
@@ -128,43 +129,45 @@ fun QuotesScreen(
     }
 
     Column(
-        modifier = Modifier.pointerInput(selectedTabIndex, isSwipeInProgress, queuedDirection) {
-            detectDragGestures(
-                onDragStart = {
-                    totalDragX = 0f
-                    totalDragY = 0f
-                    hasCheckedAngle = false
-                    swipeInvalidForThisGesture = false
-                },
-                onDrag = { _, dragAmount ->
-                    if (swipeInvalidForThisGesture) return@detectDragGestures
+        modifier =
+            Modifier.pointerInput(selectedTabIndex, isSwipeInProgress, queuedDirection) {
+                detectDragGestures(
+                    onDragStart = {
+                        totalDragX = 0f
+                        totalDragY = 0f
+                        hasCheckedAngle = false
+                        swipeInvalidForThisGesture = false
+                    },
+                    onDrag = { _, dragAmount ->
+                        if (swipeInvalidForThisGesture) return@detectDragGestures
 
-                    totalDragX += dragAmount.x
-                    totalDragY += dragAmount.y
+                        totalDragX += dragAmount.x
+                        totalDragY += dragAmount.y
 
-                    if (!hasCheckedAngle && abs(totalDragX) >= swipeThreshold) {
-                        hasCheckedAngle = true
+                        if (!hasCheckedAngle && abs(totalDragX) >= swipeThreshold) {
+                            hasCheckedAngle = true
 
-                        val horizontalDominant =
-                            abs(totalDragX) >= abs(totalDragY)
+                            val horizontalDominant =
+                                abs(totalDragX) >= abs(totalDragY)
 
-                        if (!horizontalDominant) {
-                            swipeInvalidForThisGesture = true
-                        } else {
-                            val direction = when {
-                                totalDragX > 0f && selectedTabIndex > 0 -> -1
-                                totalDragX < 0f && selectedTabIndex < maxTabIndex -> 1
-                                else -> 0
-                            }
+                            if (!horizontalDominant) {
+                                swipeInvalidForThisGesture = true
+                            } else {
+                                val direction =
+                                    when {
+                                        totalDragX > 0f && selectedTabIndex > 0 -> -1
+                                        totalDragX < 0f && selectedTabIndex < maxTabIndex -> 1
+                                        else -> 0
+                                    }
 
-                            if (direction != 0) {
-                                requestTabSwipe(direction)
+                                if (direction != 0) {
+                                    requestTabSwipe(direction)
+                                }
                             }
                         }
-                    }
-                }
-            )
-        }
+                    },
+                )
+            },
     ) {
         Title("Quotes")
         if (bookList.isEmpty()) {
@@ -172,7 +175,7 @@ fun QuotesScreen(
         } else {
             PrimaryTabRow(
                 selectedTabIndex = selectedTabIndex,
-                containerColor = Color.Transparent
+                containerColor = Color.Transparent,
             ) {
                 Tab(
                     selected = selectedTabIndex == 0,
@@ -180,17 +183,18 @@ fun QuotesScreen(
                     icon = {
                         Box(
                             contentAlignment = Alignment.Center,
-                            modifier = Modifier.indication(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            )
+                            modifier =
+                                Modifier.indication(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null,
+                                ),
                         ) {
                             Icon(
                                 imageVector = Icons.Default.ViewCarousel,
-                                contentDescription = "Carousel"
+                                contentDescription = "Carousel",
                             )
                         }
-                    }
+                    },
                 )
                 Tab(
                     selected = selectedTabIndex == 1,
@@ -198,66 +202,71 @@ fun QuotesScreen(
                     icon = {
                         Box(
                             contentAlignment = Alignment.Center,
-                            modifier = Modifier.indication(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            )
+                            modifier =
+                                Modifier.indication(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null,
+                                ),
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.List,
-                                contentDescription = "All"
+                                contentDescription = "All",
                             )
                         }
-                    }
+                    },
                 )
             }
 
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
             ) {
                 AnimatedContent(
                     targetState = selectedTabIndex,
                     transitionSpec = {
                         if (targetState > initialState) {
                             (slideInHorizontally { it } + fadeIn()).togetherWith(
-                                slideOutHorizontally { -it } + fadeOut()
+                                slideOutHorizontally { -it } + fadeOut(),
                             )
                         } else {
                             (slideInHorizontally { -it } + fadeIn()).togetherWith(
-                                slideOutHorizontally { it } + fadeOut()
+                                slideOutHorizontally { it } + fadeOut(),
                             )
                         }
                     },
-                    label = "TabContentAnimation"
+                    label = "TabContentAnimation",
                 ) { index ->
                     when (index) {
-                        0 -> CarouselTab(
-                            bookList = bookList,
-                            quotes = quotes,
-                            quoteViewModel = quoteViewModel,
-                            placeholderBitmap = placeholderBitmap,
-                            uiStateViewModel = uiStateViewModel
-                        )
+                        0 ->
+                            CarouselTab(
+                                bookList = bookList,
+                                quotes = quotes,
+                                quoteViewModel = quoteViewModel,
+                                placeholderBitmap = placeholderBitmap,
+                                uiStateViewModel = uiStateViewModel,
+                            )
 
-                        1 -> AllQuotesTab(
-                            quotes = allQuotes,
-                            bookList = bookList,
-                            uiStateViewModel = uiStateViewModel
-                        )
+                        1 ->
+                            AllQuotesTab(
+                                quotes = allQuotes,
+                                bookList = bookList,
+                                uiStateViewModel = uiStateViewModel,
+                            )
                     }
                 }
 
                 if (selectedTabIndex == 0) {
                     Box(
-                        modifier = Modifier
-                            .matchParentSize()
-                            .zIndex(1f)
+                        modifier =
+                            Modifier
+                                .matchParentSize()
+                                .zIndex(1f),
                     ) {
                         FabOverlay(
                             uiStateViewModel = uiStateViewModel,
-                            photoLauncher = photoLauncher
+                            photoLauncher = photoLauncher,
                         )
                     }
                 }
@@ -267,12 +276,16 @@ fun QuotesScreen(
 }
 
 @Composable
-fun ExtendedFabItem(text: String, icon: ImageVector, onClick: () -> Unit) {
+fun ExtendedFabItem(
+    text: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+) {
     ExtendedFloatingActionButton(
         text = { Text(text, style = MaterialTheme.typography.labelLarge) },
         icon = { Icon(icon, contentDescription = text) },
         onClick = onClick,
-        modifier = Modifier.width(120.dp)
+        modifier = Modifier.width(120.dp),
     )
 }
 
@@ -281,16 +294,20 @@ data class DisplayBook(
     val book: BookEntity,
     val isDummy: Boolean,
     val hasCover: Boolean,
-    val coverUrl: String? = null
+    val coverUrl: String? = null,
 )
 
-data class DummyBook(val id: String, val title: String) {
-    fun toBookEntity(): BookEntity = BookEntity(
-        id = id,
-        title = title,
-        authors = null,
-        cover = null
-    )
+data class DummyBook(
+    val id: String,
+    val title: String,
+) {
+    fun toBookEntity(): BookEntity =
+        BookEntity(
+            id = id,
+            title = title,
+            authors = null,
+            cover = null,
+        )
 }
 
 fun createPlaceholderBitmap(): ImageBitmap {
@@ -306,7 +323,7 @@ fun createPlaceholderBitmap(): ImageBitmap {
                 } else {
                     android.graphics.Color.DKGRAY
                 }
-            bitmap.setPixel(x, y, color)
+            bitmap[x, y] = color
         }
     }
 

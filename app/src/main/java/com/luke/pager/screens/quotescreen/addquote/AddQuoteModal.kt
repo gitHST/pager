@@ -42,18 +42,19 @@ fun AddQuoteModal(
     overlayAlpha: Float,
     book: BookEntity,
     prefilledQuoteText: String,
-    visible: Boolean
+    visible: Boolean,
 ) {
     val windowInfo = LocalWindowInfo.current
     val density = LocalDensity.current
     val screenHeight = with(density) { windowInfo.containerSize.height.toDp() }
     val modalHeight = screenHeight / 1.5f
 
-    val cleanedPrefilledText = prefilledQuoteText
-        .replace("\n", " ")
-        .replace("\r", " ")
-        .replace(Regex("\\s+"), " ")
-        .trim()
+    val cleanedPrefilledText =
+        prefilledQuoteText
+            .replace("\n", " ")
+            .replace("\r", " ")
+            .replace(Regex("\\s+"), " ")
+            .trim()
 
     var quoteText by remember(visible, cleanedPrefilledText) { mutableStateOf(cleanedPrefilledText) }
     var pageNumber by remember(visible) { mutableStateOf("") }
@@ -72,7 +73,7 @@ fun AddQuoteModal(
     CenteredModalScaffold(
         overlayAlpha = overlayAlpha,
         onDismiss = onDismiss,
-        visible = visible
+        visible = visible,
     ) { scrollState ->
         SubmitQuoteHeader(
             onDismiss = onDismiss,
@@ -80,7 +81,7 @@ fun AddQuoteModal(
             pageNum = pageNumber,
             bookId = book.id,
             quoteViewModel = quoteViewModel,
-            scrollState = scrollState
+            scrollState = scrollState,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -89,42 +90,45 @@ fun AddQuoteModal(
                 Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)
-                    .animateContentSize()
+                    .animateContentSize(),
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
-                    modifier = Modifier
-                        .width(100.dp)
-                        .heightIn(max = 150.dp)
+                    modifier =
+                        Modifier
+                            .width(100.dp)
+                            .heightIn(max = 150.dp),
                 ) {
                     BookCoverImage(
                         coverData = book.cover,
-                        coverUrl = coverUrl
+                        coverUrl = coverUrl,
                     )
                 }
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(end = 8.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(end = 8.dp),
                     verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.Start
+                    horizontalAlignment = Alignment.Start,
                 ) {
                     Text(
                         text = book.title,
                         style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
 
                     book.authors?.let {
                         Text(
                             text = it,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onBackground
+                            color = MaterialTheme.colorScheme.onBackground,
                         )
                     }
                     book.firstPublishDate?.let {
@@ -132,7 +136,7 @@ fun AddQuoteModal(
                             text = book.firstPublishDate,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            modifier = Modifier.padding(bottom = 8.dp),
                         )
                     }
                 }
@@ -147,7 +151,7 @@ fun AddQuoteModal(
                     scrollState = scrollState,
                     containerHeight = containerHeightPx,
                     existingSpaceTaken = 295,
-                    insideText = "Quote..."
+                    insideText = "Quote...",
                 )
             }
 
@@ -160,8 +164,9 @@ fun AddQuoteModal(
                         pageNumber = newValue
                     }
                 },
-                modifier = Modifier
-                    .width(120.dp),
+                modifier =
+                    Modifier
+                        .width(120.dp),
                 textStyle = MaterialTheme.typography.bodyMedium,
                 singleLine = true,
                 placeholder = { Text("_") },
@@ -169,17 +174,18 @@ fun AddQuoteModal(
                     Text(
                         text = "Page:",
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(start = 4.dp)
+                        modifier = Modifier.padding(start = 4.dp),
                     )
                 },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    disabledContainerColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
-                )
+                colors =
+                    TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                    ),
             )
         }
     }

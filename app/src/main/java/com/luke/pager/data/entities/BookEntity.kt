@@ -18,7 +18,7 @@ data class BookEntity(
     val firstPublishDate: String? = null,
     val bookmarked: Boolean = false,
     val genres: String? = null,
-    val dateAdded: String? = null
+    val dateAdded: String? = null,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

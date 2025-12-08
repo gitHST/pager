@@ -23,7 +23,7 @@ import kotlinx.coroutines.delay
 fun SpoilerToggle(
     spoilers: Boolean,
     currentSpoilerIconIndex: Int,
-    onSpoilerToggle: (Boolean, Int) -> Unit
+    onSpoilerToggle: (Boolean, Int) -> Unit,
 ) {
     val spoilerIcons =
         listOf(
@@ -34,7 +34,7 @@ fun SpoilerToggle(
             R.drawable.ic_sentiment_sad,
             R.drawable.ic_sentiment_stressed,
             R.drawable.ic_sentiment_worried,
-            R.drawable.ic_mood_bad
+            R.drawable.ic_mood_bad,
         )
     val currentSpoilerIconRes = spoilerIcons[currentSpoilerIconIndex]
     var spoilerLabelState by remember { mutableStateOf(if (spoilers) "Spoilers" else "No spoilers") }
@@ -65,19 +65,19 @@ fun SpoilerToggle(
                     }
                 onSpoilerToggle(newSpoilers, newIconIndex)
                 spoilerLabelState = if (newSpoilers) "Spoilers" else "No spoilers"
-            }
+            },
         ) {
             if (spoilers) {
                 Icon(
                     painter = painterResource(id = currentSpoilerIconRes),
                     contentDescription = "Spoilers On",
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.primary,
                 )
             } else {
                 Icon(
                     imageVector = Icons.Filled.SentimentSatisfiedAlt,
                     contentDescription = "Spoilers Off",
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.primary,
                 )
             }
         }
@@ -86,7 +86,7 @@ fun SpoilerToggle(
             Text(
                 text = spoilerLabelState,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

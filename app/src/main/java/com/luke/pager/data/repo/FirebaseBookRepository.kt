@@ -11,26 +11,29 @@ import kotlinx.coroutines.tasks.await
 
 class FirebaseBookRepository(
     uid: String,
-    firestore: FirebaseFirestore = Firebase.firestore
+    firestore: FirebaseFirestore = Firebase.firestore,
 ) : IBookRepository {
-
     private val booksCollection =
-        firestore.collection("users")
+        firestore
+            .collection("users")
             .document(uid)
             .collection("books")
 
-    override fun getAllBooks(): Flow<List<BookEntity>> = callbackFlow {
-        val listener = booksCollection.addSnapshotListener { snapshot, error ->
-            if (error != null) return@addSnapshotListener
+    override fun getAllBooks(): Flow<List<BookEntity>> =
+        callbackFlow {
+            val listener =
+                booksCollection.addSnapshotListener { snapshot, error ->
+                    if (error != null) return@addSnapshotListener
 
-            val books = snapshot?.documents?.mapNotNull { doc ->
-                doc.toBookEntityOrNull()
-            } ?: emptyList()
+                    val books =
+                        snapshot?.documents?.mapNotNull { doc ->
+                            doc.toBookEntityOrNull()
+                        } ?: emptyList()
 
-            trySend(books).isSuccess
+                    trySend(books).isSuccess
+                }
+            awaitClose { listener.remove() }
         }
-        awaitClose { listener.remove() }
-    }
 
     override suspend fun insertAndReturnId(book: BookEntity): String {
         val docRef = booksCollection.document()
@@ -42,7 +45,6 @@ class FirebaseBookRepository(
 
         return id
     }
-
 
     private fun com.google.firebase.firestore.DocumentSnapshot.toBookEntityOrNull(): BookEntity? {
         val id = this.id
@@ -82,7 +84,7 @@ class FirebaseBookRepository(
             firstPublishDate = firstPublishDate,
             bookmarked = bookmarked,
             genres = genres,
-            dateAdded = dateAdded
+            dateAdded = dateAdded,
         )
     }
 
@@ -103,6 +105,6 @@ class FirebaseBookRepository(
             "first_publish_date" to firstPublishDate,
             "bookmarked" to bookmarked,
             "genres" to genres,
-            "date_added" to dateAdded
+            "date_added" to dateAdded,
         )
 }

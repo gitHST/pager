@@ -28,7 +28,7 @@ fun StarRatingBar(
     hasRated: Boolean,
     onRatingChange: (Float) -> Unit,
     onUserInteracted: () -> Unit,
-    starScale: Float = 1.5f
+    starScale: Float = 1.5f,
 ) {
     val starSize = 24.dp * starScale
     val starRowWidthFraction = 0.7f
@@ -37,9 +37,9 @@ fun StarRatingBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
         modifier =
-        Modifier
-            .fillMaxWidth()
-            .height(starSize)
+            Modifier
+                .fillMaxWidth()
+                .height(starSize),
     ) {
         IconButton(onClick = {
             if (rating > 0.0f) {
@@ -51,9 +51,9 @@ fun StarRatingBar(
         }
         Box(
             modifier =
-            Modifier
-                .fillMaxWidth(starRowWidthFraction)
-                .height(starSize)
+                Modifier
+                    .fillMaxWidth(starRowWidthFraction)
+                    .height(starSize),
         ) {
             Row(modifier = Modifier.matchParentSize()) {
                 for (i in 1..5) {
@@ -65,21 +65,21 @@ fun StarRatingBar(
                         }
                     Box(
                         modifier =
-                        Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .clickable {
-                                val target = i.toFloat()
-                                onRatingChange(if (rating == target) target - 0.5f else target)
-                                onUserInteracted()
-                            },
-                        contentAlignment = Alignment.Center
+                            Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .clickable {
+                                    val target = i.toFloat()
+                                    onRatingChange(if (rating == target) target - 0.5f else target)
+                                    onUserInteracted()
+                                },
+                        contentAlignment = Alignment.Center,
                     ) {
                         Icon(
                             icon,
                             contentDescription = null,
                             tint = if (hasRated) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(starSize)
+                            modifier = Modifier.size(starSize),
                         )
                     }
                 }

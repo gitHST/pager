@@ -16,7 +16,6 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SubmitReviewHeaderTest {
-
     private lateinit var bookViewModel: BookViewModel
     private lateinit var navController: androidx.navigation.NavHostController
     private lateinit var book: OpenLibraryBook
@@ -25,13 +24,14 @@ class SubmitReviewHeaderTest {
     fun setup() {
         bookViewModel = mockk(relaxed = true)
         navController = mockk(relaxed = true)
-        book = OpenLibraryBook(
-            key = "OL12345M",
-            title = "Test Book",
-            authorName = listOf("Test Author"),
-            coverIndex = 1,
-            firstPublishYear = 2020
-        )
+        book =
+            OpenLibraryBook(
+                key = "OL12345M",
+                title = "Test Book",
+                authorName = listOf("Test Author"),
+                coverIndex = 1,
+                firstPublishYear = 2020,
+            )
     }
 
     @After
@@ -40,51 +40,52 @@ class SubmitReviewHeaderTest {
     }
 
     @Test
-    fun `submitReview called with correct parameters and navigates to diary`() = runTest {
-        val rating = 4.5f
-        val reviewText = "Excellent book!"
-        val privacy = Privacy.FRIENDS
-        val spoilers = true
+    fun `submitReview called with correct parameters and navigates to diary`() =
+        runTest {
+            val rating = 4.5f
+            val reviewText = "Excellent book!"
+            val privacy = Privacy.FRIENDS
+            val spoilers = true
 
-        val dateReviewedSlot = slot<String>()
+            val dateReviewedSlot = slot<String>()
 
-        coEvery {
+            coEvery {
+                bookViewModel.submitReview(
+                    eq(book),
+                    eq(rating),
+                    eq(reviewText),
+                    capture(dateReviewedSlot),
+                    eq(privacy),
+                    eq(spoilers),
+                    any(),
+                )
+            } coAnswers {
+                lastArg<() -> Unit>().invoke()
+            }
+
+            // Simulate calling submission manually for test (not via Composable)
+            val formatter = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
+            val expectedDatePrefix = formatter.format(java.util.Date()).substring(0, 10) // yyyy-MM-dd
+
             bookViewModel.submitReview(
-                eq(book),
-                eq(rating),
-                eq(reviewText),
-                capture(dateReviewedSlot),
-                eq(privacy),
-                eq(spoilers),
-                any()
-            )
-        } coAnswers {
-            lastArg<() -> Unit>().invoke()
-        }
+                book,
+                rating,
+                reviewText,
+                "$expectedDatePrefix 12:00:00",
+                privacy,
+                spoilers,
+            ) {
+                navController.navigate("diary") {
+                    popUpTo("review_screen") { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
 
-        // Simulate calling submission manually for test (not via Composable)
-        val formatter = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
-        val expectedDatePrefix = formatter.format(java.util.Date()).substring(0, 10) // yyyy-MM-dd
-
-        bookViewModel.submitReview(
-            book,
-            rating,
-            reviewText,
-            "$expectedDatePrefix 12:00:00",
-            privacy,
-            spoilers
-        ) {
-            navController.navigate("diary") {
-                popUpTo("review_screen") { inclusive = true }
-                launchSingleTop = true
+            verify {
+                bookViewModel.submitReview(book, rating, reviewText, any(), privacy, spoilers, any())
+            }
+            verify {
+                navController.navigate("diary", any<androidx.navigation.NavOptionsBuilder.() -> Unit>())
             }
         }
-
-        verify {
-            bookViewModel.submitReview(book, rating, reviewText, any(), privacy, spoilers, any())
-        }
-        verify {
-            navController.navigate("diary", any<androidx.navigation.NavOptionsBuilder.() -> Unit>())
-        }
-    }
 }

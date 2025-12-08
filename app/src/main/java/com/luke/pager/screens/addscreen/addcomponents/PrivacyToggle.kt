@@ -23,7 +23,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun PrivacyToggle(
     privacy: Privacy,
-    onLockToggle: (Privacy) -> Unit
+    onLockToggle: (Privacy) -> Unit,
 ) {
     val privacyIcons = listOf(Icons.Filled.Public, Icons.Filled.Lock, Icons.Filled.Group)
     val privacyLabels = listOf("Public", "Private", "Friends Only")
@@ -54,7 +54,7 @@ fun PrivacyToggle(
             Icon(
                 imageVector = currentPrivacyIcon,
                 contentDescription = currentPrivacyLabel,
-                tint = MaterialTheme.colorScheme.primary
+                tint = MaterialTheme.colorScheme.primary,
             )
         }
 
@@ -62,7 +62,7 @@ fun PrivacyToggle(
             Text(
                 text = currentPrivacyLabel,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

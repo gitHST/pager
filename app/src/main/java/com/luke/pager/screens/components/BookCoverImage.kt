@@ -36,21 +36,23 @@ fun BookCoverImage(
     cornerRadius: Int = 14,
     width: Dp = 80.dp,
     heightMax: Dp = 120.dp,
-    contentScale: ContentScale = ContentScale.Crop
+    contentScale: ContentScale = ContentScale.Crop,
 ) {
     val shape = RoundedCornerShape(cornerRadius.dp)
     var aspectRatio by remember { mutableFloatStateOf(2f / 3f) }
 
     Box(
-        modifier = Modifier
-            .width(width)
-            .heightIn(max = heightMax)
+        modifier =
+            Modifier
+                .width(width)
+                .heightIn(max = heightMax),
     ) {
         Box(
-            modifier = modifier
-                .aspectRatio(aspectRatio)
-                .clip(shape),
-            contentAlignment = Alignment.Center
+            modifier =
+                modifier
+                    .aspectRatio(aspectRatio)
+                    .clip(shape),
+            contentAlignment = Alignment.Center,
         ) {
             when {
                 coverData != null -> {
@@ -72,14 +74,14 @@ fun BookCoverImage(
                     if (loading) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
-                            strokeWidth = 2.dp
+                            strokeWidth = 2.dp,
                         )
                     } else if (imageBitmap != null) {
                         Image(
                             bitmap = imageBitmap!!,
                             contentDescription = "Book Cover",
                             contentScale = contentScale,
-                            modifier = Modifier.matchParentSize()
+                            modifier = Modifier.matchParentSize(),
                         )
                     } else {
                         Text("No cover", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -102,19 +104,23 @@ fun BookCoverImage(
                         painter = painter,
                         contentDescription = "Book Cover",
                         contentScale = contentScale,
-                        modifier = Modifier.matchParentSize()
+                        modifier = Modifier.matchParentSize(),
                     )
 
                     when (painterState) {
                         is AsyncImagePainter.State.Loading -> {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(20.dp),
-                                strokeWidth = 2.dp
+                                strokeWidth = 2.dp,
                             )
                         }
 
                         is AsyncImagePainter.State.Error, is AsyncImagePainter.State.Empty -> {
-                            Text("No cover", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(
+                                "No cover",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
                         }
 
                         else -> Unit

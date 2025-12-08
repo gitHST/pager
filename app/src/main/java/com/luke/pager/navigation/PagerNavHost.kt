@@ -40,15 +40,16 @@ fun PagerNavHost(
     reviewViewModel: ReviewViewModel,
     quoteViewModel: QuoteViewModel,
     themeMode: ThemeMode,
-    onThemeModeChange: (ThemeMode) -> Unit
+    onThemeModeChange: (ThemeMode) -> Unit,
 ) {
     val topLevelRoutes = listOf("profile", "plus", "quotes", "diary")
 
     val currentRouteEntry by navController.currentBackStackEntryAsState()
 
-    val uiStateViewModel: QuoteUiStateViewModel = viewModel(
-        viewModelStoreOwner = LocalActivity.current as ViewModelStoreOwner
-    )
+    val uiStateViewModel: QuoteUiStateViewModel =
+        viewModel(
+            viewModelStoreOwner = LocalActivity.current as ViewModelStoreOwner,
+        )
 
     val previousRoute = remember { mutableStateOf<String?>(null) }
 
@@ -56,16 +57,17 @@ fun PagerNavHost(
 
     val testMode = true
 
-    val photoLauncher = takePhotoHandler(
-        snackbarScope = coroutineScope,
-        onPhotoCaptured = { photoUri ->
-            uiStateViewModel.setCapturedImageUri(photoUri.toString())
-            if (navController.currentDestination?.route != "scan_screen") {
-                navController.navigate("scan_screen")
-            }
-        },
-        testMode = testMode
-    )
+    val photoLauncher =
+        takePhotoHandler(
+            snackbarScope = coroutineScope,
+            onPhotoCaptured = { photoUri ->
+                uiStateViewModel.setCapturedImageUri(photoUri.toString())
+                if (navController.currentDestination?.route != "scan_screen") {
+                    navController.navigate("scan_screen")
+                }
+            },
+            testMode = testMode,
+        )
 
     LaunchedEffect(currentRouteEntry) {
         val newRoute = currentRouteEntry?.destination?.route
@@ -90,19 +92,19 @@ fun PagerNavHost(
                 fromIndex != -1 && toIndex != -1 && toIndex > fromIndex ->
                     slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.Left,
-                        animationSpec = tween(durationMillis = 250)
+                        animationSpec = tween(durationMillis = 250),
                     )
 
                 fromIndex != -1 && toIndex != -1 && toIndex < fromIndex ->
                     slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.Right,
-                        animationSpec = tween(durationMillis = 250)
+                        animationSpec = tween(durationMillis = 250),
                     )
 
                 else ->
                     slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.Left,
-                        animationSpec = tween(durationMillis = 250)
+                        animationSpec = tween(durationMillis = 250),
                     )
             }
         },
@@ -117,19 +119,19 @@ fun PagerNavHost(
                 fromIndex != -1 && toIndex != -1 && toIndex > fromIndex ->
                     slideOutOfContainer(
                         AnimatedContentTransitionScope.SlideDirection.Left,
-                        animationSpec = tween(durationMillis = 250)
+                        animationSpec = tween(durationMillis = 250),
                     )
 
                 fromIndex != -1 && toIndex != -1 && toIndex < fromIndex ->
                     slideOutOfContainer(
                         AnimatedContentTransitionScope.SlideDirection.Right,
-                        animationSpec = tween(durationMillis = 250)
+                        animationSpec = tween(durationMillis = 250),
                     )
 
                 else ->
                     slideOutOfContainer(
                         AnimatedContentTransitionScope.SlideDirection.Left,
-                        animationSpec = tween(durationMillis = 250)
+                        animationSpec = tween(durationMillis = 250),
                     )
             }
         },
@@ -144,19 +146,19 @@ fun PagerNavHost(
                 fromIndex != -1 && toIndex != -1 && toIndex > fromIndex ->
                     slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.Right,
-                        animationSpec = tween(durationMillis = 250)
+                        animationSpec = tween(durationMillis = 250),
                     )
 
                 fromIndex != -1 && toIndex != -1 && toIndex < fromIndex ->
                     slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.Left,
-                        animationSpec = tween(durationMillis = 250)
+                        animationSpec = tween(durationMillis = 250),
                     )
 
                 else ->
                     slideIntoContainer(
                         AnimatedContentTransitionScope.SlideDirection.Right,
-                        animationSpec = tween(durationMillis = 250)
+                        animationSpec = tween(durationMillis = 250),
                     )
             }
         },
@@ -171,22 +173,22 @@ fun PagerNavHost(
                 fromIndex != -1 && toIndex != -1 && toIndex > fromIndex ->
                     slideOutOfContainer(
                         AnimatedContentTransitionScope.SlideDirection.Right,
-                        animationSpec = tween(durationMillis = 250)
+                        animationSpec = tween(durationMillis = 250),
                     )
 
                 fromIndex != -1 && toIndex != -1 && toIndex < fromIndex ->
                     slideOutOfContainer(
                         AnimatedContentTransitionScope.SlideDirection.Left,
-                        animationSpec = tween(durationMillis = 250)
+                        animationSpec = tween(durationMillis = 250),
                     )
 
                 else ->
                     slideOutOfContainer(
                         AnimatedContentTransitionScope.SlideDirection.Right,
-                        animationSpec = tween(durationMillis = 250)
+                        animationSpec = tween(durationMillis = 250),
                     )
             }
-        }
+        },
     ) {
         composable("profile") {
             SettingsScreen(
@@ -195,10 +197,9 @@ fun PagerNavHost(
                 reviewViewModel = reviewViewModel,
                 quoteViewModel = quoteViewModel,
                 themeMode = themeMode,
-                onThemeModeChange = onThemeModeChange
+                onThemeModeChange = onThemeModeChange,
             )
         }
-
 
         composable("diary") {
             DiaryScreen(navController, bookViewModel)
@@ -208,17 +209,16 @@ fun PagerNavHost(
             SearchAndResultsModal(
                 onDismiss = {},
                 bookViewModel = bookViewModel,
-                navController = navController
+                navController = navController,
             )
         }
-
 
         composable("quotes") {
             QuotesScreen(
                 bookViewModel = bookViewModel,
                 quoteViewModel = quoteViewModel,
                 uiStateViewModel = uiStateViewModel,
-                photoLauncher = photoLauncher
+                photoLauncher = photoLauncher,
             )
         }
 
@@ -231,7 +231,7 @@ fun PagerNavHost(
                 reviewId = reviewId,
                 reviews = reviews,
                 reviewViewModel = reviewViewModel,
-                onDeleteSuccess = { navController.popBackStack() }
+                onDeleteSuccess = { navController.popBackStack() },
             )
         }
 
@@ -240,7 +240,7 @@ fun PagerNavHost(
                 uiStateViewModel = uiStateViewModel,
                 photoLauncher = photoLauncher,
                 navController = navController,
-                debugMode = testMode
+                debugMode = testMode,
             )
         }
 
@@ -248,7 +248,7 @@ fun PagerNavHost(
             MultiPagePreviewModal(
                 scannedPages = uiStateViewModel.scannedPages.collectAsState().value,
                 uiStateViewModel = uiStateViewModel,
-                navController = navController
+                navController = navController,
             )
         }
     }

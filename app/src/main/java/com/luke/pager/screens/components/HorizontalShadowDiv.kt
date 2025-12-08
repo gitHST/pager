@@ -23,85 +23,89 @@ fun HorizontalShadowDiv(
     shadowFacingUp: Boolean = false,
     hozPadding: Float = 0f,
     visible: Boolean = true,
-    hideLine: Boolean = false
+    hideLine: Boolean = false,
 ) {
     val isDarkTheme = LocalUseDarkTheme.current
 
     val outlineShadow = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
 
-    val shadowColor = if (isDarkTheme) {
-        Color.Black.copy(alpha = 0.65f)
-    } else {
-        outlineShadow
-    }
+    val shadowColor =
+        if (isDarkTheme) {
+            Color.Black.copy(alpha = 0.65f)
+        } else {
+            outlineShadow
+        }
 
-    val lineColor = if (isDarkTheme) {
-        Color.Black.copy(alpha = 0.8f)
-    } else {
-        outlineShadow
-    }
+    val lineColor =
+        if (isDarkTheme) {
+            Color.Black.copy(alpha = 0.8f)
+        } else {
+            outlineShadow
+        }
 
     Column(modifier = modifier.padding(horizontal = hozPadding.dp)) {
-
         if (shadowFacingUp) {
-
             AnimatedVisibility(
                 visible = visible,
                 enter = fadeIn(),
-                exit = fadeOut()
+                exit = fadeOut(),
             ) {
                 Box(
                     Modifier
                         .fillMaxWidth()
                         .height(6.dp)
                         .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    shadowColor
-                                )
-                            )
-                        )
+                            brush =
+                                Brush.verticalGradient(
+                                    colors =
+                                        listOf(
+                                            Color.Transparent,
+                                            shadowColor,
+                                        ),
+                                ),
+                        ),
                 )
             }
 
             if (!hideLine) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(lineColor)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(lineColor),
                 )
             }
-
         } else {
-
             if (!hideLine) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(lineColor)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(lineColor),
                 )
             }
 
             AnimatedVisibility(
                 visible = visible,
                 enter = fadeIn(),
-                exit = fadeOut()
+                exit = fadeOut(),
             ) {
                 Box(
                     Modifier
                         .fillMaxWidth()
                         .height(6.dp)
                         .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    shadowColor,
-                                    Color.Transparent
-                                )
-                            )
-                        )
+                            brush =
+                                Brush.verticalGradient(
+                                    colors =
+                                        listOf(
+                                            shadowColor,
+                                            Color.Transparent,
+                                        ),
+                                ),
+                        ),
                 )
             }
         }

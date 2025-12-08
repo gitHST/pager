@@ -25,45 +25,50 @@ import java.util.UUID
 fun takePhotoHandler(
     snackbarScope: CoroutineScope,
     onPhotoCaptured: (Uri) -> Unit,
-    testMode: Boolean = false
+    testMode: Boolean = false,
 ): () -> Unit {
     val context = LocalContext.current
     var lastPhotoUri by remember { mutableStateOf<Uri?>(null) }
     var testImageCounter by rememberSaveable { mutableIntStateOf(2) }
 
-    val cameraLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.TakePicture()
-    ) { success ->
-        if (success) {
-            lastPhotoUri?.let { onPhotoCaptured(it) }
-        }
-    }
-
-    val cameraPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted ->
-            if (!isGranted) {
-                snackbarScope.launch {
-                }
+    val cameraLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.TakePicture(),
+        ) { success ->
+            if (success) {
+                lastPhotoUri?.let { onPhotoCaptured(it) }
             }
         }
-    )
+
+    val cameraPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+            onResult = { isGranted ->
+                if (!isGranted) {
+                    snackbarScope.launch {
+                    }
+                }
+            },
+        )
 
     fun launchRealCamera() {
-        val permissionCheck = ActivityCompat.checkSelfPermission(
-            context,
-            Manifest.permission.CAMERA
-        )
-        if (permissionCheck == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-            val photoFile = File(
-                context.cacheDir,
-                "${UUID.randomUUID()}.jpg"
-            )
-            val newPhotoUri = FileProvider.getUriForFile(
+        val permissionCheck =
+            ActivityCompat.checkSelfPermission(
                 context,
-                "${context.packageName}.provider",
-                photoFile
+                Manifest.permission.CAMERA,
             )
+        if (permissionCheck == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            val photoFile =
+                File(
+                    context.cacheDir,
+                    "${UUID.randomUUID()}.jpg",
+                )
+            val newPhotoUri =
+                FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.provider",
+                    photoFile,
+                )
             lastPhotoUri = newPhotoUri
             cameraLauncher.launch(newPhotoUri)
         } else {
@@ -74,18 +79,20 @@ fun takePhotoHandler(
     return remember {
         {
             if (testMode) {
-                val testImageName = when (testImageCounter) {
-                    2 -> R.drawable.sample_text_image_two
-                    3 -> R.drawable.sample_text_image_three
-                    4 -> R.drawable.sample_text_image_four
-                    5 -> R.drawable.sample_text_image_five
-                    else -> R.drawable.sample_text_image_two
-                }
-                val drawable = androidx.core.content.res.ResourcesCompat.getDrawable(
-                    context.resources,
-                    testImageName,
-                    context.theme
-                )
+                val testImageName =
+                    when (testImageCounter) {
+                        2 -> R.drawable.sample_text_image_two
+                        3 -> R.drawable.sample_text_image_three
+                        4 -> R.drawable.sample_text_image_four
+                        5 -> R.drawable.sample_text_image_five
+                        else -> R.drawable.sample_text_image_two
+                    }
+                val drawable =
+                    androidx.core.content.res.ResourcesCompat.getDrawable(
+                        context.resources,
+                        testImageName,
+                        context.theme,
+                    )
                 if (drawable != null) {
                     val testImageUri =
                         "android.resource://${context.packageName}/$testImageName".toUri()

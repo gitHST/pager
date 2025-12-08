@@ -62,7 +62,7 @@ android {
 
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -117,24 +117,27 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         html.required.set(true)
     }
 
-    val fileFilter = listOf(
-        "**/R.class",
-        "**/R$*.class",
-        "**/BuildConfig.*",
-        "**/Manifest*.*",
-        "**/*Test*.*",
-        "android/**/*.*"
-    )
+    val fileFilter =
+        listOf(
+            "**/R.class",
+            "**/R$*.class",
+            "**/BuildConfig.*",
+            "**/Manifest*.*",
+            "**/*Test*.*",
+            "android/**/*.*",
+        )
 
     val buildDirFile = layout.buildDirectory.asFile.get()
 
-    val debugTree = fileTree(buildDirFile.resolve("intermediates/javac/debug")) {
-        exclude(fileFilter)
-    }
+    val debugTree =
+        fileTree(buildDirFile.resolve("intermediates/javac/debug")) {
+            exclude(fileFilter)
+        }
 
-    val kotlinDebugTree = fileTree(buildDirFile.resolve("tmp/kotlin-classes/debug")) {
-        exclude(fileFilter)
-    }
+    val kotlinDebugTree =
+        fileTree(buildDirFile.resolve("tmp/kotlin-classes/debug")) {
+            exclude(fileFilter)
+        }
 
     classDirectories.setFrom(files(debugTree, kotlinDebugTree))
     sourceDirectories.setFrom(files("src/main/java", "src/main/kotlin"))
@@ -142,9 +145,9 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         fileTree(buildDirFile) {
             include(
                 "**/jacoco/testDebugUnitTest.exec",
-                "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec"
+                "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec",
             )
-        }
+        },
     )
 }
 
@@ -177,7 +180,6 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.storage)
 
-
     testImplementation(libs.mockk)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
@@ -189,5 +191,4 @@ dependencies {
 
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
 }

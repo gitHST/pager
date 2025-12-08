@@ -5,7 +5,7 @@ import java.io.IOException
 
 data class SearchResult(
     val books: List<OpenLibraryBook>,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
 )
 
 suspend fun searchBooksSmart(rawQuery: String): SearchResult {
@@ -65,25 +65,24 @@ suspend fun searchBooksSmart(rawQuery: String): SearchResult {
         result
             .sortedWith(
                 compareByDescending<Pair<Int, OpenLibraryBook>> { it.first }
-                    .thenBy { it.second.title.lowercase() }
-            )
-            .map { it.second }
+                    .thenBy { it.second.title.lowercase() },
+            ).map { it.second }
 
     return SearchResult(sorted)
 }
 
-fun String.normalizeTitle(): String {
-    return this.lowercase()
+fun String.normalizeTitle(): String =
+    this
+        .lowercase()
         .replace(Regex("""^["'“”‘’]+|["'“”‘’]+$"""), "")
         .replace(Regex("""\s*\(.*?\)"""), "")
         .replace(Regex(""":.*$"""), "")
         .replace(Regex("""-.*$"""), "")
         .replace(Regex("""\s+"""), " ")
         .trim()
-}
 
-fun String.stripLeadingArticle(): String {
-    return this.trimStart()
+fun String.stripLeadingArticle(): String =
+    this
+        .trimStart()
         .replace(Regex("""^(the|a|an)\s+""", RegexOption.IGNORE_CASE), "")
         .trim()
-}

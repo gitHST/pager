@@ -69,46 +69,50 @@ fun CarouselTab(
     quotes: List<QuoteEntity>,
     quoteViewModel: QuoteViewModel,
     placeholderBitmap: ImageBitmap,
-    uiStateViewModel: QuoteUiStateViewModel
+    uiStateViewModel: QuoteUiStateViewModel,
 ) {
-    val booksWithCovers = remember(bookList) {
-        val realBooks = bookList.map { book ->
-            val coverBitmap = book.cover?.let { byteArrayToImageBitmap(it) }
+    val booksWithCovers =
+        remember(bookList) {
+            val realBooks =
+                bookList
+                    .map { book ->
+                        val coverBitmap = book.cover?.let { byteArrayToImageBitmap(it) }
 
-            val coverUrl =
-                if (coverBitmap == null && book.coverId != null) {
-                    "https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg"
-                } else {
-                    null
-                }
+                        val coverUrl =
+                            if (coverBitmap == null && book.coverId != null) {
+                                "https://covers.openlibrary.org/b/id/${book.coverId}-M.jpg"
+                            } else {
+                                null
+                            }
 
-            DisplayBook(
-                imageBitmap = coverBitmap ?: placeholderBitmap,
-                book = book,
-                isDummy = false,
-                hasCover = (coverBitmap != null || coverUrl != null),
-                coverUrl = coverUrl
-            )
-        }.toMutableList()
+                        DisplayBook(
+                            imageBitmap = coverBitmap ?: placeholderBitmap,
+                            book = book,
+                            isDummy = false,
+                            hasCover = (coverBitmap != null || coverUrl != null),
+                            coverUrl = coverUrl,
+                        )
+                    }.toMutableList()
 
-        val dummies = listOf(
-            DummyBook("-1", "Dummy Book 1")
-        )
-
-        dummies.forEach {
-            realBooks.add(
-                DisplayBook(
-                    imageBitmap = placeholderBitmap,
-                    book = it.toBookEntity(),
-                    isDummy = true,
-                    hasCover = false,
-                    coverUrl = null
+            val dummies =
+                listOf(
+                    DummyBook("-1", "Dummy Book 1"),
                 )
-            )
-        }
 
-        realBooks
-    }
+            dummies.forEach {
+                realBooks.add(
+                    DisplayBook(
+                        imageBitmap = placeholderBitmap,
+                        book = it.toBookEntity(),
+                        isDummy = true,
+                        hasCover = false,
+                        coverUrl = null,
+                    ),
+                )
+            }
+
+            realBooks
+        }
 
     val isExpanded by uiStateViewModel.isFabExpanded.collectAsState()
     val fullyCollapsed by uiStateViewModel.fullyCollapsed.collectAsState()
@@ -120,20 +124,21 @@ fun CarouselTab(
     val isSortAscendingState = uiStateViewModel.isSortAscending.collectAsState()
     val isSortAscending = isSortAscendingState.value
 
-    val sortedQuotes = remember(quotes, isSortAscending) {
-        if (isSortAscending) {
-            quotes.sortedBy { it.dateAdded }
-        } else {
-            quotes.sortedByDescending { it.dateAdded }
+    val sortedQuotes =
+        remember(quotes, isSortAscending) {
+            if (isSortAscending) {
+                quotes.sortedBy { it.dateAdded }
+            } else {
+                quotes.sortedByDescending { it.dateAdded }
+            }
         }
-    }
 
     val listState = rememberLazyListState()
     val quotesListState = rememberLazyListState()
     val hasScrolledQuotes by remember {
         derivedStateOf {
             quotesListState.firstVisibleItemIndex > 0 ||
-                    quotesListState.firstVisibleItemScrollOffset > 0
+                quotesListState.firstVisibleItemScrollOffset > 0
         }
     }
     val hasNotReachedEndOfQuotes by remember {
@@ -145,11 +150,11 @@ fun CarouselTab(
             } else {
                 val lastVisibleItem = visibleItems.last()
                 lastVisibleItem.index < totalItemsCount - 1 ||
-                        (
-                                lastVisibleItem.index == totalItemsCount - 1 &&
-                                        lastVisibleItem.offset + lastVisibleItem.size >
-                                        quotesListState.layoutInfo.viewportEndOffset
-                                )
+                    (
+                        lastVisibleItem.index == totalItemsCount - 1 &&
+                            lastVisibleItem.offset + lastVisibleItem.size >
+                            quotesListState.layoutInfo.viewportEndOffset
+                    )
             }
         }
     }
@@ -163,7 +168,8 @@ fun CarouselTab(
 
     LaunchedEffect(listState.isScrollInProgress) {
         if (!listState.isScrollInProgress) {
-            val nearestIndex = listState.firstVisibleItemIndex +
+            val nearestIndex =
+                listState.firstVisibleItemIndex +
                     if (listState.firstVisibleItemScrollOffset > 150) 1 else 0
 
             coroutineScope.launch {
@@ -188,7 +194,7 @@ fun CarouselTab(
                     books = booksWithCovers,
                     listState = listState,
                     itemWidthPx = itemWidthPx,
-                    scale = scale
+                    scale = scale,
                 )
             }
             Text(
@@ -196,46 +202,49 @@ fun CarouselTab(
                 fontSize = 20.sp,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 1,
-                modifier = Modifier
-                    .padding(horizontal = 40.dp)
-                    .height(30.dp)
+                modifier =
+                    Modifier
+                        .padding(horizontal = 40.dp)
+                        .height(30.dp),
             )
             Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(start = 36.dp, end = 36.dp, top = 16.dp, bottom = 16.dp)
+                modifier =
+                    Modifier
+                        .fillMaxHeight()
+                        .padding(start = 36.dp, end = 36.dp, top = 16.dp, bottom = 16.dp),
             ) {
                 if (sortedQuotes.isEmpty()) {
                     Column(
                         modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
                             "No quotes for this book",
                             fontSize = 18.sp,
                             fontStyle = FontStyle.Italic,
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                            modifier = Modifier
-                                .padding(horizontal = 4.dp)
-                                .padding(top = 16.dp)
+                            modifier =
+                                Modifier
+                                    .padding(horizontal = 4.dp)
+                                    .padding(top = 16.dp),
                         )
 
                         AnimatedVisibility(
                             visible = !isExpanded && fullyCollapsed && !showQuoteModal,
                             enter = fadeIn(tween(150)),
-                            exit = fadeOut(tween(100))
+                            exit = fadeOut(tween(100)),
                         ) {
                             ExtendedFloatingActionButton(
                                 text = {
                                     Text(
                                         "Add",
-                                        style = MaterialTheme.typography.labelLarge
+                                        style = MaterialTheme.typography.labelLarge,
                                     )
                                 },
                                 icon = {
                                     Icon(
                                         Icons.Default.Add,
-                                        contentDescription = "Add quote"
+                                        contentDescription = "Add quote",
                                     )
                                 },
                                 onClick = {
@@ -243,40 +252,44 @@ fun CarouselTab(
                                     uiStateViewModel.setFullyCollapsed(false)
                                     uiStateViewModel.setShowFabActions(false)
                                 },
-                                modifier = Modifier
-                                    .padding(16.dp)
-                                    .size(width = 110.dp, height = 40.dp)
+                                modifier =
+                                    Modifier
+                                        .padding(16.dp)
+                                        .size(width = 110.dp, height = 40.dp),
                             )
                         }
                     }
                 } else {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(end = 5.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(end = 5.dp),
                     ) {
                         HorizontalShadowDiv(visible = hasScrolledQuotes)
 
                         LazyColumn(
                             state = quotesListState,
                             verticalArrangement = Arrangement.spacedBy(16.dp),
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 4.dp)
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 4.dp),
                         ) {
                             items(sortedQuotes.size) { index ->
                                 val quote = sortedQuotes[index]
                                 val isActive = activeQuoteId == quote.id
 
                                 Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable(
-                                            interactionSource = remember { MutableInteractionSource() },
-                                            indication = null
-                                        ) {
-                                            activeQuoteId = if (isActive) null else quote.id
-                                        }
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .clickable(
+                                                interactionSource = remember { MutableInteractionSource() },
+                                                indication = null,
+                                            ) {
+                                                activeQuoteId = if (isActive) null else quote.id
+                                            },
                                 ) {
                                     if (index != 0) {
                                         HorizontalDivider()
@@ -287,31 +300,32 @@ fun CarouselTab(
                                         text = quote.quoteText,
                                         fontSize = 16.sp,
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onBackground
+                                        color = MaterialTheme.colorScheme.onBackground,
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
 
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically
+                                        verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         if (isActive) {
                                             Box(
-                                                modifier = Modifier
-                                                    .size(32.dp)
-                                                    .clickable(
-                                                        interactionSource = remember { MutableInteractionSource() },
-                                                        indication = null
-                                                    ) {
-                                                        editingQuote = quote
-                                                    },
-                                                contentAlignment = Alignment.Center
+                                                modifier =
+                                                    Modifier
+                                                        .size(32.dp)
+                                                        .clickable(
+                                                            interactionSource = remember { MutableInteractionSource() },
+                                                            indication = null,
+                                                        ) {
+                                                            editingQuote = quote
+                                                        },
+                                                contentAlignment = Alignment.Center,
                                             ) {
                                                 Icon(
                                                     imageVector = Icons.Default.Edit,
                                                     contentDescription = "Edit quote",
                                                     tint = metaTextColor,
-                                                    modifier = Modifier.size(16.dp)
+                                                    modifier = Modifier.size(16.dp),
                                                 )
                                             }
                                         }
@@ -321,9 +335,10 @@ fun CarouselTab(
                                             Text(
                                                 text = "p.${quote.pageNumber}",
                                                 fontSize = 14.sp,
-                                                style = MaterialTheme.typography.bodySmall.copy(
-                                                    color = metaTextColor
-                                                )
+                                                style =
+                                                    MaterialTheme.typography.bodySmall.copy(
+                                                        color = metaTextColor,
+                                                    ),
                                             )
                                         }
                                     }
@@ -338,34 +353,36 @@ fun CarouselTab(
                         HorizontalShadowDiv(
                             shadowFacingUp = true,
                             visible = hasNotReachedEndOfQuotes,
-                            modifier = Modifier.align(Alignment.BottomCenter)
+                            modifier = Modifier.align(Alignment.BottomCenter),
                         )
 
                         IconButton(
                             onClick = { uiStateViewModel.toggleSortOrder() },
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(4.dp)
-                                .offset(x = 47.dp)
+                            modifier =
+                                Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(4.dp)
+                                    .offset(x = 47.dp),
                         ) {
                             Icon(
                                 imageVector =
                                     if (isSortAscending) Icons.Default.South else Icons.Default.North,
                                 contentDescription = "Toggle sort order",
-                                tint = Color.Gray
+                                tint = Color.Gray,
                             )
                         }
                         IconButton(
                             onClick = { uiStateViewModel.setFabExpanded(true) },
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(4.dp)
-                                .offset(x = 47.dp, y = 47.dp)
+                            modifier =
+                                Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(4.dp)
+                                    .offset(x = 47.dp, y = 47.dp),
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Add,
                                 contentDescription = "Add",
-                                tint = Color.Gray
+                                tint = Color.Gray,
                             )
                         }
                     }
@@ -380,7 +397,7 @@ fun CarouselTab(
                 overlayAlpha = overlayAlpha,
                 book = displayBook.book,
                 visible = showQuoteModal,
-                prefilledQuoteText = uiStateViewModel.prefilledQuoteText.collectAsState().value
+                prefilledQuoteText = uiStateViewModel.prefilledQuoteText.collectAsState().value,
             )
 
             editingQuote?.let { quoteToEdit ->
@@ -390,7 +407,7 @@ fun CarouselTab(
                     overlayAlpha = 0.5f,
                     book = displayBook.book,
                     quote = quoteToEdit,
-                    visible = true
+                    visible = true,
                 )
             }
         }

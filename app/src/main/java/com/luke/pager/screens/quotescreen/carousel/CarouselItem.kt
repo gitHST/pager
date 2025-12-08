@@ -31,7 +31,6 @@ import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import kotlin.math.abs
 
-
 @Composable
 fun CarouselItemContinuous(
     imageBitmap: ImageBitmap,
@@ -42,7 +41,7 @@ fun CarouselItemContinuous(
     cornerRadius: Int = 8,
     width: Dp = 110.dp,
     contentScale: ContentScale = ContentScale.Crop,
-    scale: Float
+    scale: Float,
 ) {
     val translateDensity = LocalDensity.current
 
@@ -73,20 +72,20 @@ fun CarouselItemContinuous(
     }
 
     Box(
-        modifier = Modifier
-            .width(width * scale)
-            .aspectRatio(aspectRatio)
-            .graphicsLayer {
-                scaleX = animatedScale
-                scaleY = animatedScale
-                this.translationX = animatedTranslationX
-                this.rotationY = animatedRotationY
-                this.alpha = animatedAlpha
-                cameraDistance = 8 * density
-            }
-            .zIndex(-continuousDistance)
-            .clip(RoundedCornerShape(cornerRadius.dp)),
-        contentAlignment = Alignment.Center
+        modifier =
+            Modifier
+                .width(width * scale)
+                .aspectRatio(aspectRatio)
+                .graphicsLayer {
+                    scaleX = animatedScale
+                    scaleY = animatedScale
+                    this.translationX = animatedTranslationX
+                    this.rotationY = animatedRotationY
+                    this.alpha = animatedAlpha
+                    cameraDistance = 8 * density
+                }.zIndex(-continuousDistance)
+                .clip(RoundedCornerShape(cornerRadius.dp)),
+        contentAlignment = Alignment.Center,
     ) {
         if (hasCover) {
             if (coverUrl != null) {
@@ -94,33 +93,33 @@ fun CarouselItemContinuous(
                     model = coverUrl,
                     contentDescription = null,
                     contentScale = contentScale,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
                 )
             } else {
                 Image(
                     bitmap = imageBitmap,
                     contentDescription = null,
                     contentScale = contentScale,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
                 )
             }
         } else {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
-                        shape = RoundedCornerShape(cornerRadius.dp)
-                    )
-                    .padding(8.dp),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(cornerRadius.dp),
+                        ).padding(8.dp),
+                contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = "No cover",
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = MaterialTheme.colorScheme.onBackground,
                 )
             }
         }
