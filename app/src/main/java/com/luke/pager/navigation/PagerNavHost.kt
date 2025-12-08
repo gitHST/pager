@@ -24,6 +24,7 @@ import com.luke.pager.data.viewmodel.ReviewViewModel
 import com.luke.pager.screens.DiaryScreen
 import com.luke.pager.screens.ReviewScreen
 import com.luke.pager.screens.addscreen.SearchAndResultsModal
+import com.luke.pager.screens.profile.ProfileScreen
 import com.luke.pager.screens.profile.SettingsScreen
 import com.luke.pager.screens.quotescreen.QuotesScreen
 import com.luke.pager.screens.quotescreen.scan.MultiPagePreviewModal
@@ -191,15 +192,25 @@ fun PagerNavHost(
         },
     ) {
         composable("profile") {
+            ProfileScreen(
+                navController = navController,
+                bookViewModel = bookViewModel,
+                reviewViewModel = reviewViewModel,
+                quoteViewModel = quoteViewModel
+            )
+        }
+
+        composable("settings") {
             SettingsScreen(
                 navController = navController,
                 bookViewModel = bookViewModel,
                 reviewViewModel = reviewViewModel,
                 quoteViewModel = quoteViewModel,
                 themeMode = themeMode,
-                onThemeModeChange = onThemeModeChange,
+                onThemeModeChange = onThemeModeChange
             )
         }
+
 
         composable("diary") {
             DiaryScreen(navController, bookViewModel)
