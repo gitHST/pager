@@ -1,4 +1,3 @@
-
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -51,13 +50,15 @@ fun draggableTextSelection(
     val density = LocalDensity.current
     val handleTouchRadiusPx = with(density) { HANDLE_TOUCH_RADIUS_DP.dp.toPx() }
 
-    val handleColor = Color.Black
+    val textColor = MaterialTheme.colorScheme.onBackground
+    val selectionColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+    val handleColor = MaterialTheme.colorScheme.primary
 
-    val highlightedText = remember(startCursorIndex, endCursorIndex, fullText) {
+    val highlightedText = remember(startCursorIndex, endCursorIndex, fullText, selectionColor) {
         buildAnnotatedString {
             append(fullText)
             addStyle(
-                style = SpanStyle(background = Color(0xFFB3E5FC)),
+                style = SpanStyle(background = selectionColor),
                 start = startCursorIndex.coerceAtMost(endCursorIndex),
                 end = startCursorIndex.coerceAtLeast(endCursorIndex)
             )
@@ -160,7 +161,10 @@ fun draggableTextSelection(
     ) {
         Text(
             text = highlightedText,
-            style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontSize = 18.sp,
+                color = textColor
+            ),
             maxLines = Int.MAX_VALUE,
             overflow = TextOverflow.Clip,
             onTextLayout = { result -> textLayoutResult = result }

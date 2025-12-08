@@ -84,11 +84,12 @@ fun AllQuotesTab(
         } else {
             Box(Modifier.fillMaxSize()) {
                 HorizontalShadowDiv(
+                    hideLine = true,
                     visible = hasScrolled,
+                    shadowFacingUp = false,
                     modifier = Modifier
                         .align(Alignment.TopCenter)
-                        .offset(y = (-1).dp),
-                    shadowFacingUp = false
+                        .offset(y = 0.dp)
                 )
 
                 Column(
@@ -108,7 +109,8 @@ fun AllQuotesTab(
                             Text(
                                 text = quote.quoteText,
                                 fontSize = 16.sp,
-                                style = MaterialTheme.typography.bodyMedium
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onBackground
                             )
                             Spacer(modifier = Modifier.height(10.dp))
 
@@ -121,6 +123,7 @@ fun AllQuotesTab(
                                     modifier = Modifier.weight(1f),
                                     fontSize = 14.sp,
                                     style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onBackground,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -141,7 +144,11 @@ fun AllQuotesTab(
                                         .padding(top = 8.dp)
                                         .fillMaxWidth()
                                         .height(1.dp)
-                                        .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f))
+                                        .background(
+                                            MaterialTheme.colorScheme.onBackground.copy(
+                                                alpha = 0.2f
+                                            )
+                                        )
                                 )
                             } else {
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -151,6 +158,7 @@ fun AllQuotesTab(
                 }
 
                 HorizontalShadowDiv(
+                    hideLine = true,
                     shadowFacingUp = true,
                     visible = hasNotReachedEnd,
                     modifier = Modifier.align(Alignment.BottomCenter)
@@ -161,7 +169,7 @@ fun AllQuotesTab(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(4.dp)
-                        .offset(x = (45).dp, y = (8).dp)
+                        .offset(x = 45.dp, y = 8.dp)
                 ) {
                     Icon(
                         imageVector = if (isSortAscending) Icons.Default.South else Icons.Default.North,

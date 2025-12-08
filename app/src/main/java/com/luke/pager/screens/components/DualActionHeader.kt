@@ -36,7 +36,8 @@ fun DualActionHeader(
     scrollState: androidx.compose.foundation.ScrollState,
     modifier: Modifier = Modifier
 ) {
-    val targetBorderColor = if (scrollState.value > 0) Color.LightGray else Color.Transparent
+    val targetBorderColor =
+        if (scrollState.value > 0) MaterialTheme.colorScheme.outline else Color.Transparent
     val animatedBorderColor by animateColorAsState(
         targetValue = targetBorderColor,
         animationSpec = tween(durationMillis = 300)

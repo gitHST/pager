@@ -43,7 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextRange
@@ -75,8 +74,8 @@ fun ReviewScreen(
         var menuExpanded by remember { mutableStateOf(false) }
         val focusRequester = remember { FocusRequester() }
         val keyboardController = LocalSoftwareKeyboardController.current
-        var localRating by remember { mutableFloatStateOf(review.rating?.toFloat() ?: 0f) }
-        var tempDisplayRating by remember { mutableFloatStateOf(review.rating?.toFloat() ?: 0f) }
+        var localRating by remember { mutableFloatStateOf(review.rating ?: 0f) }
+        var tempDisplayRating by remember { mutableFloatStateOf(review.rating ?: 0f) }
         var localPrivacy by remember { mutableStateOf(review.privacy) }
         var localSpoilers by remember { mutableStateOf(review.hasSpoilers) }
         var currentSpoilerIconIndex by remember { mutableIntStateOf(0) }
@@ -102,21 +101,23 @@ fun ReviewScreen(
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
+                    Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
                     modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
+                        Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)       // ← fixed toolbar-like height
+                            .padding(bottom = 16.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "Review",
-                        fontSize = 24.sp
+                        fontSize = 24.sp,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
 
                     if (!isEditing) {
@@ -124,7 +125,8 @@ fun ReviewScreen(
                             IconButton(onClick = { menuExpanded = true }) {
                                 Icon(
                                     imageVector = Icons.Default.MoreVert,
-                                    contentDescription = "More options"
+                                    contentDescription = "More options",
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             }
 
@@ -132,9 +134,12 @@ fun ReviewScreen(
                                 expanded = menuExpanded,
                                 onDismissRequest = { menuExpanded = false },
                                 modifier =
-                                Modifier
-                                    .padding(top = 0.dp)
-                                    .background(Color.White, RoundedCornerShape(16.dp)),
+                                    Modifier
+                                        .padding(top = 0.dp)
+                                        .background(
+                                            MaterialTheme.colorScheme.surface,
+                                            RoundedCornerShape(16.dp)
+                                        ),
                                 shape = RoundedCornerShape(16.dp)
                             ) {
                                 DropdownMenuItem(
@@ -171,7 +176,11 @@ fun ReviewScreen(
 
                 review.dateReviewed?.let {
                     val dateOnly = it.split(" ").firstOrNull() ?: it
-                    Text("Finished reading on: $dateOnly", fontSize = 14.sp)
+                    Text(
+                        "Finished reading on: $dateOnly",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
                 }
 
                 if (isEditing) {

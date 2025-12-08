@@ -15,16 +15,36 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.luke.pager.ui.theme.LocalUseDarkTheme
 
 @Composable
 fun HorizontalShadowDiv(
     modifier: Modifier = Modifier,
     shadowFacingUp: Boolean = false,
     hozPadding: Float = 0f,
-    visible: Boolean = true
+    visible: Boolean = true,
+    hideLine: Boolean = false
 ) {
+    val isDarkTheme = LocalUseDarkTheme.current
+
+    val outlineShadow = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+
+    val shadowColor = if (isDarkTheme) {
+        Color.Black.copy(alpha = 0.65f)
+    } else {
+        outlineShadow
+    }
+
+    val lineColor = if (isDarkTheme) {
+        Color.Black.copy(alpha = 0.8f)
+    } else {
+        outlineShadow
+    }
+
     Column(modifier = modifier.padding(horizontal = hozPadding.dp)) {
+
         if (shadowFacingUp) {
+
             AnimatedVisibility(
                 visible = visible,
                 enter = fadeIn(),
@@ -38,25 +58,33 @@ fun HorizontalShadowDiv(
                             brush = Brush.verticalGradient(
                                 colors = listOf(
                                     Color.Transparent,
-                                    MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                                    shadowColor
                                 )
                             )
                         )
                 )
             }
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(Color.LightGray)
-            )
+
+            if (!hideLine) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(lineColor)
+                )
+            }
+
         } else {
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(Color.LightGray)
-            )
+
+            if (!hideLine) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(lineColor)
+                )
+            }
+
             AnimatedVisibility(
                 visible = visible,
                 enter = fadeIn(),
@@ -69,7 +97,7 @@ fun HorizontalShadowDiv(
                         .background(
                             brush = Brush.verticalGradient(
                                 colors = listOf(
-                                    MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                    shadowColor,
                                     Color.Transparent
                                 )
                             )

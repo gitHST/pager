@@ -6,12 +6,12 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -25,7 +25,10 @@ fun BottomNavBar(navController: NavHostController) {
         NavItem("diary", "Diary", Icons.Filled.Book),
     )
 
-    NavigationBar {
+    NavigationBar(
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface
+    ) {
         val currentRoute by navController.currentBackStackEntryAsState()
         items.forEach { item ->
             NavigationBarItem(
@@ -38,15 +41,14 @@ fun BottomNavBar(navController: NavHostController) {
                 },
                 icon = { Icon(item.icon, contentDescription = item.label) },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color.Black,
-                    unselectedIconColor = Color.Gray,
-                    indicatorColor = Color(0xFFE1E1E1)
+                    selectedIconColor = MaterialTheme.colorScheme.onSurface,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    indicatorColor = MaterialTheme.colorScheme.surfaceVariant
                 )
             )
         }
     }
 }
-
 data class NavItem(
     val route: String,
     val label: String,

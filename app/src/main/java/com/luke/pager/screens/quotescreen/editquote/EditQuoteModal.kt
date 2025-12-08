@@ -129,19 +129,22 @@ fun EditQuoteModal(
                 ) {
                     Text(
                         text = book.title,
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onBackground
                     )
 
                     book.authors?.let {
                         Text(
                             text = it,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                     book.firstPublishDate?.let {
                         Text(
                             text = book.firstPublishDate,
                             style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
                     }

@@ -116,6 +116,7 @@ fun MultiPagePreviewModal(
                         style = MaterialTheme.typography.bodyMedium,
                         fontStyle = FontStyle.Italic,
                         textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 12.dp)
