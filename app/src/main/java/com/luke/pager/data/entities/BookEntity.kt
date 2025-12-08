@@ -36,7 +36,6 @@ data class BookEntity(
         if (cover != null && other.cover != null) {
             if (!cover.contentEquals(other.cover)) return false
         } else if (!cover.contentEquals(other.cover)) {
-            // one null, one non-null
             return false
         }
         if (publisher != other.publisher) return false
