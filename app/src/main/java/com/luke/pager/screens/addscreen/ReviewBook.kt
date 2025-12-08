@@ -14,15 +14,19 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.luke.pager.auth.AuthManager
+import com.luke.pager.data.repo.FirebaseUserSettingsRepository
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.network.OpenLibraryBook
 import com.luke.pager.screens.addscreen.addcomponents.DatePickerPopup
@@ -30,6 +34,7 @@ import com.luke.pager.screens.addscreen.addcomponents.PrivacyDateSpoilersRow
 import com.luke.pager.screens.addscreen.addcomponents.StarRatingBar
 import com.luke.pager.screens.addscreen.addcomponents.SubmitReviewHeader
 import com.luke.pager.screens.components.ScrollingTextField
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -42,10 +47,20 @@ fun ReviewBook(
     navController: NavHostController,
     containerHeight: Int,
 ) {
+    // Settings repo for per-user prefs (theme + default privacy)
+    val settingsRepository = remember {
+        FirebaseUserSettingsRepository(AuthManager.uid)
+    }
+    val coroutineScope = rememberCoroutineScope()
+
+    val defaultPrivacy by settingsRepository
+        .defaultPrivacyFlow
+        .collectAsState(initial = Privacy.PUBLIC)
+
     var rating by remember { mutableFloatStateOf(0f) }
     var spoilers by remember { mutableStateOf(false) }
     var hasRated by remember { mutableStateOf(false) }
-    var privacy by remember { mutableStateOf(Privacy.PUBLIC) }
+    var privacy by remember(defaultPrivacy) { mutableStateOf(defaultPrivacy) }
     var reviewText by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -98,12 +113,24 @@ fun ReviewBook(
                 privacy,
                 spoilers,
                 onDateClick = { showDatePicker = true },
-                onLockToggle = { privacy = it },
+                onLockToggle = { newPrivacy ->
+                    privacy = newPrivacy
+                    coroutineScope.launch {
+                        settingsRepository.setDefaultPrivacy(newPrivacy)
+                    }
+                },
                 onSpoilerToggle = { spoilers = it },
             )
             Spacer(Modifier.height(12.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                ScrollingTextField(reviewText, { reviewText = it }, scrollState, containerHeight, 362, "Review...")
+                ScrollingTextField(
+                    reviewText,
+                    { reviewText = it },
+                    scrollState,
+                    containerHeight,
+                    362,
+                    "Review..."
+                )
             }
             Spacer(Modifier.height(8.dp))
         }

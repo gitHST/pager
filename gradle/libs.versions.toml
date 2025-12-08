@@ -24,7 +24,6 @@ mockk = "1.14.6"
 kotlin-test = "1.10.2"
 material3 = "1.4.0"
 mlkitText = "16.0.1"
-smile = "5.0.0"
 
 
 [libraries]
@@ -57,7 +56,6 @@ mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlin-test" }
 mlkit-text-recognition = { group = "com.google.mlkit", name = "text-recognition", version.ref = "mlkitText" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version = "1.10.2" }
-smile = { group = "com.github.haifengl", name = "smile-core", version.ref = "smile" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.6.0" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }

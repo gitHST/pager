@@ -11,6 +11,7 @@ class FirebaseReviewRepository(
     private val uid: String,
     firestore: FirebaseFirestore = Firebase.firestore,
 ) : IReviewRepository {
+
     private val reviewsCollection =
         firestore
             .collection("users")
@@ -32,16 +33,19 @@ class FirebaseReviewRepository(
     private val globalBooksCollection = firestore.collection("books")
 
     override suspend fun insertReview(review: ReviewEntity) {
+        // Local (per-user) review document with auto ID
         val docRef = reviewsCollection.document()
         val id = docRef.id
 
         val reviewToSave = review.copy(id = id)
         docRef.set(reviewToSave.toFirestoreMap()).await()
 
+        // Global (per-book) review document, keyed by a safe version of bookKey
         reviewToSave.bookKey?.let { bookKey ->
+            val safeBookId = bookKey.toFirestoreSafeId()
             val globalReviewRef =
                 globalBooksCollection
-                    .document(bookKey)
+                    .document(safeBookId)
                     .collection("reviews")
                     .document(id)
 
@@ -59,17 +63,21 @@ class FirebaseReviewRepository(
         val bookId = reviewDoc.getString("book_id") ?: return
         val bookKey = reviewDoc.getString("book_key")
 
+        // Delete local review
         reviewsCollection.document(reviewId).delete().await()
 
+        // Delete global review if there is a bookKey
         if (bookKey != null) {
+            val safeBookId = bookKey.toFirestoreSafeId()
             globalBooksCollection
-                .document(bookKey)
+                .document(safeBookId)
                 .collection("reviews")
                 .document(reviewId)
                 .delete()
                 .await()
         }
 
+        // Check if any reviews remain for this local book
         val remainingReviewsSnapshot =
             reviewsCollection
                 .whereEqualTo("book_id", bookId)
@@ -77,8 +85,10 @@ class FirebaseReviewRepository(
                 .await()
 
         if (remainingReviewsSnapshot.isEmpty) {
+            // No reviews left: delete local book
             booksCollection.document(bookId).delete().await()
 
+            // Delete all quotes tied to this local book
             val quoteSnapshot =
                 quotesCollection
                     .whereEqualTo("book_id", bookId)
@@ -103,8 +113,9 @@ class FirebaseReviewRepository(
         val reviewDoc = reviewsCollection.document(reviewId).get().await()
         val bookKey = reviewDoc.getString("book_key")
         if (bookKey != null) {
+            val safeBookId = bookKey.toFirestoreSafeId()
             globalBooksCollection
-                .document(bookKey)
+                .document(safeBookId)
                 .collection("reviews")
                 .document(reviewId)
                 .update("review_text", newText)
@@ -124,8 +135,9 @@ class FirebaseReviewRepository(
         val reviewDoc = reviewsCollection.document(reviewId).get().await()
         val bookKey = reviewDoc.getString("book_key")
         if (bookKey != null) {
+            val safeBookId = bookKey.toFirestoreSafeId()
             globalBooksCollection
-                .document(bookKey)
+                .document(safeBookId)
                 .collection("reviews")
                 .document(reviewId)
                 .update("rating", newRating)
@@ -145,8 +157,9 @@ class FirebaseReviewRepository(
         val reviewDoc = reviewsCollection.document(reviewId).get().await()
         val bookKey = reviewDoc.getString("book_key")
         if (bookKey != null) {
+            val safeBookId = bookKey.toFirestoreSafeId()
             globalBooksCollection
-                .document(bookKey)
+                .document(safeBookId)
                 .collection("reviews")
                 .document(reviewId)
                 .update("privacy", privacy.name)
@@ -215,3 +228,6 @@ class FirebaseReviewRepository(
         )
     }
 }
+
+private fun String.toFirestoreSafeId(): String =
+    this.trimStart('/').replace('/', '_')
