@@ -191,7 +191,7 @@ fun PagerAppUI(
                 setOf(
                     "scan_screen",
                     "multi_page_preview",
-                    "profile",
+                    "settings",
                 )
             val shouldShowBottomBar = currentRoute !in hideBottomBarRoutes
 

@@ -47,7 +47,6 @@ fun ReviewBook(
     navController: NavHostController,
     containerHeight: Int,
 ) {
-    // Settings repo for per-user prefs (theme + default privacy)
     val settingsRepository = remember {
         FirebaseUserSettingsRepository(AuthManager.uid)
     }
