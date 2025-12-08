@@ -94,7 +94,8 @@ fun DiaryScreen(
                         Text(
                             text = date,
                             fontSize = 18.sp,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            modifier = Modifier.padding(bottom = 8.dp),
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                     items(bookPairs) { (book, review) ->

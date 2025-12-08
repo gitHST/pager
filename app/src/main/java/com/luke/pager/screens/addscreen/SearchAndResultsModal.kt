@@ -288,9 +288,9 @@ fun BookRowUIClickable(
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(book.title, style = MaterialTheme.typography.bodyMedium)
+                Text(book.title, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground)
                 book.authorName?.let {
-                    Text(it.joinToString(), style = MaterialTheme.typography.bodySmall)
+                    Text(it.joinToString(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onBackground)
                 }
                 book.firstPublishYear?.let {
                     Text(

@@ -286,7 +286,8 @@ fun CarouselTab(
                                     Text(
                                         text = quote.quoteText,
                                         fontSize = 16.sp,
-                                        style = MaterialTheme.typography.bodyMedium
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onBackground
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
 
@@ -326,6 +327,10 @@ fun CarouselTab(
                                             )
                                         }
                                     }
+
+                                    if (index == sortedQuotes.lastIndex) {
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                    }
                                 }
                             }
                         }
@@ -341,7 +346,7 @@ fun CarouselTab(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
                                 .padding(4.dp)
-                                .offset(x = (47).dp)
+                                .offset(x = 47.dp)
                         ) {
                             Icon(
                                 imageVector =
@@ -355,7 +360,7 @@ fun CarouselTab(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
                                 .padding(4.dp)
-                                .offset(x = (47).dp, y = (47).dp)
+                                .offset(x = 47.dp, y = 47.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Add,

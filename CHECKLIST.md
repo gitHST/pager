@@ -11,6 +11,7 @@ Use this checklist before releasing a version of the app on GitHub.
 - [ ] Removed unused screens from nav bar and nav host
 - [ ] All lint and static analysis issues resolved ./gradlew ktlintFormat
 - [ ] Version code & version name updated (`build.gradle.kts`)
+- [ ] Dark mode still works
 - [ ] Proguard/R8 rules configured
 
 ---

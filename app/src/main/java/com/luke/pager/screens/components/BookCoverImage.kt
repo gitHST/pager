@@ -82,7 +82,7 @@ fun BookCoverImage(
                             modifier = Modifier.matchParentSize()
                         )
                     } else {
-                        Text("No cover", style = MaterialTheme.typography.labelSmall)
+                        Text("No cover", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
 
@@ -114,7 +114,7 @@ fun BookCoverImage(
                         }
 
                         is AsyncImagePainter.State.Error, is AsyncImagePainter.State.Empty -> {
-                            Text("No cover", style = MaterialTheme.typography.labelSmall)
+                            Text("No cover", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
 
                         else -> Unit
@@ -122,7 +122,7 @@ fun BookCoverImage(
                 }
 
                 else -> {
-                    Text("No cover", style = MaterialTheme.typography.labelSmall)
+                    Text("No cover", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }

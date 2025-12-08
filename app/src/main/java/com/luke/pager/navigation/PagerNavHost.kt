@@ -21,9 +21,7 @@ import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.data.viewmodel.ReviewViewModel
-import com.luke.pager.screens.ActivityScreen
 import com.luke.pager.screens.DiaryScreen
-import com.luke.pager.screens.ExploreScreen
 import com.luke.pager.screens.ReviewScreen
 import com.luke.pager.screens.addscreen.SearchAndResultsModal
 import com.luke.pager.screens.profile.SettingsScreen
@@ -31,6 +29,7 @@ import com.luke.pager.screens.quotescreen.QuotesScreen
 import com.luke.pager.screens.quotescreen.scan.MultiPagePreviewModal
 import com.luke.pager.screens.quotescreen.scan.ScanScreen
 import com.luke.pager.screens.quotescreen.scan.takePhotoHandler
+import com.luke.pager.ui.theme.ThemeMode
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -39,7 +38,9 @@ fun PagerNavHost(
     navController: NavHostController,
     bookViewModel: BookViewModel,
     reviewViewModel: ReviewViewModel,
-    quoteViewModel: QuoteViewModel
+    quoteViewModel: QuoteViewModel,
+    themeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit
 ) {
     val topLevelRoutes = listOf("profile", "plus", "quotes", "diary")
 
@@ -192,13 +193,12 @@ fun PagerNavHost(
                 navController = navController,
                 bookViewModel = bookViewModel,
                 reviewViewModel = reviewViewModel,
-                quoteViewModel = quoteViewModel
+                quoteViewModel = quoteViewModel,
+                themeMode = themeMode,
+                onThemeModeChange = onThemeModeChange
             )
         }
 
-        composable("activity") {
-            ActivityScreen(bookViewModel)
-        }
 
         composable("diary") {
             DiaryScreen(navController, bookViewModel)
@@ -212,9 +212,6 @@ fun PagerNavHost(
             )
         }
 
-        composable("explore") {
-            ExploreScreen(bookViewModel)
-        }
 
         composable("quotes") {
             QuotesScreen(

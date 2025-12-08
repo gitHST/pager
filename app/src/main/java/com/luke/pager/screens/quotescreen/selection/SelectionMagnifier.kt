@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
@@ -67,8 +66,9 @@ fun SelectionMagnifier(
         color = MaterialTheme.colorScheme.onSurface
     )
     val markerStrokeWidthPx = with(density) { 2.dp.toPx() }
-    val highlightColor = Color(0xFFB3E5FC)
-    val handleColor = Color(0xFF888888)
+
+    val highlightColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+    val handleColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
 
     Box(
         modifier = modifier,

@@ -41,7 +41,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
@@ -70,7 +69,6 @@ fun ScanScreen(
     val scannedPages by uiStateViewModel.scannedPages.collectAsState()
     val capturedImageUri by uiStateViewModel.capturedImageUri.collectAsState()
 
-    var textBlocks by remember { mutableStateOf<List<MlText.TextBlock>>(emptyList()) }
     var imageWidth by remember { mutableIntStateOf(1) }
     var imageHeight by remember { mutableIntStateOf(1) }
     var allClusters by remember { mutableStateOf<List<List<MlText.TextBlock>>>(emptyList()) }
@@ -92,7 +90,6 @@ fun ScanScreen(
             isLaunchingCamera = true
             try {
                 val result = processImageAndCluster(context, capturedImageUri!!.toUri())
-                textBlocks = result.textBlocks
                 imageWidth = result.imageWidth
                 imageHeight = result.imageHeight
                 rotatedBitmap = result.rotatedBitmap
@@ -140,7 +137,7 @@ fun ScanScreen(
                 Log.d(
                     "ScanScreen",
                     "snapshotFlow triggered | scannedPages=${scannedPages.map { it.imageUri }} | " +
-                        "isRetaking=$isRetaking | targetPageCount=$targetPageCount"
+                            "isRetaking=$isRetaking | targetPageCount=$targetPageCount"
                 )
 
                 if (isRetaking) {
@@ -182,7 +179,13 @@ fun ScanScreen(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Close",
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(24.dp),
+                            tint =
+                                if (!isLaunchingCamera) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                                }
                         )
                     }
 
@@ -207,9 +210,13 @@ fun ScanScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
-                            contentDescription = "Next / Confirm",
-                            modifier = Modifier.size(24.dp),
-                            tint = if (!isLaunchingCamera) Color.Black else Color.Gray
+                            contentDescription = "Confirm",
+                            tint =
+                                if (!isLaunchingCamera) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                                }
                         )
                     }
                 }
@@ -223,69 +230,78 @@ fun ScanScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         if (!isLaunchingCamera && selectedPage?.rotatedBitmap != null) {
-                            Box(modifier = Modifier.matchParentSize()) {
-                                ScanImageWithOverlay(
-                                    bitmap = selectedPage!!.rotatedBitmap,
-                                    allClusters = selectedPage!!.allClusters,
-                                    imageWidth = selectedPage!!.imageWidth,
-                                    imageHeight = selectedPage!!.imageHeight,
-                                    outlineLevel = OutlineLevel.CLUSTER,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-
-                                Button(
-                                    onClick = {
-                                        isRetaking = true
-                                        photoLauncher()
-                                    },
+                            Column(
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Box(
                                     modifier = Modifier
-                                        .align(Alignment.BottomStart)
-                                        .padding(20.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary
-                                    ),
-                                    elevation = ButtonDefaults.buttonElevation(6.dp)
+                                        .fillMaxWidth()
+                                        .weight(1f),
+                                    contentAlignment = Alignment.Center
                                 ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Default.Autorenew,
-                                            contentDescription = "Retake Photo",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                        Text(
-                                            "Retake",
-                                            color = Color.White,
-                                            modifier = Modifier.padding(start = 8.dp)
-                                        )
-                                    }
+                                    ScanImageWithOverlay(
+                                        bitmap = selectedPage!!.rotatedBitmap,
+                                        allClusters = selectedPage!!.allClusters,
+                                        imageWidth = selectedPage!!.imageWidth,
+                                        imageHeight = selectedPage!!.imageHeight,
+                                        outlineLevel = OutlineLevel.CLUSTER,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
                                 }
 
-                                Button(
-                                    onClick = {
-                                        targetPageCount++
-                                        photoLauncher()
-                                    },
+                                Row(
                                     modifier = Modifier
-                                        .align(Alignment.BottomEnd)
-                                        .padding(20.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary
-                                    ),
-                                    elevation = ButtonDefaults.buttonElevation(6.dp)
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 20.dp, vertical = 24.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Default.Add,
-                                            contentDescription = "Add Page",
-                                            tint = Color.White,
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                        Text(
-                                            "Add Page",
-                                            color = Color.White,
-                                            modifier = Modifier.padding(start = 8.dp)
-                                        )
+                                    Button(
+                                        onClick = {
+                                            isRetaking = true
+                                            photoLauncher()
+                                        },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.primary,
+                                            contentColor = MaterialTheme.colorScheme.onPrimary
+                                        ),
+                                        elevation = ButtonDefaults.buttonElevation(6.dp)
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                imageVector = Icons.Default.Autorenew,
+                                                contentDescription = "Retake Photo",
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                            Text(
+                                                "Retake",
+                                                modifier = Modifier.padding(start = 8.dp)
+                                            )
+                                        }
+                                    }
+
+                                    Button(
+                                        onClick = {
+                                            targetPageCount++
+                                            photoLauncher()
+                                        },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.primary,
+                                            contentColor = MaterialTheme.colorScheme.onPrimary
+                                        ),
+                                        elevation = ButtonDefaults.buttonElevation(6.dp)
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                imageVector = Icons.Default.Add,
+                                                contentDescription = "Add Page",
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                            Text(
+                                                "Add Page",
+                                                modifier = Modifier.padding(start = 8.dp)
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -304,10 +320,12 @@ fun ScanScreen(
                             style = MaterialTheme.typography.bodyMedium,
                             fontStyle = FontStyle.Italic,
                             textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 4.dp)
                         )
+
 
                         LazyRow(
                             modifier = Modifier

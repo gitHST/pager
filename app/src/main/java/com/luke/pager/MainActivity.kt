@@ -9,6 +9,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,11 +19,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +41,7 @@ import com.luke.pager.auth.AuthManager
 import com.luke.pager.data.repo.FirebaseBookRepository
 import com.luke.pager.data.repo.FirebaseQuoteRepository
 import com.luke.pager.data.repo.FirebaseReviewRepository
+import com.luke.pager.data.repo.FirebaseUserSettingsRepository
 import com.luke.pager.data.repo.IBookRepository
 import com.luke.pager.data.repo.IQuoteRepository
 import com.luke.pager.data.repo.IReviewRepository
@@ -45,9 +50,15 @@ import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.data.viewmodel.ReviewViewModel
 import com.luke.pager.navigation.BottomNavBar
 import com.luke.pager.navigation.PagerNavHost
-import com.luke.pager.ui.theme.NiceBlue
+import com.luke.pager.ui.theme.BackgroundDark
+import com.luke.pager.ui.theme.BackgroundLight
+import com.luke.pager.ui.theme.LocalUseDarkTheme
 import com.luke.pager.ui.theme.PagerTheme
+import com.luke.pager.ui.theme.PlusBackgroundDark
+import com.luke.pager.ui.theme.PlusBackgroundLight
+import com.luke.pager.ui.theme.ThemeMode
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -76,6 +87,7 @@ class MainActivity : ComponentActivity() {
             }
 
             if (!ready) {
+                // Auth still setting up – keep this simple screen as you had before
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -97,12 +109,58 @@ class MainActivity : ComponentActivity() {
             val bookRepo: IBookRepository = FirebaseBookRepository(uid)
             val reviewRepo: IReviewRepository = FirebaseReviewRepository(uid)
             val quoteRepo: IQuoteRepository = FirebaseQuoteRepository(uid)
+            val settingsRepository = remember { FirebaseUserSettingsRepository(uid) }
 
-            val bookViewModel = BookViewModel(bookRepo, reviewRepo)
-            val reviewViewModel = ReviewViewModel(reviewRepo)
-            val quoteViewModel = QuoteViewModel(quoteRepo)
+            val bookViewModel = remember { BookViewModel(bookRepo, reviewRepo) }
+            val reviewViewModel = remember { ReviewViewModel(reviewRepo) }
+            val quoteViewModel = remember { QuoteViewModel(quoteRepo) }
 
-            PagerAppUI(bookViewModel, reviewViewModel, quoteViewModel)
+            val coroutineScope = rememberCoroutineScope()
+
+            // ThemeMode is nullable until we get the first value from Firestore
+            var themeMode by remember { mutableStateOf<ThemeMode?>(null) }
+
+            // Collect theme from Firestore (offline cache makes this quick after first time)
+            LaunchedEffect(settingsRepository) {
+                settingsRepository.themeModeFlow.collect { mode ->
+                    themeMode = mode
+                }
+            }
+
+            if (themeMode == null) {
+                // We don't know the persisted theme yet → use system theme for a blank/splash screen
+                val systemIsDark = isSystemInDarkTheme()
+                CompositionLocalProvider(LocalUseDarkTheme provides systemIsDark) {
+                    PagerTheme(useDarkTheme = systemIsDark) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(if (systemIsDark) BackgroundDark else BackgroundLight),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            // Optional: small indicator, or just leave empty for instant feel
+                            CircularProgressIndicator()
+                        }
+                    }
+                }
+            } else {
+                // We have the real theme – render the actual app UI
+                PagerAppUI(
+                    bookViewModel = bookViewModel,
+                    reviewViewModel = reviewViewModel,
+                    quoteViewModel = quoteViewModel,
+                    themeMode = themeMode!!,
+                    onThemeModeChange = { mode ->
+                        // Update UI immediately
+                        themeMode = mode
+
+                        // Persist to Firestore
+                        coroutineScope.launch {
+                            settingsRepository.setThemeMode(mode)
+                        }
+                    }
+                )
+            }
         }
     }
 
@@ -116,109 +174,151 @@ class MainActivity : ComponentActivity() {
 fun PagerAppUI(
     bookViewModel: BookViewModel,
     reviewViewModel: ReviewViewModel,
-    quoteViewModel: QuoteViewModel
+    quoteViewModel: QuoteViewModel,
+    themeMode: ThemeMode,
+    onThemeModeChange: (ThemeMode) -> Unit
 ) {
-    PagerTheme {
-        val navController = rememberNavController()
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.destination?.route
-        val snackbarHostState = remember { SnackbarHostState() }
-
-        val hideBottomBarRoutes = setOf(
-            "scan_screen",
-            "multi_page_preview",
-            "profile"
-        )
-        val shouldShowBottomBar = currentRoute !in hideBottomBarRoutes
-
-        val transitionDurationMillis = 200
-
-        var animatedTargetColor by remember { mutableStateOf<Color?>(null) }
-        var bottomBarVisible by remember { mutableStateOf(true) }
-
-        LaunchedEffect(Unit) {
-            bookViewModel.loadBooks()
-            bookViewModel.loadAllReviews()
-            quoteViewModel.loadAllQuotes()
+    val systemIsDark = isSystemInDarkTheme()
+    val useDarkTheme =
+        when (themeMode) {
+            ThemeMode.LIGHT -> false
+            ThemeMode.DARK -> true
+            ThemeMode.SYSTEM -> systemIsDark
         }
 
-        val isInitialLoading by bookViewModel.isInitialLoading.collectAsState()
+    CompositionLocalProvider(LocalUseDarkTheme provides useDarkTheme) {
+        PagerTheme(useDarkTheme = useDarkTheme) {
+            val navController = rememberNavController()
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentRoute = navBackStackEntry?.destination?.route
+            val snackbarHostState = remember { SnackbarHostState() }
 
-        LaunchedEffect(currentRoute) {
-            if (animatedTargetColor == null) {
-                delay(1)
+            val hideBottomBarRoutes = setOf(
+                "scan_screen",
+                "multi_page_preview",
+                "profile"
+            )
+            val shouldShowBottomBar = currentRoute !in hideBottomBarRoutes
+
+            val transitionDurationMillis = 100
+
+            var animatedTargetColor by remember { mutableStateOf<Color?>(null) }
+            var bottomBarVisible by remember { mutableStateOf(true) }
+
+            var textureAlpha by remember { mutableFloatStateOf(if (useDarkTheme) 0.1f else 0.9f) }
+            var prevUseDarkTheme by remember { mutableStateOf(useDarkTheme) }
+            var prevRoute by remember { mutableStateOf(currentRoute) }
+
+            LaunchedEffect(bookViewModel) {
+                bookViewModel.loadBooks()
+                bookViewModel.loadAllReviews()
+                quoteViewModel.loadAllQuotes()
             }
-            animatedTargetColor =
-                when (currentRoute) {
-                    "plus" -> NiceBlue
-                    else -> Color(0xFFF7FEFF)
+
+            val isInitialLoading by bookViewModel.isInitialLoading.collectAsState()
+
+            fun backgroundColorFor(route: String?, dark: Boolean): Color {
+                return when (route) {
+                    "plus" -> if (dark) PlusBackgroundDark else PlusBackgroundLight
+                    else -> if (dark) BackgroundDark else BackgroundLight
                 }
-        }
+            }
 
-        LaunchedEffect(shouldShowBottomBar) {
-            delay(transitionDurationMillis.toLong())
-            bottomBarVisible = shouldShowBottomBar
-        }
+            LaunchedEffect(currentRoute, useDarkTheme) {
+                if (animatedTargetColor == null) {
+                    animatedTargetColor = backgroundColorFor(currentRoute, useDarkTheme)
+                    textureAlpha = if (useDarkTheme) 0.1f else 0.9f
+                    prevUseDarkTheme = useDarkTheme
+                    prevRoute = currentRoute
+                    return@LaunchedEffect
+                }
 
-        val animatedBackgroundColor by animateColorAsState(
-            targetValue = animatedTargetColor ?: Color.Transparent,
-            animationSpec = tween(durationMillis = transitionDurationMillis)
-        )
+                val isThemeChanged = useDarkTheme != prevUseDarkTheme
+                val isRouteChanged = currentRoute != prevRoute
 
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(animatedBackgroundColor)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.clean_gray_paper),
-                contentDescription = null,
-                contentScale = ContentScale.FillBounds,
+                if (isThemeChanged && !prevUseDarkTheme) {
+                    textureAlpha = 0.1f
+                    delay(transitionDurationMillis.toLong())
+                    animatedTargetColor = backgroundColorFor(currentRoute, true)
+                } else if (isThemeChanged) {
+                    animatedTargetColor = backgroundColorFor(currentRoute, false)
+                    delay(transitionDurationMillis.toLong())
+                    textureAlpha = 0.9f
+                } else if (isRouteChanged) {
+                    animatedTargetColor = backgroundColorFor(currentRoute, useDarkTheme)
+                }
+
+                prevUseDarkTheme = useDarkTheme
+                prevRoute = currentRoute
+            }
+
+            LaunchedEffect(shouldShowBottomBar) {
+                delay(transitionDurationMillis.toLong())
+                bottomBarVisible = shouldShowBottomBar
+            }
+
+            val animatedBackgroundColor by animateColorAsState(
+                targetValue = animatedTargetColor ?: Color.Transparent,
+                animationSpec = tween(durationMillis = transitionDurationMillis)
+            )
+
+            Box(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .alpha(0.9f)
-            )
-
-            Scaffold(
-                containerColor = Color.Transparent,
-                snackbarHost = { SnackbarHost(snackbarHostState) },
-                bottomBar = {
-                    if (bottomBarVisible) {
-                        BottomNavBar(navController)
-                    }
-                }
-            ) { paddingValues ->
-                Box(
+                        .background(animatedBackgroundColor)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.clean_gray_paper),
+                    contentDescription = null,
+                    contentScale = ContentScale.FillBounds,
                     modifier =
                         Modifier
                             .fillMaxSize()
-                            .padding(paddingValues)
-                ) {
-                    PagerNavHost(
-                        navController,
-                        bookViewModel,
-                        reviewViewModel,
-                        quoteViewModel
-                    )
-                }
-            }
+                            .alpha(textureAlpha)
+                )
 
-            if (isInitialLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color(0x66000000)),
-                    contentAlignment = Alignment.Center
-                ) {
+                Scaffold(
+                    containerColor = Color.Transparent,
+                    snackbarHost = { SnackbarHost(snackbarHostState) },
+                    bottomBar = {
+                        if (bottomBarVisible) {
+                            BottomNavBar(navController)
+                        }
+                    }
+                ) { paddingValues ->
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues)
+                    ) {
+                        PagerNavHost(
+                            navController = navController,
+                            bookViewModel = bookViewModel,
+                            reviewViewModel = reviewViewModel,
+                            quoteViewModel = quoteViewModel,
+                            themeMode = themeMode,
+                            onThemeModeChange = onThemeModeChange
+                        )
+                    }
+                }
+
+                if (isInitialLoading) {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                            .fillMaxSize()
+                            .background(Color(0x66000000)),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
                     }
                 }
             }

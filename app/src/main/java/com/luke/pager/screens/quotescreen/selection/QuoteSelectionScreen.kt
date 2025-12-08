@@ -52,6 +52,7 @@ fun QuoteSelectionScreen(
                 Text(
                     text = "Select Quote",
                     style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
