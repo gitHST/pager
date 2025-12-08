@@ -7,8 +7,8 @@ import com.luke.pager.data.entities.QuoteEntity
 import kotlinx.coroutines.tasks.await
 
 class FirebaseQuoteRepository(
-    private val uid: String,
-    private val firestore: FirebaseFirestore = Firebase.firestore
+    uid: String,
+    firestore: FirebaseFirestore = Firebase.firestore
 ) : IQuoteRepository {
 
     private val quotesCollection =

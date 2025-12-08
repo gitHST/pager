@@ -9,7 +9,7 @@ import kotlinx.coroutines.tasks.await
 
 class FirebaseReviewRepository(
     private val uid: String,
-    private val firestore: FirebaseFirestore = Firebase.firestore
+    firestore: FirebaseFirestore = Firebase.firestore
 ) : IReviewRepository {
 
     private val reviewsCollection =

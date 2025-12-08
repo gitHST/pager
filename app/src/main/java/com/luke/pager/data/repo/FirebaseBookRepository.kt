@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class FirebaseBookRepository(
-    private val uid: String,
-    private val firestore: FirebaseFirestore = Firebase.firestore
+    uid: String,
+    firestore: FirebaseFirestore = Firebase.firestore
 ) : IBookRepository {
 
     private val booksCollection =
