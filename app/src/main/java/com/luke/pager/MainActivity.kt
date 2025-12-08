@@ -87,7 +87,6 @@ class MainActivity : ComponentActivity() {
             }
 
             if (!ready) {
-                // Auth still setting up – keep this simple screen as you had before
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -117,10 +116,8 @@ class MainActivity : ComponentActivity() {
 
             val coroutineScope = rememberCoroutineScope()
 
-            // ThemeMode is nullable until we get the first value from Firestore
             var themeMode by remember { mutableStateOf<ThemeMode?>(null) }
 
-            // Collect theme from Firestore (offline cache makes this quick after first time)
             LaunchedEffect(settingsRepository) {
                 settingsRepository.themeModeFlow.collect { mode ->
                     themeMode = mode
@@ -128,7 +125,6 @@ class MainActivity : ComponentActivity() {
             }
 
             if (themeMode == null) {
-                // We don't know the persisted theme yet → use system theme for a blank/splash screen
                 val systemIsDark = isSystemInDarkTheme()
                 CompositionLocalProvider(LocalUseDarkTheme provides systemIsDark) {
                     PagerTheme(useDarkTheme = systemIsDark) {
@@ -138,23 +134,19 @@ class MainActivity : ComponentActivity() {
                                 .background(if (systemIsDark) BackgroundDark else BackgroundLight),
                             contentAlignment = Alignment.Center
                         ) {
-                            // Optional: small indicator, or just leave empty for instant feel
                             CircularProgressIndicator()
                         }
                     }
                 }
             } else {
-                // We have the real theme – render the actual app UI
                 PagerAppUI(
                     bookViewModel = bookViewModel,
                     reviewViewModel = reviewViewModel,
                     quoteViewModel = quoteViewModel,
                     themeMode = themeMode!!,
                     onThemeModeChange = { mode ->
-                        // Update UI immediately
                         themeMode = mode
 
-                        // Persist to Firestore
                         coroutineScope.launch {
                             settingsRepository.setThemeMode(mode)
                         }

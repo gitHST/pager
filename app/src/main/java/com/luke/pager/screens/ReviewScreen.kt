@@ -110,7 +110,7 @@ fun ReviewScreen(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .height(56.dp)       // ← fixed toolbar-like height
+                            .height(56.dp)
                             .padding(bottom = 16.dp),
                     contentAlignment = Alignment.Center
                 ) {
