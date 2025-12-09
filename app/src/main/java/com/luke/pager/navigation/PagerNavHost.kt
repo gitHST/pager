@@ -17,6 +17,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.luke.pager.data.viewmodel.AuthViewModel
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
@@ -24,6 +25,7 @@ import com.luke.pager.data.viewmodel.ReviewViewModel
 import com.luke.pager.screens.DiaryScreen
 import com.luke.pager.screens.ReviewScreen
 import com.luke.pager.screens.addscreen.SearchAndResultsModal
+import com.luke.pager.screens.auth.RegisterScreen
 import com.luke.pager.screens.profile.ProfileScreen
 import com.luke.pager.screens.profile.SettingsScreen
 import com.luke.pager.screens.quotescreen.QuotesScreen
@@ -47,9 +49,16 @@ fun PagerNavHost(
 
     val currentRouteEntry by navController.currentBackStackEntryAsState()
 
+    val activityOwner = LocalActivity.current as ViewModelStoreOwner
+
     val uiStateViewModel: QuoteUiStateViewModel =
         viewModel(
-            viewModelStoreOwner = LocalActivity.current as ViewModelStoreOwner,
+            viewModelStoreOwner = activityOwner,
+        )
+
+    val authViewModel: AuthViewModel =
+        viewModel(
+            viewModelStoreOwner = activityOwner,
         )
 
     val previousRoute = remember { mutableStateOf<String?>(null) }
@@ -196,7 +205,8 @@ fun PagerNavHost(
                 navController = navController,
                 bookViewModel = bookViewModel,
                 reviewViewModel = reviewViewModel,
-                quoteViewModel = quoteViewModel
+                quoteViewModel = quoteViewModel,
+                authViewModel = authViewModel,
             )
         }
 
@@ -207,10 +217,9 @@ fun PagerNavHost(
                 reviewViewModel = reviewViewModel,
                 quoteViewModel = quoteViewModel,
                 themeMode = themeMode,
-                onThemeModeChange = onThemeModeChange
+                onThemeModeChange = onThemeModeChange,
             )
         }
-
 
         composable("diary") {
             DiaryScreen(navController, bookViewModel)
@@ -260,6 +269,13 @@ fun PagerNavHost(
                 scannedPages = uiStateViewModel.scannedPages.collectAsState().value,
                 uiStateViewModel = uiStateViewModel,
                 navController = navController,
+            )
+        }
+
+        composable("register") {
+            RegisterScreen(
+                navController = navController,
+                authViewModel = authViewModel,
             )
         }
     }

@@ -37,6 +37,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
 import com.luke.pager.auth.AuthManager
 import com.luke.pager.data.repo.FirebaseBookRepository
 import com.luke.pager.data.repo.FirebaseQuoteRepository
@@ -77,15 +78,27 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            var ready by remember { mutableStateOf(false) }
-            var uid by remember { mutableStateOf("") }
+            val auth = remember { FirebaseAuth.getInstance() }
 
+            var ready by remember { mutableStateOf(false) }
+            var uid by remember { mutableStateOf<String?>(null) }
+
+            // Ensure we have a user (anonymous or existing) and keep uid in sync
             LaunchedEffect(Unit) {
+                // Ensure there is *some* user (will anonymously sign in if needed)
                 uid = AuthManager.ensureAnonymousUser()
                 ready = true
+
+                // Listen for auth state changes (e.g. after login/register)
+                auth.addAuthStateListener { firebaseAuth ->
+                    val newUser = firebaseAuth.currentUser
+                    if (newUser != null && newUser.uid != uid) {
+                        uid = newUser.uid
+                    }
+                }
             }
 
-            if (!ready) {
+            if (!ready || uid == null) {
                 Box(
                     modifier =
                         Modifier
@@ -106,14 +119,15 @@ class MainActivity : ComponentActivity() {
                 return@setContent
             }
 
-            val bookRepo: IBookRepository = FirebaseBookRepository(uid)
-            val reviewRepo: IReviewRepository = FirebaseReviewRepository(uid)
-            val quoteRepo: IQuoteRepository = FirebaseQuoteRepository(uid)
-            val settingsRepository = remember { FirebaseUserSettingsRepository(uid) }
+            // --- Rebuild repos & viewmodels whenever uid changes ---
+            val bookRepo: IBookRepository = remember(uid) { FirebaseBookRepository(uid!!) }
+            val reviewRepo: IReviewRepository = remember(uid) { FirebaseReviewRepository(uid!!) }
+            val quoteRepo: IQuoteRepository = remember(uid) { FirebaseQuoteRepository(uid!!) }
+            val settingsRepository = remember(uid) { FirebaseUserSettingsRepository(uid!!) }
 
-            val bookViewModel = remember { BookViewModel(bookRepo, reviewRepo) }
-            val reviewViewModel = remember { ReviewViewModel(reviewRepo) }
-            val quoteViewModel = remember { QuoteViewModel(quoteRepo) }
+            val bookViewModel = remember(uid) { BookViewModel(bookRepo, reviewRepo) }
+            val reviewViewModel = remember(uid) { ReviewViewModel(reviewRepo) }
+            val quoteViewModel = remember(uid) { QuoteViewModel(quoteRepo) }
 
             val coroutineScope = rememberCoroutineScope()
 
@@ -191,7 +205,7 @@ fun PagerAppUI(
                 setOf(
                     "scan_screen",
                     "multi_page_preview",
-                    "settings",
+                    "settings", // <- settings, not profile
                 )
             val shouldShowBottomBar = currentRoute !in hideBottomBarRoutes
 
