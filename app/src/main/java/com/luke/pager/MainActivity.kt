@@ -83,13 +83,10 @@ class MainActivity : ComponentActivity() {
             var ready by remember { mutableStateOf(false) }
             var uid by remember { mutableStateOf<String?>(null) }
 
-            // Ensure we have a user (anonymous or existing) and keep uid in sync
             LaunchedEffect(Unit) {
-                // Ensure there is *some* user (will anonymously sign in if needed)
                 uid = AuthManager.ensureAnonymousUser()
                 ready = true
 
-                // Listen for auth state changes (e.g. after login/register)
                 auth.addAuthStateListener { firebaseAuth ->
                     val newUser = firebaseAuth.currentUser
                     if (newUser != null && newUser.uid != uid) {
@@ -119,7 +116,6 @@ class MainActivity : ComponentActivity() {
                 return@setContent
             }
 
-            // --- Rebuild repos & viewmodels whenever uid changes ---
             val bookRepo: IBookRepository = remember(uid) { FirebaseBookRepository(uid!!) }
             val reviewRepo: IReviewRepository = remember(uid) { FirebaseReviewRepository(uid!!) }
             val quoteRepo: IQuoteRepository = remember(uid) { FirebaseQuoteRepository(uid!!) }
@@ -205,7 +201,7 @@ fun PagerAppUI(
                 setOf(
                     "scan_screen",
                     "multi_page_preview",
-                    "settings", // <- settings, not profile
+                    "settings",
                 )
             val shouldShowBottomBar = currentRoute !in hideBottomBarRoutes
 
