@@ -39,9 +39,6 @@ class BookViewModel(
             initialValue = emptyList(),
         )
 
-    /**
-     * Insert a book and return its Firestore auto-generated string ID.
-     */
     suspend fun insertAndReturnId(book: BookEntity): String = bookRepository.insertAndReturnId(book)
 
     fun loadBooks() {
@@ -60,11 +57,6 @@ class BookViewModel(
         }
     }
 
-    /**
-     * Create a new Book + Review pair for an OpenLibrary result.
-     * - Book gets a Firestore auto ID (string)
-     * - Review uses that ID as bookId, and OpenLibrary key as bookKey for social features.
-     */
     fun submitReview(
         openBook: OpenLibraryBook,
         rating: Float?,

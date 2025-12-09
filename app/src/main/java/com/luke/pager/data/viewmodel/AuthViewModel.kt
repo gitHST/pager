@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.Firebase
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.auth
+import com.google.firebase.auth.userProfileChangeRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -25,19 +26,11 @@ class AuthViewModel : ViewModel() {
         _authError.value = null
     }
 
-    /**
-     * Login with email/password.
-     *
-     * NOTE: If the user is currently anonymous and logs in to an *existing* account,
-     * this will switch to that account (different uid). Any data stored under the
-     * anonymous uid won't be visible under the new uid. For that first-time
-     * account creation flow, use [register] which upgrades the anon user instead.
-     */
     fun login(
         email: String,
         password: String,
         onSuccess: () -> Unit = {},
-        onError: (String) -> Unit = {}
+        onError: (String) -> Unit = {},
     ) {
         viewModelScope.launch {
             try {
@@ -57,18 +50,11 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Register a new email/password account.
-     *
-     * If the current user is anonymous, we *link* the email credential to the
-     * existing anonymous user. This keeps the same uid, so all Firestore data
-     * under users/{uid} (books, reviews, quotes, settings) is preserved.
-     */
     fun register(
         email: String,
         password: String,
         onSuccess: () -> Unit = {},
-        onError: (String) -> Unit = {}
+        onError: (String) -> Unit = {},
     ) {
         viewModelScope.launch {
             try {
@@ -90,6 +76,41 @@ class AuthViewModel : ViewModel() {
                 onSuccess()
             } catch (e: Exception) {
                 val msg = e.message ?: "Registration failed"
+                _authError.value = msg
+                onError(msg)
+            }
+        }
+    }
+
+    fun updateDisplayName(
+        newName: String,
+        onSuccess: () -> Unit = {},
+        onError: (String) -> Unit = {},
+    ) {
+        val user = firebaseAuth.currentUser
+        if (user == null) {
+            onError("Not logged in")
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                _authError.value = null
+
+                val profileUpdates =
+                    userProfileChangeRequest {
+                        displayName =
+                            newName
+                                .trim()
+                                .ifBlank { null }
+                    }
+
+                user.updateProfile(profileUpdates).await()
+
+                _isLoggedIn.value = user.isAnonymous == false
+                onSuccess()
+            } catch (e: Exception) {
+                val msg = e.message ?: "Failed to update profile"
                 _authError.value = msg
                 onError(msg)
             }
