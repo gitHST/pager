@@ -14,7 +14,6 @@ class AuthViewModel : ViewModel() {
 
     private val firebaseAuth = Firebase.auth
 
-    // Logged in == has a non-anonymous user
     private val _isLoggedIn =
         MutableStateFlow(firebaseAuth.currentUser?.isAnonymous == false)
     val isLoggedIn: StateFlow<Boolean> get() = _isLoggedIn
@@ -80,10 +79,8 @@ class AuthViewModel : ViewModel() {
                     EmailAuthProvider.getCredential(email.trim(), password)
 
                 if (currentUser != null && currentUser.isAnonymous) {
-                    // ✅ Upgrade anonymous account → email/password without changing uid
                     currentUser.linkWithCredential(credential).await()
                 } else {
-                    // No anon user (or already permanent) → normal create
                     firebaseAuth
                         .createUserWithEmailAndPassword(email.trim(), password)
                         .await()
