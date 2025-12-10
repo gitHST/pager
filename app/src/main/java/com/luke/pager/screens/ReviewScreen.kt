@@ -1,5 +1,6 @@
 package com.luke.pager.screens
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -65,287 +66,372 @@ fun ReviewScreen(
     onDeleteSuccess: () -> Unit,
 ) {
     val review = reviews[reviewId]
+
+    // --- DEBUG LOGGING ---
+    LaunchedEffect(reviews, reviewId) {
+        Log.d("ReviewScreen", "---- ReviewScreen Debug ----")
+        Log.d("ReviewScreen", "ReviewScreen launched with reviewId = $reviewId")
+        Log.d("ReviewScreen", "Keys in reviews map = ${reviews.keys}")
+        Log.d("ReviewScreen", "Found review: ${review != null}")
+        review?.let {
+            Log.d("ReviewScreen", "Review.bookId = ${it.bookId}")
+            Log.d("ReviewScreen", "Review.rating = ${it.rating}")
+            Log.d("ReviewScreen", "Review.privacy = ${it.privacy}")
+            Log.d("ReviewScreen", "Review.text = ${it.reviewText}")
+        }
+    }
+
     var showDeleteDialog by remember { mutableStateOf(false) }
 
-    review?.let {
-        var isEditing by remember { mutableStateOf(false) }
-        var localReviewText by remember { mutableStateOf(review.reviewText.orEmpty()) }
-        var editedText by remember { mutableStateOf(TextFieldValue(localReviewText)) }
-        var menuExpanded by remember { mutableStateOf(false) }
-        val focusRequester = remember { FocusRequester() }
-        val keyboardController = LocalSoftwareKeyboardController.current
-        var localRating by remember { mutableFloatStateOf(review.rating ?: 0f) }
-        var tempDisplayRating by remember { mutableFloatStateOf(review.rating ?: 0f) }
-        var localPrivacy by remember { mutableStateOf(review.privacy) }
-        var localSpoilers by remember { mutableStateOf(review.hasSpoilers) }
-        var currentSpoilerIconIndex by remember { mutableIntStateOf(0) }
-        val textStyle =
-            MaterialTheme.typography.bodyMedium.copy(
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Start,
-            )
+    // Some state only makes sense when we actually have a review
+    var isEditing by remember { mutableStateOf(false) }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester() }
 
-        LaunchedEffect(isEditing) {
-            if (isEditing) {
-                editedText = editedText.copy(selection = TextRange(editedText.text.length))
-                focusRequester.requestFocus()
-                keyboardController?.show()
-            }
-        }
-
-        BackHandler(enabled = isEditing) {
-            isEditing = false
-            editedText = TextFieldValue(localReviewText)
-        }
-
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column(
+    // Top-level layout frame so the screen is never visually "empty"
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            // Header
+            Box(
                 modifier =
                     Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .padding(bottom = 16.dp),
+                contentAlignment = Alignment.Center,
             ) {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                            .padding(bottom = 16.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = "Review",
-                        fontSize = 24.sp,
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
+                Text(
+                    text = "Review",
+                    fontSize = 24.sp,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
 
-                    if (!isEditing) {
-                        Box(modifier = Modifier.align(Alignment.TopEnd)) {
-                            IconButton(onClick = { menuExpanded = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.MoreVert,
-                                    contentDescription = "More options",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                )
-                            }
+                if (review != null && !isEditing) {
+                    Box(modifier = Modifier.align(Alignment.TopEnd)) {
+                        var menuExpanded by remember { mutableStateOf(false) }
 
-                            DropdownMenu(
-                                expanded = menuExpanded,
-                                onDismissRequest = { menuExpanded = false },
-                                modifier =
-                                    Modifier
-                                        .padding(top = 0.dp)
-                                        .background(
-                                            MaterialTheme.colorScheme.surface,
-                                            RoundedCornerShape(16.dp),
-                                        ),
-                                shape = RoundedCornerShape(16.dp),
-                            ) {
-                                DropdownMenuItem(
-                                    text = { Text("Edit", style = MaterialTheme.typography.labelLarge) },
-                                    onClick = {
-                                        menuExpanded = false
-                                        isEditing = true
-                                        editedText = TextFieldValue(localReviewText)
-                                    },
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = Icons.Default.Edit,
-                                            contentDescription = "Edit",
-                                        )
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Delete", style = MaterialTheme.typography.labelLarge) },
-                                    onClick = {
-                                        menuExpanded = false
-                                        showDeleteDialog = true
-                                    },
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = Icons.Default.Delete,
-                                            contentDescription = "Delete",
-                                        )
-                                    },
-                                )
-                            }
+                        IconButton(onClick = { menuExpanded = true }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "More options",
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
                         }
-                    }
-                }
 
-                review.dateReviewed?.let {
-                    val dateOnly = it.split(" ").firstOrNull() ?: it
-                    Text(
-                        "Finished reading on: $dateOnly",
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
-                }
-
-                if (isEditing) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    StarRatingBar(
-                        rating = localRating,
-                        hasRated = true,
-                        onRatingChange = { newRating: Float -> localRating = newRating },
-                        onUserInteracted = {},
-                        starScale = 1.0f,
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                } else {
-                    if (tempDisplayRating > 0f) {
-                        val rating = tempDisplayRating
-                        val starScale = 1.5f
-                        val starSize = 24.dp * starScale
-                        val starRowWidthFraction = 0.7f
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Box(
+                        DropdownMenu(
+                            expanded = menuExpanded,
+                            onDismissRequest = { menuExpanded = false },
                             modifier =
                                 Modifier
-                                    .fillMaxWidth(starRowWidthFraction)
-                                    .height(starSize),
+                                    .padding(top = 0.dp)
+                                    .background(
+                                        MaterialTheme.colorScheme.surface,
+                                        RoundedCornerShape(16.dp),
+                                    ),
+                            shape = RoundedCornerShape(16.dp),
                         ) {
-                            Row(modifier = Modifier.matchParentSize()) {
-                                for (i in 1..5) {
-                                    val icon =
-                                        when {
-                                            rating >= i -> Icons.Filled.Star
-                                            rating == i - 0.5f -> Icons.AutoMirrored.Outlined.StarHalf
-                                            else -> Icons.Outlined.StarBorder
-                                        }
-                                    Box(
-                                        modifier =
-                                            Modifier
-                                                .weight(1f)
-                                                .fillMaxHeight(),
-                                        contentAlignment = Alignment.Center,
-                                    ) {
-                                        Icon(
-                                            icon,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.tertiary,
-                                            modifier = Modifier.height(starSize),
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (isEditing) {
-                    Row(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .height(75.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                    ) {
-                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                            PrivacyToggle(privacy = localPrivacy, onLockToggle = { localPrivacy = it })
-                        }
-                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                            SpoilerToggle(
-                                spoilers = localSpoilers,
-                                currentSpoilerIconIndex = currentSpoilerIconIndex,
-                                onSpoilerToggle = { newSpoilers, newIconIndex ->
-                                    localSpoilers = newSpoilers
-                                    currentSpoilerIconIndex = newIconIndex
+                            DropdownMenuItem(
+                                text = { Text("Edit", style = MaterialTheme.typography.labelLarge) },
+                                onClick = {
+                                    menuExpanded = false
+                                    isEditing = true
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Edit,
+                                        contentDescription = "Edit",
+                                    )
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Delete", style = MaterialTheme.typography.labelLarge) },
+                                onClick = {
+                                    menuExpanded = false
+                                    showDeleteDialog = true
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Delete",
+                                    )
                                 },
                             )
                         }
                     }
                 }
-
-                val sharedModifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-
-                if (isEditing) {
-                    Box(modifier = sharedModifier) {
-                        BasicTextField(
-                            value = editedText,
-                            onValueChange = { editedText = it },
-                            textStyle = textStyle,
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .focusRequester(focusRequester),
-                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                        )
-                    }
-                } else {
-                    Box(modifier = sharedModifier) {
-                        Text(
-                            localReviewText.ifBlank { "No review given" },
-                            fontSize = 16.sp,
-                            modifier = Modifier.fillMaxWidth(),
-                            style = textStyle,
-                            fontStyle = if (localReviewText.isBlank()) FontStyle.Italic else FontStyle.Normal,
-                        )
-                    }
-                }
             }
 
-            if (isEditing) {
-                Row(
-                    modifier =
-                        Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Button(onClick = {
-                        reviewViewModel.updateReviewText(reviewId, editedText.text)
-                        reviewViewModel.updateReviewRating(reviewId, localRating)
-                        reviewViewModel.updateReviewPrivacy(reviewId, localPrivacy)
-                        localReviewText = editedText.text
-                        tempDisplayRating = localRating
-                        isEditing = false
-                    }) {
-                        Text("Save", style = MaterialTheme.typography.bodyMedium)
+            when {
+                review == null && reviews.isEmpty() -> {
+                    // Still loading reviews
+                    Text(
+                        text = "Loading review...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                    )
+                }
+
+                review == null -> {
+                    // We have some reviews, but not this one
+                    Text(
+                        text = "Review not found.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                    )
+                }
+
+                else -> {
+                    // --- Main review content ---
+                    ReviewContent(
+                        reviewId = reviewId,
+                        review = review,
+                        isEditing = isEditing,
+                        onIsEditingChange = { isEditing = it },
+                        focusRequester = focusRequester,
+                        keyboardController = keyboardController,
+                        reviewViewModel = reviewViewModel,
+                        onDeleteClick = {
+                            showDeleteDialog = true
+                        },
+                    )
+                }
+            }
+        }
+
+        if (review != null && isEditing) {
+            BackHandler(enabled = true) {
+                // cancel edit on system back
+                isEditing = false
+            }
+        }
+
+        if (review != null && showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showDeleteDialog = false
+                            reviewViewModel.deleteReviewAndBookById(review.id)
+                            onDeleteSuccess()
+                        },
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError,
+                            ),
+                        shape = RoundedCornerShape(20.dp),
+                    ) {
+                        Text("Delete", style = MaterialTheme.typography.bodyMedium)
                     }
-                    Button(onClick = {
-                        isEditing = false
-                        editedText = TextFieldValue(localReviewText)
-                    }) {
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteDialog = false }) {
                         Text("Cancel", style = MaterialTheme.typography.bodyMedium)
                     }
+                },
+                title = { Text("Delete review", style = MaterialTheme.typography.titleLarge) },
+                text = { Text("Delete this review?", style = MaterialTheme.typography.bodyMedium) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ReviewContent(
+    reviewId: String,
+    review: ReviewEntity,
+    isEditing: Boolean,
+    onIsEditingChange: (Boolean) -> Unit,
+    focusRequester: FocusRequester,
+    keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?,
+    reviewViewModel: ReviewViewModel,
+    onDeleteClick: () -> Unit,
+) {
+    var localReviewText by remember(review.id) { mutableStateOf(review.reviewText.orEmpty()) }
+    var editedText by remember(review.id) { mutableStateOf(TextFieldValue(localReviewText)) }
+    var localRating by remember(review.id) { mutableFloatStateOf(review.rating ?: 0f) }
+    var tempDisplayRating by remember(review.id) { mutableFloatStateOf(review.rating ?: 0f) }
+    var localPrivacy by remember(review.id) { mutableStateOf(review.privacy) }
+    var localSpoilers by remember(review.id) { mutableStateOf(review.hasSpoilers) }
+    var currentSpoilerIconIndex by remember(review.id) { mutableIntStateOf(0) }
+
+    val textStyle =
+        MaterialTheme.typography.bodyMedium.copy(
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Start,
+        )
+
+    LaunchedEffect(isEditing) {
+        if (isEditing) {
+            editedText = editedText.copy(selection = TextRange(editedText.text.length))
+            focusRequester.requestFocus()
+            keyboardController?.show()
+        }
+    }
+
+    Column(
+        modifier =
+            Modifier
+                .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        review.dateReviewed?.let {
+            val dateOnly = it.split(" ").firstOrNull() ?: it
+            Text(
+                "Finished reading on: $dateOnly",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+        }
+
+        if (isEditing) {
+            Spacer(modifier = Modifier.height(8.dp))
+            StarRatingBar(
+                rating = localRating,
+                hasRated = true,
+                onRatingChange = { newRating: Float -> localRating = newRating },
+                onUserInteracted = {},
+                starScale = 1.0f,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        } else {
+            if (tempDisplayRating > 0f) {
+                val rating = tempDisplayRating
+                val starScale = 1.5f
+                val starSize = 24.dp * starScale
+                val starRowWidthFraction = 0.7f
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth(starRowWidthFraction)
+                            .height(starSize),
+                ) {
+                    Row(modifier = Modifier.matchParentSize()) {
+                        for (i in 1..5) {
+                            val icon =
+                                when {
+                                    rating >= i -> Icons.Filled.Star
+                                    rating == i - 0.5f -> Icons.AutoMirrored.Outlined.StarHalf
+                                    else -> Icons.Outlined.StarBorder
+                                }
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .weight(1f)
+                                        .fillMaxHeight(),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(
+                                    icon,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.tertiary,
+                                    modifier = Modifier.height(starSize),
+                                )
+                            }
+                        }
+                    }
                 }
             }
+        }
 
-            if (showDeleteDialog) {
-                AlertDialog(
-                    onDismissRequest = { showDeleteDialog = false },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                showDeleteDialog = false
-                                reviewViewModel.deleteReviewAndBookById(reviewId)
-                                onDeleteSuccess()
-                            },
-                            colors =
-                                ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.error,
-                                    contentColor = MaterialTheme.colorScheme.onError,
-                                ),
-                            shape = RoundedCornerShape(20.dp),
-                        ) {
-                            Text("Delete", style = MaterialTheme.typography.bodyMedium)
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showDeleteDialog = false }) {
-                            Text("Cancel", style = MaterialTheme.typography.bodyMedium)
-                        }
-                    },
-                    title = { Text("Delete review", style = MaterialTheme.typography.titleLarge) },
-                    text = { Text("Delete this review?", style = MaterialTheme.typography.bodyMedium) },
+        if (isEditing) {
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(75.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+            ) {
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    PrivacyToggle(privacy = localPrivacy, onLockToggle = { localPrivacy = it })
+                }
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    SpoilerToggle(
+                        spoilers = localSpoilers,
+                        currentSpoilerIconIndex = currentSpoilerIconIndex,
+                        onSpoilerToggle = { newSpoilers, newIconIndex ->
+                            localSpoilers = newSpoilers
+                            currentSpoilerIconIndex = newIconIndex
+                        },
+                    )
+                }
+            }
+        }
+
+        val sharedModifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+
+        if (isEditing) {
+            Box(modifier = sharedModifier) {
+                BasicTextField(
+                    value = editedText,
+                    onValueChange = { editedText = it },
+                    textStyle = textStyle,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester),
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 )
+            }
+        } else {
+            Box(modifier = sharedModifier) {
+                Text(
+                    localReviewText.ifBlank { "No review given" },
+                    fontSize = 16.sp,
+                    modifier = Modifier.fillMaxWidth(),
+                    style = textStyle,
+                    fontStyle =
+                        if (localReviewText.isBlank()) {
+                            FontStyle.Italic
+                        } else {
+                            FontStyle.Normal
+                        },
+                )
+            }
+        }
+
+        if (isEditing) {
+            Row(
+                modifier =
+                    Modifier
+                        .align(Alignment.End)
+                        .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Button(onClick = {
+                    reviewViewModel.updateReviewText(review.id, editedText.text)
+                    reviewViewModel.updateReviewRating(review.id, localRating)
+                    reviewViewModel.updateReviewPrivacy(review.id, localPrivacy)
+                    localReviewText = editedText.text
+                    tempDisplayRating = localRating
+                    onIsEditingChange(false)
+                }) {
+                    Text("Save", style = MaterialTheme.typography.bodyMedium)
+                }
+                Button(onClick = {
+                    onIsEditingChange(false)
+                    editedText = TextFieldValue(localReviewText)
+                }) {
+                    Text("Cancel", style = MaterialTheme.typography.bodyMedium)
+                }
             }
         }
     }
