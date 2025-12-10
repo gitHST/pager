@@ -44,6 +44,8 @@ fun PagerNavHost(
     quoteViewModel: QuoteViewModel,
     themeMode: ThemeMode,
     onThemeModeChange: (ThemeMode) -> Unit,
+    syncOverCellular: Boolean,
+    onSyncOverCellularChange: (Boolean) -> Unit,
 ) {
     val topLevelRoutes = listOf("profile", "plus", "quotes", "diary")
 
@@ -218,6 +220,8 @@ fun PagerNavHost(
                 quoteViewModel = quoteViewModel,
                 themeMode = themeMode,
                 onThemeModeChange = onThemeModeChange,
+                syncOverCellular = syncOverCellular,
+                onSyncOverCellularChange = onSyncOverCellularChange,
             )
         }
 

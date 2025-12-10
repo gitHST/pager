@@ -19,6 +19,7 @@ import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
+import com.luke.pager.network.canSyncNow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -164,6 +165,29 @@ class AuthViewModel : ViewModel() {
                 _authError.value = null
                 val uid = user.uid
 
+                // 1) Read sync_over_cellular from Firestore (default = false)
+                val firestore = Firebase.firestore
+                val settingsDoc =
+                    firestore
+                        .collection("users")
+                        .document(uid)
+                        .collection("settings")
+                        .document("app")
+                        .get()
+                        .await()
+
+                val allowCellular =
+                    settingsDoc.getBoolean("sync_over_cellular") ?: false
+
+                // 2) Check current network type vs setting
+                if (!canSyncNow(context, allowCellular)) {
+                    val msg = "Waiting for Wi-Fi to upload profile photo"
+                    _authError.value = msg
+                    onError(msg)
+                    return@launch
+                }
+
+                // 3) Crop + compress locally
                 val bytes = cropAndCompressProfileImage(
                     context = context,
                     imageUri = imageUri,
@@ -172,6 +196,7 @@ class AuthViewModel : ViewModel() {
                     offsetPx = offsetPx,
                 )
 
+                // 4) Upload to Firebase Storage
                 val storageRef =
                     FirebaseStorage
                         .getInstance()
@@ -181,12 +206,13 @@ class AuthViewModel : ViewModel() {
                 storageRef.putBytes(bytes).await()
                 val downloadUri = storageRef.downloadUrl.await()
 
+                // 5) Update Auth profile
                 val profileUpdates = userProfileChangeRequest {
                     photoUri = downloadUri
                 }
                 user.updateProfile(profileUpdates).await()
 
-                val firestore = Firebase.firestore
+                // 6) Store URL in Firestore settings
                 firestore
                     .collection("users")
                     .document(uid)
@@ -252,8 +278,7 @@ class AuthViewModel : ViewModel() {
                     postScale(destScale, destScale)
                 }
 
-                val output =
-                    createBitmap(outSize, outSize)
+                val output = createBitmap(outSize, outSize)
                 val canvas = Canvas(output)
                 val paint = Paint(Paint.ANTI_ALIAS_FLAG)
                 canvas.drawBitmap(original, matrix, paint)
