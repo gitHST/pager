@@ -57,16 +57,23 @@ fun DiaryScreen(
     bookViewModel: BookViewModel,
 ) {
     val books by bookViewModel.books.collectAsState()
-    val reviews by bookViewModel.allReviews.collectAsState()
+    val reviewsById by bookViewModel.allReviews.collectAsState()
 
     LaunchedEffect(Unit) {
         bookViewModel.loadBooks()
         bookViewModel.loadAllReviews()
     }
 
+    // Helper: index reviews by bookId for UI use
+    val reviewsByBookId: Map<String, ReviewEntity> =
+        reviewsById
+            .values
+            .filterNotNull()
+            .associateBy { it.bookId }
+
     val booksWithReviews =
         books.mapNotNull { book ->
-            val review = reviews[book.id]
+            val review = reviewsByBookId[book.id]
             if (review?.dateReviewed != null) {
                 Pair(book, review)
             } else {
@@ -103,7 +110,8 @@ fun DiaryScreen(
                             book = book,
                             review = review,
                             onReviewClick = {
-                                navController.navigate("review_screen/${book.id}")
+                                // 🔹 NOW navigate with the REAL review id
+                                navController.navigate("review_screen/${review.id}")
                             },
                         )
                     }
