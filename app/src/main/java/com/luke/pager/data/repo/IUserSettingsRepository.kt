@@ -7,7 +7,9 @@ import kotlinx.coroutines.flow.Flow
 interface IUserSettingsRepository {
     val themeModeFlow: Flow<ThemeMode>
     val defaultPrivacyFlow: Flow<Privacy>
+    val syncOverCellularFlow: Flow<Boolean>
 
     suspend fun setThemeMode(mode: ThemeMode)
     suspend fun setDefaultPrivacy(privacy: Privacy)
+    suspend fun setSyncOverCellular(enabled: Boolean)
 }

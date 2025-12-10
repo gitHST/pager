@@ -66,6 +66,26 @@ class FirebaseUserSettingsRepository(
             awaitClose { listener.remove() }
         }
 
+    override val syncOverCellularFlow: Flow<Boolean> =
+        callbackFlow {
+            val listener = settingsDocument.addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.w("UserSettingsRepo", "Cellular sync listener error", error)
+                    trySend(false)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null && snapshot.exists()) {
+                    val value = snapshot.getBoolean("sync_over_cellular") ?: false
+                    trySend(value)
+                } else {
+                    trySend(false)
+                }
+            }
+
+            awaitClose { listener.remove() }
+        }
+
     override suspend fun setThemeMode(mode: ThemeMode) {
         try {
             settingsDocument
@@ -89,6 +109,19 @@ class FirebaseUserSettingsRepository(
                 .await()
         } catch (e: Exception) {
             Log.w("UserSettingsRepo", "Failed to set default privacy", e)
+        }
+    }
+
+    override suspend fun setSyncOverCellular(enabled: Boolean) {
+        try {
+            settingsDocument
+                .set(
+                    mapOf("sync_over_cellular" to enabled),
+                    SetOptions.merge()
+                )
+                .await()
+        } catch (e: Exception) {
+            Log.w("UserSettingsRepo", "Failed to set sync over cellular", e)
         }
     }
 }

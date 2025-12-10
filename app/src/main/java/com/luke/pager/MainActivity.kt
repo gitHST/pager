@@ -46,9 +46,6 @@ import com.luke.pager.data.repo.FirebaseUserSettingsRepository
 import com.luke.pager.data.repo.IBookRepository
 import com.luke.pager.data.repo.IQuoteRepository
 import com.luke.pager.data.repo.IReviewRepository
-import com.luke.pager.data.viewmodel.BookViewModel
-import com.luke.pager.data.viewmodel.QuoteViewModel
-import com.luke.pager.data.viewmodel.ReviewViewModel
 import com.luke.pager.navigation.BottomNavBar
 import com.luke.pager.navigation.PagerNavHost
 import com.luke.pager.ui.theme.BackgroundDark
@@ -121,17 +118,24 @@ class MainActivity : ComponentActivity() {
             val quoteRepo: IQuoteRepository = remember(uid) { FirebaseQuoteRepository(uid!!) }
             val settingsRepository = remember(uid) { FirebaseUserSettingsRepository(uid!!) }
 
-            val bookViewModel = remember(uid) { BookViewModel(bookRepo, reviewRepo) }
-            val reviewViewModel = remember(uid) { ReviewViewModel(reviewRepo) }
-            val quoteViewModel = remember(uid) { QuoteViewModel(quoteRepo) }
+            val bookViewModel = remember(uid) { com.luke.pager.data.viewmodel.BookViewModel(bookRepo, reviewRepo) }
+            val reviewViewModel = remember(uid) { com.luke.pager.data.viewmodel.ReviewViewModel(reviewRepo) }
+            val quoteViewModel = remember(uid) { com.luke.pager.data.viewmodel.QuoteViewModel(quoteRepo) }
 
             val coroutineScope = rememberCoroutineScope()
 
             var themeMode by remember { mutableStateOf<ThemeMode?>(null) }
+            var syncOverCellular by remember { mutableStateOf(false) }
 
             LaunchedEffect(settingsRepository) {
                 settingsRepository.themeModeFlow.collect { mode ->
                     themeMode = mode
+                }
+            }
+
+            LaunchedEffect(settingsRepository) {
+                settingsRepository.syncOverCellularFlow.collect { enabled ->
+                    syncOverCellular = enabled
                 }
             }
 
@@ -158,9 +162,15 @@ class MainActivity : ComponentActivity() {
                     themeMode = themeMode!!,
                     onThemeModeChange = { mode ->
                         themeMode = mode
-
                         coroutineScope.launch {
                             settingsRepository.setThemeMode(mode)
+                        }
+                    },
+                    syncOverCellular = syncOverCellular,
+                    onSyncOverCellularChange = { enabled ->
+                        syncOverCellular = enabled
+                        coroutineScope.launch {
+                            settingsRepository.setSyncOverCellular(enabled)
                         }
                     },
                 )
@@ -176,11 +186,13 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun PagerAppUI(
-    bookViewModel: BookViewModel,
-    reviewViewModel: ReviewViewModel,
-    quoteViewModel: QuoteViewModel,
+    bookViewModel: com.luke.pager.data.viewmodel.BookViewModel,
+    reviewViewModel: com.luke.pager.data.viewmodel.ReviewViewModel,
+    quoteViewModel: com.luke.pager.data.viewmodel.QuoteViewModel,
     themeMode: ThemeMode,
     onThemeModeChange: (ThemeMode) -> Unit,
+    syncOverCellular: Boolean,
+    onSyncOverCellularChange: (Boolean) -> Unit,
 ) {
     val systemIsDark = isSystemInDarkTheme()
     val useDarkTheme =
@@ -307,6 +319,8 @@ fun PagerAppUI(
                             quoteViewModel = quoteViewModel,
                             themeMode = themeMode,
                             onThemeModeChange = onThemeModeChange,
+                            syncOverCellular = syncOverCellular,
+                            onSyncOverCellularChange = onSyncOverCellularChange,
                         )
                     }
                 }

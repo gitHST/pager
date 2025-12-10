@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,6 +22,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,7 +32,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
@@ -47,6 +51,8 @@ fun SettingsScreen(
     quoteViewModel: QuoteViewModel,
     themeMode: ThemeMode,
     onThemeModeChange: (ThemeMode) -> Unit,
+    syncOverCellular: Boolean,
+    onSyncOverCellularChange: (Boolean) -> Unit,
 ) {
     val themeOptions =
         listOf(
@@ -95,6 +101,16 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start,
         ) {
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Appearance section header
+            Text(
+                text = "Appearance",
+                fontSize = 22.sp,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+
+            // Theme row
             Row(
                 modifier =
                     Modifier
@@ -157,6 +173,90 @@ fun SettingsScreen(
                         }
                     }
                 }
+            }
+
+            // Data section
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = "Data",
+                fontSize = 22.sp,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+
+            // Sync data over cellular (Switch backed by repo)
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .clickable {
+                            onSyncOverCellularChange(!syncOverCellular)
+                        },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "Sync data over cellular",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                Switch(
+                    checked = syncOverCellular,
+                    onCheckedChange = { checked ->
+                        onSyncOverCellularChange(checked)
+                    },
+                    modifier = Modifier.scale(0.8f),
+                )
+            }
+
+            Text(
+                text = "Export data",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+
+            // Account section
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = "Account",
+                fontSize = 22.sp,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Logout (no-op for now)
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .clickable { /* TODO: implement logout */ },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "Logout",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Delete account (no-op for now)
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .clickable { /* TODO: implement delete account */ },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "Delete account and data",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.error,
+                )
             }
         }
     }
