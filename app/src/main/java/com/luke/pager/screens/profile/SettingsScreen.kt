@@ -45,6 +45,7 @@ import androidx.navigation.NavController
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.gson.Gson
+import com.luke.pager.data.viewmodel.AuthViewModel
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.data.viewmodel.ReviewViewModel
@@ -61,6 +62,7 @@ fun SettingsScreen(
     bookViewModel: BookViewModel,
     reviewViewModel: ReviewViewModel,
     quoteViewModel: QuoteViewModel,
+    authViewModel: AuthViewModel,
     themeMode: ThemeMode,
     onThemeModeChange: (ThemeMode) -> Unit,
     syncOverCellular: Boolean,
@@ -82,11 +84,12 @@ fun SettingsScreen(
     val coroutineScope = rememberCoroutineScope()
     val firebaseUser = Firebase.auth.currentUser
 
-    // Export dialog state
     var showExportDialog by remember { mutableStateOf(false) }
     var exportEmail by remember { mutableStateOf("") }
     var exportError by remember { mutableStateOf<String?>(null) }
     var isExporting by remember { mutableStateOf(false) }
+
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
     fun startExport(toEmail: String) {
         coroutineScope.launch {
@@ -224,32 +227,6 @@ fun SettingsScreen(
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
                         .clickable {
-                            // If user has an email already, export straight to that.
-                            val defaultEmail = firebaseUser?.email
-                            if (defaultEmail.isNullOrBlank()) {
-                                exportEmail = ""
-                                showExportDialog = true
-                            } else {
-                                exportEmail = defaultEmail
-                                showExportDialog = true // let them confirm/change
-                            }
-                        },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = "Export data",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-            }
-
-            Row(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .clickable {
                             onSyncOverCellularChange(!syncOverCellular)
                         },
                 verticalAlignment = Alignment.CenterVertically,
@@ -269,11 +246,30 @@ fun SettingsScreen(
                 )
             }
 
-            Text(
-                text = "Export data",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .clickable {
+                            val defaultEmail = firebaseUser?.email
+                            if (defaultEmail.isNullOrBlank()) {
+                                exportEmail = ""
+                                showExportDialog = true
+                            } else {
+                                exportEmail = defaultEmail
+                                showExportDialog = true
+                            }
+                        },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "Export data",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
             Text(
@@ -283,21 +279,28 @@ fun SettingsScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .clickable { /* TODO: implement logout */ },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = "Logout",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
+            if (firebaseUser != null && !firebaseUser.isAnonymous) {
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                            .clickable {
+                                showLogoutDialog = true
+                            },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = "Logout",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
             }
+
             Spacer(modifier = Modifier.height(8.dp))
 
             Row(
@@ -372,17 +375,42 @@ fun SettingsScreen(
             },
         )
     }
+
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text("Logout") },
+            text = {
+                Text(
+                    text = "Are you sure you want to log out?",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        authViewModel.logout()
+                        showLogoutDialog = false
+                        navController.popBackStack()
+                    },
+                ) {
+                    Text("Logout")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showLogoutDialog = false },
+                ) {
+                    Text("Cancel")
+                }
+            },
+        )
+    }
 }
 
 /**
  * Build a JSON payload for export.
- *
- * This assumes your viewmodels expose current lists:
- *   - BookViewModel.books
- *   - QuoteViewModel.quotes
- *   - ReviewViewModel.reviews
- *
- * If your property names differ, just adjust the three lines inside.
  */
 private suspend fun buildExportJson(
     bookViewModel: BookViewModel,
@@ -390,7 +418,6 @@ private suspend fun buildExportJson(
     quoteViewModel: QuoteViewModel,
 ): String =
     withContext(Dispatchers.Default) {
-        // Adjust these to match your actual StateFlow/LiveData names.
         val books = bookViewModel.books.value
         val quotes = quoteViewModel.quotes.value
         val reviews = reviewViewModel.reviews.value
@@ -409,22 +436,18 @@ private fun sendExportEmail(
     toEmail: String,
     json: String,
 ) {
-    // Use ACTION_SEND so more apps can handle it (Gmail, Outlook, etc.)
     val sendIntent = Intent(Intent.ACTION_SEND).apply {
-        type = "message/rfc822" // target email-capable apps
+        type = "message/rfc822"
         putExtra(Intent.EXTRA_EMAIL, arrayOf(toEmail))
         putExtra(Intent.EXTRA_SUBJECT, "Your Pager data export")
         putExtra(Intent.EXTRA_TEXT, json)
     }
 
-    // Wrap in a chooser so the user can pick their app
     val chooser = Intent.createChooser(sendIntent, "Send data export")
 
-    // Check if there's at least one app that can handle this
     if (sendIntent.resolveActivity(context.packageManager) != null) {
         context.startActivity(chooser)
     } else {
-        // This will be caught and shown in your dialog as exportError
         throw IllegalStateException(
             "No app found that can send email. Install an email app and try again.",
         )
