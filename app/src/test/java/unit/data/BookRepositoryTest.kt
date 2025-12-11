@@ -70,7 +70,7 @@ class BookRepositoryTest {
         }
 
     @Test
-    fun `loadAllReviews should populate allReviews map keyed by bookId`() =
+    fun `loadAllReviews should populate allReviews map keyed by reviewId`() =
         runTest {
             val reviews =
                 listOf(
@@ -88,7 +88,8 @@ class BookRepositoryTest {
 
             bookViewModel.loadAllReviews()
 
-            val expected = reviews.associateBy { it.bookId }
+            // ViewModel now keys by review.id, not bookId
+            val expected: Map<String, ReviewEntity?> = reviews.associateBy { it.id }
             assertEquals(expected, bookViewModel.allReviews.value)
         }
 }
