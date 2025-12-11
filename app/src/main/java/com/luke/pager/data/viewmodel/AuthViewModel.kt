@@ -139,15 +139,6 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    fun getInitialDisplayName(context: Context): String {
-        val user = firebaseAuth.currentUser
-        return if (isDisplayNamePending(context)) {
-            getPendingDisplayName(context) ?: user?.displayName.orEmpty()
-        } else {
-            user?.displayName.orEmpty()
-        }
-    }
-
     fun tryUploadPendingDisplayName(
         context: Context,
         onComplete: (Boolean) -> Unit = {},
