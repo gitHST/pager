@@ -101,6 +101,12 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Offline-first display name update:
+     * - cache per-uid name locally and mark as pending
+     * - immediately call onSuccess (so UI can close edit mode even offline)
+     * - try to push to Firebase in background
+     */
     fun updateDisplayName(
         context: Context,
         newName: String,
@@ -119,14 +125,17 @@ class AuthViewModel : ViewModel() {
             try {
                 _authError.value = null
                 val trimmed = newName.trim()
+                val uid = user.uid
 
-                setPendingDisplayName(context, trimmed)
-                markDisplayNamePending(context, true)
+                cacheDisplayName(context, uid, trimmed, pending = true)
 
+                // Let the UI proceed immediately
                 onSuccess()
 
                 try {
                     uploadDisplayNameToFirebase(trimmed)
+                    // mark as not pending on success
+                    cacheDisplayName(context, uid, trimmed, pending = false)
                 } catch (e: Exception) {
                     val msg = e.message ?: "Name will sync when you're online"
                     _authError.value = msg
@@ -139,6 +148,22 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Used by UI to get name in an offline-first way.
+     * Per-uid cache means we don't leak old names into new accounts.
+     */
+    fun getOfflineFirstDisplayName(context: Context): String {
+        val user = firebaseAuth.currentUser ?: return ""
+        val uid = user.uid
+
+        val cached = getCachedDisplayName(context, uid)
+        return cached ?: user.displayName.orEmpty()
+    }
+
+    /**
+     * Try to upload any pending display name for the current user.
+     * Call from ProfileScreen on appear, or when connectivity changes.
+     */
     fun tryUploadPendingDisplayName(
         context: Context,
         onComplete: (Boolean) -> Unit = {},
@@ -150,20 +175,22 @@ class AuthViewModel : ViewModel() {
         }
 
         viewModelScope.launch {
-            if (!isDisplayNamePending(context)) {
+            val uid = user.uid
+            if (!isDisplayNamePending(context, uid)) {
                 onComplete(true)
                 return@launch
             }
 
-            val pendingName = getPendingDisplayName(context)
+            val pendingName = getCachedDisplayName(context, uid)
             if (pendingName.isNullOrBlank()) {
-                markDisplayNamePending(context, false)
+                cacheDisplayName(context, uid, null, pending = false)
                 onComplete(true)
                 return@launch
             }
 
             try {
                 uploadDisplayNameToFirebase(pendingName)
+                cacheDisplayName(context, uid, pendingName, pending = false)
                 onComplete(true)
             } catch (e: Exception) {
                 val msg = e.message ?: "Failed to sync display name"
@@ -173,9 +200,7 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    private suspend fun uploadDisplayNameToFirebase(
-        name: String,
-    ) {
+    private suspend fun uploadDisplayNameToFirebase(name: String) {
         val user = firebaseAuth.currentUser
             ?: throw IllegalStateException("No current user")
 
@@ -185,32 +210,32 @@ class AuthViewModel : ViewModel() {
             }
 
         user.updateProfile(profileUpdates).await()
-
         _isLoggedIn.value = user.isAnonymous == false
-
-        markDisplayNamePending(user = null, context = null, pending = false)
     }
 
-    private fun markDisplayNamePending(
-        user: Any? = null,
-        context: Context? = null,
-        pending: Boolean,
-    ) {
-        if (context != null) {
-            val prefs =
-                context.getSharedPreferences("profile_name_prefs", Context.MODE_PRIVATE)
-            prefs.edit {
-                putBoolean("display_name_pending", pending)
-            }
+    /**
+     * Logout: clear per-uid cached identity, then sign out.
+     */
+    fun logout(context: Context) {
+        val user = firebaseAuth.currentUser
+        if (user != null) {
+            clearLocalIdentityCache(context, user.uid)
         }
-    }
 
-    fun logout() {
         firebaseAuth.signOut()
         _isLoggedIn.value = false
         _authError.value = null
     }
 
+    /**
+     * Crop + compress the image to match the circular preview,
+     * save it locally (for immediate use and offline-first),
+     * queue it for upload, then attempt to sync to Firebase
+     * respecting sync_over_cellular & current connectivity.
+     *
+     * onSuccess now always receives the *display* URI
+     * (typically a local file:// URI).
+     */
     fun updateProfilePhoto(
         context: Context,
         imageUri: Uri,
@@ -231,6 +256,7 @@ class AuthViewModel : ViewModel() {
                 _authError.value = null
                 val uid = user.uid
 
+                // Crop + compress locally
                 val bytes = cropAndCompressProfileImage(
                     context = context,
                     imageUri = imageUri,
@@ -239,18 +265,19 @@ class AuthViewModel : ViewModel() {
                     offsetPx = offsetPx,
                 )
 
+                // Save to local file per-uid and mark pending
                 val localUriString = withContext(Dispatchers.IO) {
                     val file = profilePhotoFile(context, uid)
                     file.outputStream().use { it.write(bytes) }
-
-                    markProfilePhotoPending(context, true)
-
+                    setProfilePhotoPending(context, uid, true)
                     Uri.fromFile(file).toString()
                 }
 
+                // Immediately update UI with local cached image
                 _isLoggedIn.value = user.isAnonymous == false
                 onSuccess(localUriString)
 
+                // Try to upload to Firebase in background
                 try {
                     uploadProfilePhotoToFirebase(
                         context = context,
@@ -258,7 +285,8 @@ class AuthViewModel : ViewModel() {
                         bytes = bytes,
                     )
                 } catch (e: Exception) {
-                    val msg = e.message ?: "Profile photo will sync when you're online"
+                    val msg =
+                        e.message ?: "Profile photo will sync when you're online"
                     _authError.value = msg
                 }
             } catch (e: Exception) {
@@ -269,6 +297,23 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Offline-first PFP getter for UI.
+     */
+    fun getOfflineFirstProfilePhotoUri(context: Context): Uri? {
+        val user = firebaseAuth.currentUser ?: return null
+        val uid = user.uid
+        val file = profilePhotoFile(context, uid)
+        return if (file.exists()) {
+            Uri.fromFile(file)
+        } else {
+            user.photoUrl
+        }
+    }
+
+    /**
+     * Try to upload any pending profile photo for current user.
+     */
     fun tryUploadPendingProfilePhoto(
         context: Context,
         onComplete: (Boolean) -> Unit = {},
@@ -281,11 +326,14 @@ class AuthViewModel : ViewModel() {
 
         viewModelScope.launch {
             val uid = user.uid
-            val pending = isProfilePhotoPending(context)
-            val file = profilePhotoFile(context, uid)
+            if (!isProfilePhotoPending(context, uid)) {
+                onComplete(true)
+                return@launch
+            }
 
-            if (!pending || !file.exists()) {
-                markProfilePhotoPending(context, false)
+            val file = profilePhotoFile(context, uid)
+            if (!file.exists()) {
+                setProfilePhotoPending(context, uid, false)
                 onComplete(true)
                 return@launch
             }
@@ -310,6 +358,11 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Upload bytes to Firebase Storage + Auth + Firestore,
+     * respecting sync_over_cellular settings.
+     * On success, clears per-uid pending flag.
+     */
     private suspend fun uploadProfilePhotoToFirebase(
         context: Context,
         uid: String,
@@ -317,17 +370,13 @@ class AuthViewModel : ViewModel() {
     ) {
         val firestore = Firebase.firestore
 
-        val settingsDoc = try {
-            firestore
-                .collection("users")
-                .document(uid)
-                .collection("settings")
-                .document("app")
-                .get()
-                .await()
-        } catch (e: Exception) {
-            throw e
-        }
+        val settingsDoc = firestore
+            .collection("users")
+            .document(uid)
+            .collection("settings")
+            .document("app")
+            .get()
+            .await()
 
         val allowCellular =
             settingsDoc.getBoolean("sync_over_cellular") ?: false
@@ -362,7 +411,7 @@ class AuthViewModel : ViewModel() {
             )
             .await()
 
-        markProfilePhotoPending(context, false)
+        setProfilePhotoPending(context, uid, false)
     }
 
     private suspend fun cropAndCompressProfileImage(
@@ -423,69 +472,74 @@ class AuthViewModel : ViewModel() {
             }
         }
 
+    // ---------- Local identity cache helpers (per uid) ----------
 
-    fun getOfflineFirstDisplayName(context: Context): String {
-        return if (isDisplayNamePending(context)) {
-            getPendingDisplayName(context) ?: firebaseAuth.currentUser?.displayName.orEmpty()
-        } else {
-            firebaseAuth.currentUser?.displayName.orEmpty()
-        }
-    }
-
-    fun getOfflineFirstProfilePhotoUri(context: Context): Uri? {
-        val user = firebaseAuth.currentUser ?: return null
-        val uid = user.uid
-
-        val cachedFile = profilePhotoFile(context, uid)
-        return if (cachedFile.exists()) {
-            Uri.fromFile(cachedFile)
-        } else {
-            user.photoUrl
-        }
-    }
     private fun profilePhotoFile(context: Context, uid: String): File =
         File(context.filesDir, "profile_photo_${uid}.jpg")
 
-    private fun markProfilePhotoPending(context: Context, pending: Boolean) {
-        val prefs =
-            context.getSharedPreferences("profile_photo_prefs", Context.MODE_PRIVATE)
-        prefs.edit {
-            putBoolean("profile_photo_pending", pending)
+    private fun profilePhotoPrefs(context: Context) =
+        context.getSharedPreferences("profile_photo_prefs", Context.MODE_PRIVATE)
+
+    private fun setProfilePhotoPending(context: Context, uid: String, pending: Boolean) {
+        profilePhotoPrefs(context).edit {
+            putBoolean("profile_photo_pending_$uid", pending)
         }
     }
 
-    private fun isProfilePhotoPending(context: Context): Boolean {
-        val prefs =
-            context.getSharedPreferences("profile_photo_prefs", Context.MODE_PRIVATE)
-        return prefs.getBoolean("profile_photo_pending", false)
-    }
+    private fun isProfilePhotoPending(context: Context, uid: String): Boolean =
+        profilePhotoPrefs(context)
+            .getBoolean("profile_photo_pending_$uid", false)
 
+    private fun namePrefs(context: Context) =
+        context.getSharedPreferences("profile_name_prefs", Context.MODE_PRIVATE)
 
-    private fun setPendingDisplayName(context: Context, name: String) {
-        val prefs =
-            context.getSharedPreferences("profile_name_prefs", Context.MODE_PRIVATE)
-        prefs.edit {
-            putString("pending_display_name", name)
+    private fun cacheDisplayName(
+        context: Context,
+        uid: String,
+        name: String?,
+        pending: Boolean,
+    ) {
+        namePrefs(context).edit {
+            if (name == null) {
+                remove("display_name_$uid")
+            } else {
+                putString("display_name_$uid", name)
+            }
+            putBoolean("display_name_pending_$uid", pending)
         }
     }
 
-    private fun getPendingDisplayName(context: Context): String? {
-        val prefs =
-            context.getSharedPreferences("profile_name_prefs", Context.MODE_PRIVATE)
-        return prefs.getString("pending_display_name", null)
-    }
+    private fun getCachedDisplayName(
+        context: Context,
+        uid: String,
+    ): String? =
+        namePrefs(context).getString("display_name_$uid", null)
 
-    private fun markDisplayNamePending(context: Context, pending: Boolean) {
-        val prefs =
-            context.getSharedPreferences("profile_name_prefs", Context.MODE_PRIVATE)
-        prefs.edit {
-            putBoolean("display_name_pending", pending)
+    private fun isDisplayNamePending(
+        context: Context,
+        uid: String,
+    ): Boolean =
+        namePrefs(context).getBoolean("display_name_pending_$uid", false)
+
+    private fun clearLocalIdentityCache(
+        context: Context,
+        uid: String,
+    ) {
+        // Delete cached PFP
+        val file = profilePhotoFile(context, uid)
+        if (file.exists()) {
+            file.delete()
         }
-    }
 
-    private fun isDisplayNamePending(context: Context): Boolean {
-        val prefs =
-            context.getSharedPreferences("profile_name_prefs", Context.MODE_PRIVATE)
-        return prefs.getBoolean("display_name_pending", false)
+        // Clear name entries
+        namePrefs(context).edit {
+            remove("display_name_$uid")
+            remove("display_name_pending_$uid")
+        }
+
+        // Clear PFP pending flag
+        profilePhotoPrefs(context).edit {
+            remove("profile_photo_pending_$uid")
+        }
     }
 }
