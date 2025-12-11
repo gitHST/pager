@@ -21,8 +21,8 @@ fun canSyncNow(
     val onCellular = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
 
     return when {
-        onWifiLike -> true               // always OK on Wi-Fi / ethernet
-        onCellular -> allowCellular      // only if user allows it
-        else -> false                    // VPN / unknown / offline
+        onWifiLike -> true
+        onCellular -> allowCellular
+        else -> false
     }
 }

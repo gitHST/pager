@@ -67,28 +67,17 @@ fun ReviewScreen(
 ) {
     val review = reviews[reviewId]
 
-    // --- DEBUG LOGGING ---
     LaunchedEffect(reviews, reviewId) {
-        Log.d("ReviewScreen", "---- ReviewScreen Debug ----")
-        Log.d("ReviewScreen", "ReviewScreen launched with reviewId = $reviewId")
-        Log.d("ReviewScreen", "Keys in reviews map = ${reviews.keys}")
-        Log.d("ReviewScreen", "Found review: ${review != null}")
         review?.let {
-            Log.d("ReviewScreen", "Review.bookId = ${it.bookId}")
-            Log.d("ReviewScreen", "Review.rating = ${it.rating}")
-            Log.d("ReviewScreen", "Review.privacy = ${it.privacy}")
-            Log.d("ReviewScreen", "Review.text = ${it.reviewText}")
         }
     }
 
     var showDeleteDialog by remember { mutableStateOf(false) }
 
-    // Some state only makes sense when we actually have a review
     var isEditing by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
 
-    // Top-level layout frame so the screen is never visually "empty"
     Box(
         modifier =
             Modifier
@@ -102,7 +91,6 @@ fun ReviewScreen(
                     .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Header
             Box(
                 modifier =
                     Modifier
@@ -172,27 +160,22 @@ fun ReviewScreen(
                 }
             }
 
-            when {
-                review == null && reviews.isEmpty() -> {
-                    // Still loading reviews
+            when (review) {
+                null if reviews.isEmpty() -> {
                     Text(
                         text = "Loading review...",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                     )
                 }
-
-                review == null -> {
-                    // We have some reviews, but not this one
+                null -> {
                     Text(
                         text = "Review not found.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                     )
                 }
-
                 else -> {
-                    // --- Main review content ---
                     ReviewContent(
                         reviewId = reviewId,
                         review = review,
@@ -211,7 +194,6 @@ fun ReviewScreen(
 
         if (review != null && isEditing) {
             BackHandler(enabled = true) {
-                // cancel edit on system back
                 isEditing = false
             }
         }

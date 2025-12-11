@@ -65,7 +65,6 @@ class BookRepositoryTest {
 
             bookViewModel.loadBooks()
 
-            // UnconfinedTestDispatcher runs launches immediately
             assertEquals(books, bookViewModel.books.value)
         }
 
@@ -88,7 +87,6 @@ class BookRepositoryTest {
 
             bookViewModel.loadAllReviews()
 
-            // ViewModel now keys by review.id, not bookId
             val expected: Map<String, ReviewEntity?> = reviews.associateBy { it.id }
             assertEquals(expected, bookViewModel.allReviews.value)
         }

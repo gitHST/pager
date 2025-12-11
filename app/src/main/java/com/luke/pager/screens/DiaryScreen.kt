@@ -64,7 +64,6 @@ fun DiaryScreen(
         bookViewModel.loadAllReviews()
     }
 
-    // Helper: index reviews by bookId for UI use
     val reviewsByBookId: Map<String, ReviewEntity> =
         reviewsById
             .values
@@ -110,7 +109,6 @@ fun DiaryScreen(
                             book = book,
                             review = review,
                             onReviewClick = {
-                                // 🔹 NOW navigate with the REAL review id
                                 navController.navigate("review_screen/${review.id}")
                             },
                         )

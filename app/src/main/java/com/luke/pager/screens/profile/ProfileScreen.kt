@@ -82,14 +82,11 @@ fun ProfileScreen(
     val context = LocalContext.current
     val firebaseUser = Firebase.auth.currentUser
 
-    // NEW: Always attempt to upload any pending cached profile photo
-    // when this screen appears, for both anonymous and logged-in users.
     LaunchedEffect(Unit) {
         authViewModel.tryUploadPendingProfilePhoto(context)
+        authViewModel.tryUploadPendingDisplayName(context)
     }
 
-    // Prefer locally cached profile photo (offline-first),
-    // fall back to Firebase Auth's photoUrl if nothing cached.
     val initialProfilePhotoUri: Uri? = remember(firebaseUser?.uid) {
         val uid = firebaseUser?.uid
         if (uid != null) {
@@ -105,7 +102,7 @@ fun ProfileScreen(
     }
 
     var nameInput by remember(firebaseUser?.uid) {
-        mutableStateOf(firebaseUser?.displayName.orEmpty())
+        mutableStateOf(authViewModel.getInitialDisplayName(context))
     }
 
     var profilePhotoUri by remember(firebaseUser?.uid) {
@@ -118,14 +115,13 @@ fun ProfileScreen(
         mutableStateOf(Offset.Zero)
     }
 
-    // Used to force Coil to re-load the file when we save.
     var profilePhotoVersion by remember(firebaseUser?.uid) {
         mutableIntStateOf(0)
     }
 
     var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
 
-    val scope = rememberCoroutineScope()
+    val coroutineScope = rememberCoroutineScope()
 
     val photoPickerLauncher =
         rememberLauncherForActivityResult(
@@ -149,8 +145,12 @@ fun ProfileScreen(
                 IconButton(
                     onClick = {
                         authViewModel.updateDisplayName(
+                            context = context,
                             newName = nameInput,
-                            onSuccess = { isEditing = false }
+                            onSuccess = { isEditing = false },
+                            onError = { _ ->
+                                isEditing = false
+                            },
                         )
                         showPfpModal = false
                         tempPhotoUri = null
@@ -225,7 +225,6 @@ fun ProfileScreen(
 
                     Image(
                         painter = rememberAsyncImagePainter(
-                            // Append a fake version query so Coil sees a new model
                             model = profilePhotoUri?.let { uri ->
                                 "${uri}?v=$profilePhotoVersion"
                             },
@@ -378,7 +377,7 @@ fun ProfileScreen(
                 return@ProfilePictureEditModal
             }
 
-            scope.launch {
+            coroutineScope.launch {
                 authViewModel.updateProfilePhoto(
                     context = context,
                     imageUri = uri,
@@ -387,7 +386,7 @@ fun ProfileScreen(
                     offsetPx = offsetPx,
                     onSuccess = { displayUriString ->
                         profilePhotoUri = displayUriString.toUri()
-                        profilePhotoVersion++   // bump version so image refreshes
+                        profilePhotoVersion++
                         profilePhotoZoom = 1f
                         profilePhotoOffsetFraction = Offset.Zero
                         showPfpModal = false
