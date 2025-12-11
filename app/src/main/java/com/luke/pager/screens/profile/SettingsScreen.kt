@@ -103,14 +103,12 @@ fun SettingsScreen(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Appearance section header
             Text(
                 text = "Appearance",
                 fontSize = 22.sp,
                 color = MaterialTheme.colorScheme.onBackground,
             )
 
-            // Theme row
             Row(
                 modifier =
                     Modifier
@@ -175,7 +173,6 @@ fun SettingsScreen(
                 }
             }
 
-            // Data section
             Spacer(modifier = Modifier.height(24.dp))
             Text(
                 text = "Data",
@@ -183,7 +180,6 @@ fun SettingsScreen(
                 color = MaterialTheme.colorScheme.onBackground,
             )
 
-            // Sync data over cellular (Switch backed by repo)
             Row(
                 modifier =
                     Modifier
@@ -215,7 +211,6 @@ fun SettingsScreen(
                 color = MaterialTheme.colorScheme.onBackground,
             )
 
-            // Account section
             Spacer(modifier = Modifier.height(24.dp))
             Text(
                 text = "Account",
@@ -224,7 +219,6 @@ fun SettingsScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Logout (no-op for now)
             Row(
                 modifier =
                     Modifier
@@ -242,7 +236,6 @@ fun SettingsScreen(
             }
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Delete account (no-op for now)
             Row(
                 modifier =
                     Modifier

@@ -22,7 +22,6 @@ class BookViewModel(
     private val _books = MutableStateFlow<List<BookEntity>>(emptyList())
     val books: StateFlow<List<BookEntity>> get() = _books
 
-    // Map is now keyed by REVIEW ID, not bookId
     private val _allReviews = MutableStateFlow<Map<String, ReviewEntity?>>(emptyMap())
     val allReviews: StateFlow<Map<String, ReviewEntity?>> get() = _allReviews
 
@@ -31,7 +30,6 @@ class BookViewModel(
 
     val booksSortedByReviewDate: StateFlow<List<BookEntity>> =
         combine(_books, _allReviews) { books, reviewsMap ->
-            // Build a helper map keyed by bookId so we can still sort by book
             val reviewsByBookId =
                 reviewsMap.values
                     .filterNotNull()
@@ -60,7 +58,6 @@ class BookViewModel(
     fun loadAllReviews() {
         viewModelScope.launch {
             val reviews = reviewRepository.getAllReviews()
-            // 🔹 KEY CHANGE: key by review.id instead of bookId
             _allReviews.value = reviews.associateBy { it.id }
         }
     }

@@ -63,9 +63,8 @@ class SubmitReviewHeaderTest {
                 lastArg<() -> Unit>().invoke()
             }
 
-            // Simulate calling submission manually for test (not via Composable)
             val formatter = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
-            val expectedDatePrefix = formatter.format(java.util.Date()).substring(0, 10) // yyyy-MM-dd
+            val expectedDatePrefix = formatter.format(java.util.Date()).substring(0, 10)
 
             bookViewModel.submitReview(
                 book,
