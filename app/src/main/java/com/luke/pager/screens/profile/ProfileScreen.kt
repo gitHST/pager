@@ -30,9 +30,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -61,6 +63,7 @@ import com.luke.pager.data.viewmodel.ReviewViewModel
 import com.luke.pager.screens.auth.LoginModal
 import com.luke.pager.screens.components.Title
 import kotlinx.coroutines.launch
+import java.io.File
 
 @Composable
 fun ProfileScreen(
@@ -76,14 +79,37 @@ fun ProfileScreen(
     var isEditing by remember { mutableStateOf(false) }
     var showPfpModal by remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
     val firebaseUser = Firebase.auth.currentUser
+
+    // NEW: Always attempt to upload any pending cached profile photo
+    // when this screen appears, for both anonymous and logged-in users.
+    LaunchedEffect(Unit) {
+        authViewModel.tryUploadPendingProfilePhoto(context)
+    }
+
+    // Prefer locally cached profile photo (offline-first),
+    // fall back to Firebase Auth's photoUrl if nothing cached.
+    val initialProfilePhotoUri: Uri? = remember(firebaseUser?.uid) {
+        val uid = firebaseUser?.uid
+        if (uid != null) {
+            val file = File(context.filesDir, "profile_photo_${uid}.jpg")
+            if (file.exists()) {
+                Uri.fromFile(file)
+            } else {
+                firebaseUser.photoUrl
+            }
+        } else {
+            firebaseUser?.photoUrl
+        }
+    }
 
     var nameInput by remember(firebaseUser?.uid) {
         mutableStateOf(firebaseUser?.displayName.orEmpty())
     }
 
     var profilePhotoUri by remember(firebaseUser?.uid) {
-        mutableStateOf<Uri?>(firebaseUser?.photoUrl)
+        mutableStateOf<Uri?>(initialProfilePhotoUri)
     }
     var profilePhotoZoom by remember(firebaseUser?.uid) {
         mutableFloatStateOf(1f)
@@ -92,10 +118,14 @@ fun ProfileScreen(
         mutableStateOf(Offset.Zero)
     }
 
+    // Used to force Coil to re-load the file when we save.
+    var profilePhotoVersion by remember(firebaseUser?.uid) {
+        mutableIntStateOf(0)
+    }
+
     var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
 
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
 
     val photoPickerLauncher =
         rememberLauncherForActivityResult(
@@ -194,7 +224,12 @@ fun ProfileScreen(
                     val avatarHeight = avatarSize.height.toFloat().coerceAtLeast(1f)
 
                     Image(
-                        painter = rememberAsyncImagePainter(profilePhotoUri),
+                        painter = rememberAsyncImagePainter(
+                            // Append a fake version query so Coil sees a new model
+                            model = profilePhotoUri?.let { uri ->
+                                "${uri}?v=$profilePhotoVersion"
+                            },
+                        ),
                         contentDescription = "Profile picture",
                         modifier =
                             Modifier
@@ -343,15 +378,16 @@ fun ProfileScreen(
                 return@ProfilePictureEditModal
             }
 
-            coroutineScope.launch {
+            scope.launch {
                 authViewModel.updateProfilePhoto(
                     context = context,
                     imageUri = uri,
                     zoom = zoom,
                     containerSize = containerSize,
                     offsetPx = offsetPx,
-                    onSuccess = { downloadUrl ->
-                        profilePhotoUri = downloadUrl.toUri()
+                    onSuccess = { displayUriString ->
+                        profilePhotoUri = displayUriString.toUri()
+                        profilePhotoVersion++   // bump version so image refreshes
                         profilePhotoZoom = 1f
                         profilePhotoOffsetFraction = Offset.Zero
                         showPfpModal = false
