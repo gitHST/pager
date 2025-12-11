@@ -81,11 +81,6 @@ fun ProfileScreen(
     val context = LocalContext.current
     val firebaseUser = Firebase.auth.currentUser
 
-    LaunchedEffect(Unit) {
-        authViewModel.tryUploadPendingProfilePhoto(context)
-        authViewModel.tryUploadPendingDisplayName(context)
-    }
-
     val initialProfilePhotoUri: Uri? = remember(firebaseUser?.uid) {
         authViewModel.getOfflineFirstProfilePhotoUri(context)
     }
@@ -127,6 +122,20 @@ fun ProfileScreen(
     val nameColor =
         if (nameInput.isBlank()) fadedColor
         else MaterialTheme.colorScheme.onBackground
+
+    LaunchedEffect(isLoggedIn) {
+        if (!isLoggedIn) {
+            nameInput = ""
+            profilePhotoUri = null
+            profilePhotoZoom = 1f
+            profilePhotoOffsetFraction = Offset.Zero
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        authViewModel.tryUploadPendingProfilePhoto(context)
+        authViewModel.tryUploadPendingDisplayName(context)
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxWidth()) {
