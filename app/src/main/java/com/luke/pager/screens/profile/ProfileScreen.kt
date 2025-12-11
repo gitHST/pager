@@ -63,7 +63,6 @@ import com.luke.pager.data.viewmodel.ReviewViewModel
 import com.luke.pager.screens.auth.LoginModal
 import com.luke.pager.screens.components.Title
 import kotlinx.coroutines.launch
-import java.io.File
 
 @Composable
 fun ProfileScreen(
@@ -88,21 +87,11 @@ fun ProfileScreen(
     }
 
     val initialProfilePhotoUri: Uri? = remember(firebaseUser?.uid) {
-        val uid = firebaseUser?.uid
-        if (uid != null) {
-            val file = File(context.filesDir, "profile_photo_${uid}.jpg")
-            if (file.exists()) {
-                Uri.fromFile(file)
-            } else {
-                firebaseUser.photoUrl
-            }
-        } else {
-            firebaseUser?.photoUrl
-        }
+        authViewModel.getOfflineFirstProfilePhotoUri(context)
     }
 
     var nameInput by remember(firebaseUser?.uid) {
-        mutableStateOf(authViewModel.getInitialDisplayName(context))
+        mutableStateOf(authViewModel.getOfflineFirstDisplayName(context))
     }
 
     var profilePhotoUri by remember(firebaseUser?.uid) {

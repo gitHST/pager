@@ -433,6 +433,25 @@ class AuthViewModel : ViewModel() {
         }
 
 
+    fun getOfflineFirstDisplayName(context: Context): String {
+        return if (isDisplayNamePending(context)) {
+            getPendingDisplayName(context) ?: firebaseAuth.currentUser?.displayName.orEmpty()
+        } else {
+            firebaseAuth.currentUser?.displayName.orEmpty()
+        }
+    }
+
+    fun getOfflineFirstProfilePhotoUri(context: Context): Uri? {
+        val user = firebaseAuth.currentUser ?: return null
+        val uid = user.uid
+
+        val cachedFile = profilePhotoFile(context, uid)
+        return if (cachedFile.exists()) {
+            Uri.fromFile(cachedFile)
+        } else {
+            user.photoUrl
+        }
+    }
     private fun profilePhotoFile(context: Context, uid: String): File =
         File(context.filesDir, "profile_photo_${uid}.jpg")
 

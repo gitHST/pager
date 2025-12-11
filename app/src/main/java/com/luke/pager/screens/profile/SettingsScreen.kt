@@ -1,5 +1,6 @@
 package com.luke.pager.screens.profile
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -22,25 +24,35 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.google.gson.Gson
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.data.viewmodel.ReviewViewModel
 import com.luke.pager.screens.components.Title
 import com.luke.pager.ui.theme.ThemeMode
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,6 +77,32 @@ fun SettingsScreen(
 
     val selectedLabel =
         themeOptions.firstOrNull { it.first == themeMode }?.second ?: "System default"
+
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val firebaseUser = Firebase.auth.currentUser
+
+    // Export dialog state
+    var showExportDialog by remember { mutableStateOf(false) }
+    var exportEmail by remember { mutableStateOf("") }
+    var exportError by remember { mutableStateOf<String?>(null) }
+    var isExporting by remember { mutableStateOf(false) }
+
+    fun startExport(toEmail: String) {
+        coroutineScope.launch {
+            isExporting = true
+            exportError = null
+            try {
+                val json = buildExportJson(bookViewModel, reviewViewModel, quoteViewModel)
+                sendExportEmail(context, toEmail.trim(), json)
+                showExportDialog = false
+            } catch (e: Exception) {
+                exportError = e.message ?: "Failed to export data"
+            } finally {
+                isExporting = false
+            }
+        }
+    }
 
     Column(
         modifier =
@@ -186,6 +224,32 @@ fun SettingsScreen(
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
                         .clickable {
+                            // If user has an email already, export straight to that.
+                            val defaultEmail = firebaseUser?.email
+                            if (defaultEmail.isNullOrBlank()) {
+                                exportEmail = ""
+                                showExportDialog = true
+                            } else {
+                                exportEmail = defaultEmail
+                                showExportDialog = true // let them confirm/change
+                            }
+                        },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "Export data",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+            }
+
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .clickable {
                             onSyncOverCellularChange(!syncOverCellular)
                         },
                 verticalAlignment = Alignment.CenterVertically,
@@ -252,5 +316,117 @@ fun SettingsScreen(
                 )
             }
         }
+    }
+
+    if (showExportDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                if (!isExporting) {
+                    showExportDialog = false
+                }
+            },
+            title = { Text("Export data") },
+            text = {
+                Column {
+                    Text(
+                        text = "Enter an email address to send your data export as JSON.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = exportEmail,
+                        onValueChange = { exportEmail = it },
+                        singleLine = true,
+                        label = { Text("Email") },
+                    )
+                    if (exportError != null) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = exportError!!,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (!isExporting && exportEmail.isNotBlank()) {
+                            startExport(exportEmail)
+                        }
+                    },
+                    enabled = !isExporting && exportEmail.isNotBlank(),
+                ) {
+                    Text(if (isExporting) "Exporting..." else "Export")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { if (!isExporting) showExportDialog = false },
+                    enabled = !isExporting,
+                ) {
+                    Text("Cancel")
+                }
+            },
+        )
+    }
+}
+
+/**
+ * Build a JSON payload for export.
+ *
+ * This assumes your viewmodels expose current lists:
+ *   - BookViewModel.books
+ *   - QuoteViewModel.quotes
+ *   - ReviewViewModel.reviews
+ *
+ * If your property names differ, just adjust the three lines inside.
+ */
+private suspend fun buildExportJson(
+    bookViewModel: BookViewModel,
+    reviewViewModel: ReviewViewModel,
+    quoteViewModel: QuoteViewModel,
+): String =
+    withContext(Dispatchers.Default) {
+        // Adjust these to match your actual StateFlow/LiveData names.
+        val books = bookViewModel.books.value
+        val quotes = quoteViewModel.quotes.value
+        val reviews = reviewViewModel.reviews.value
+
+        val payload = mapOf(
+            "books" to books,
+            "quotes" to quotes,
+            "reviews" to reviews,
+        )
+
+        Gson().toJson(payload)
+    }
+
+private fun sendExportEmail(
+    context: android.content.Context,
+    toEmail: String,
+    json: String,
+) {
+    // Use ACTION_SEND so more apps can handle it (Gmail, Outlook, etc.)
+    val sendIntent = Intent(Intent.ACTION_SEND).apply {
+        type = "message/rfc822" // target email-capable apps
+        putExtra(Intent.EXTRA_EMAIL, arrayOf(toEmail))
+        putExtra(Intent.EXTRA_SUBJECT, "Your Pager data export")
+        putExtra(Intent.EXTRA_TEXT, json)
+    }
+
+    // Wrap in a chooser so the user can pick their app
+    val chooser = Intent.createChooser(sendIntent, "Send data export")
+
+    // Check if there's at least one app that can handle this
+    if (sendIntent.resolveActivity(context.packageManager) != null) {
+        context.startActivity(chooser)
+    } else {
+        // This will be caught and shown in your dialog as exportError
+        throw IllegalStateException(
+            "No app found that can send email. Install an email app and try again.",
+        )
     }
 }
