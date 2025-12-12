@@ -35,7 +35,7 @@ class AuthViewModel : ViewModel() {
     private val firebaseAuth = Firebase.auth
 
     private val _isLoggedIn =
-        MutableStateFlow(firebaseAuth.currentUser?.isAnonymous == false)
+        MutableStateFlow(firebaseAuth.currentUser != null)
     val isLoggedIn: StateFlow<Boolean> get() = _isLoggedIn
 
     private val _authError = MutableStateFlow<String?>(null)
@@ -59,7 +59,7 @@ class AuthViewModel : ViewModel() {
                     .signInWithEmailAndPassword(email.trim(), password)
                     .await()
 
-                _isLoggedIn.value = firebaseAuth.currentUser?.isAnonymous == false
+                _isLoggedIn.value = firebaseAuth.currentUser != null
                 onSuccess()
             } catch (e: Exception) {
                 val msg = e.message ?: "Login failed"
@@ -91,7 +91,7 @@ class AuthViewModel : ViewModel() {
                         .await()
                 }
 
-                _isLoggedIn.value = firebaseAuth.currentUser?.isAnonymous == false
+                _isLoggedIn.value = firebaseAuth.currentUser != null
                 onSuccess()
             } catch (e: Exception) {
                 val msg = e.message ?: "Registration failed"
@@ -101,12 +101,6 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Offline-first display name update:
-     * - cache per-uid name locally and mark as pending
-     * - immediately call onSuccess (so UI can close edit mode even offline)
-     * - try to push to Firebase in background
-     */
     fun updateDisplayName(
         context: Context,
         newName: String,
@@ -129,12 +123,10 @@ class AuthViewModel : ViewModel() {
 
                 cacheDisplayName(context, uid, trimmed, pending = true)
 
-                // Let the UI proceed immediately
                 onSuccess()
 
                 try {
                     uploadDisplayNameToFirebase(trimmed)
-                    // mark as not pending on success
                     cacheDisplayName(context, uid, trimmed, pending = false)
                 } catch (e: Exception) {
                     val msg = e.message ?: "Name will sync when you're online"
@@ -148,10 +140,6 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Used by UI to get name in an offline-first way.
-     * Per-uid cache means we don't leak old names into new accounts.
-     */
     fun getOfflineFirstDisplayName(context: Context): String {
         val user = firebaseAuth.currentUser ?: return ""
         val uid = user.uid
@@ -160,10 +148,6 @@ class AuthViewModel : ViewModel() {
         return cached ?: user.displayName.orEmpty()
     }
 
-    /**
-     * Try to upload any pending display name for the current user.
-     * Call from ProfileScreen on appear, or when connectivity changes.
-     */
     fun tryUploadPendingDisplayName(
         context: Context,
         onComplete: (Boolean) -> Unit = {},
@@ -210,32 +194,87 @@ class AuthViewModel : ViewModel() {
             }
 
         user.updateProfile(profileUpdates).await()
-        _isLoggedIn.value = user.isAnonymous == false
+        _isLoggedIn.value = true
     }
 
-    /**
-     * Logout: clear per-uid cached identity, then sign out.
-     */
-    fun logout(context: Context) {
-        val user = firebaseAuth.currentUser
-        if (user != null) {
-            clearLocalIdentityCache(context, user.uid)
-        }
-
+    fun logout() {
         firebaseAuth.signOut()
         _isLoggedIn.value = false
         _authError.value = null
     }
 
-    /**
-     * Crop + compress the image to match the circular preview,
-     * save it locally (for immediate use and offline-first),
-     * queue it for upload, then attempt to sync to Firebase
-     * respecting sync_over_cellular & current connectivity.
-     *
-     * onSuccess now always receives the *display* URI
-     * (typically a local file:// URI).
-     */
+    fun deleteAccountAndData(
+        context: Context,
+        onSuccess: () -> Unit = {},
+        onError: (String) -> Unit = {},
+    ) {
+        val user = firebaseAuth.currentUser
+        if (user == null) {
+            onError("Not logged in")
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                _authError.value = null
+                val uid = user.uid
+
+                val firestore = Firebase.firestore
+                val storage = FirebaseStorage.getInstance()
+
+                suspend fun deleteSubcollection(path: String) {
+                    val colRef = firestore.collection("users").document(uid).collection(path)
+                    val snapshot = colRef.get().await()
+                    for (doc in snapshot.documents) {
+                        doc.reference.delete().await()
+                    }
+                }
+
+                deleteSubcollection("books")
+                deleteSubcollection("reviews")
+                deleteSubcollection("quotes")
+                deleteSubcollection("settings")
+
+                firestore.collection("users").document(uid).delete().await()
+
+                val userStorageRef = storage.reference.child("users/$uid")
+                try {
+                    val listResult = userStorageRef.listAll().await()
+                    for (item in listResult.items) {
+                        item.delete().await()
+                    }
+                    for (prefix in listResult.prefixes) {
+                        val subList = prefix.listAll().await()
+                        for (subItem in subList.items) {
+                            subItem.delete().await()
+                        }
+                    }
+                } catch (_: Exception) {
+                }
+
+                clearLocalIdentityCache(context, uid)
+
+                try {
+                    user.delete().await()
+                } catch (e: Exception) {
+                    val msg =
+                        e.message
+                            ?: "Failed to delete account. You may need to re-login before deletion."
+                    _authError.value = msg
+                    onError(msg)
+                    return@launch
+                }
+
+                _isLoggedIn.value = false
+                onSuccess()
+            } catch (e: Exception) {
+                val msg = e.message ?: "Failed to delete account and data"
+                _authError.value = msg
+                onError(msg)
+            }
+        }
+    }
+
     fun updateProfilePhoto(
         context: Context,
         imageUri: Uri,
@@ -256,7 +295,6 @@ class AuthViewModel : ViewModel() {
                 _authError.value = null
                 val uid = user.uid
 
-                // Crop + compress locally
                 val bytes = cropAndCompressProfileImage(
                     context = context,
                     imageUri = imageUri,
@@ -265,7 +303,6 @@ class AuthViewModel : ViewModel() {
                     offsetPx = offsetPx,
                 )
 
-                // Save to local file per-uid and mark pending
                 val localUriString = withContext(Dispatchers.IO) {
                     val file = profilePhotoFile(context, uid)
                     file.outputStream().use { it.write(bytes) }
@@ -273,21 +310,16 @@ class AuthViewModel : ViewModel() {
                     Uri.fromFile(file).toString()
                 }
 
-                // Immediately update UI with local cached image
-                _isLoggedIn.value = user.isAnonymous == false
+                _isLoggedIn.value = true
                 onSuccess(localUriString)
 
-                // Try to upload to Firebase in background
                 try {
                     uploadProfilePhotoToFirebase(
                         context = context,
                         uid = uid,
                         bytes = bytes,
                     )
-                } catch (e: Exception) {
-                    val msg =
-                        e.message ?: "Profile photo will sync when you're online"
-                    _authError.value = msg
+                } catch (_: Exception) {
                 }
             } catch (e: Exception) {
                 val msg = e.message ?: "Failed to update profile photo"
@@ -297,9 +329,6 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Offline-first PFP getter for UI.
-     */
     fun getOfflineFirstProfilePhotoUri(context: Context): Uri? {
         val user = firebaseAuth.currentUser ?: return null
         val uid = user.uid
@@ -311,9 +340,6 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Try to upload any pending profile photo for current user.
-     */
     fun tryUploadPendingProfilePhoto(
         context: Context,
         onComplete: (Boolean) -> Unit = {},
@@ -358,11 +384,6 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Upload bytes to Firebase Storage + Auth + Firestore,
-     * respecting sync_over_cellular settings.
-     * On success, clears per-uid pending flag.
-     */
     private suspend fun uploadProfilePhotoToFirebase(
         context: Context,
         uid: String,
@@ -472,7 +493,6 @@ class AuthViewModel : ViewModel() {
             }
         }
 
-    // ---------- Local identity cache helpers (per uid) ----------
 
     private fun profilePhotoFile(context: Context, uid: String): File =
         File(context.filesDir, "profile_photo_${uid}.jpg")
@@ -525,19 +545,16 @@ class AuthViewModel : ViewModel() {
         context: Context,
         uid: String,
     ) {
-        // Delete cached PFP
         val file = profilePhotoFile(context, uid)
         if (file.exists()) {
             file.delete()
         }
 
-        // Clear name entries
         namePrefs(context).edit {
             remove("display_name_$uid")
             remove("display_name_pending_$uid")
         }
 
-        // Clear PFP pending flag
         profilePhotoPrefs(context).edit {
             remove("profile_photo_pending_$uid")
         }

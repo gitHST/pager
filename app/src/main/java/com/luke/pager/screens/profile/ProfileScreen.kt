@@ -129,8 +129,14 @@ fun ProfileScreen(
             profilePhotoUri = null
             profilePhotoZoom = 1f
             profilePhotoOffsetFraction = Offset.Zero
+        } else {
+            nameInput = authViewModel.getOfflineFirstDisplayName(context)
+            profilePhotoUri = authViewModel.getOfflineFirstProfilePhotoUri(context)
+            profilePhotoZoom = 1f
+            profilePhotoOffsetFraction = Offset.Zero
         }
     }
+
 
     LaunchedEffect(Unit) {
         authViewModel.tryUploadPendingProfilePhoto(context)

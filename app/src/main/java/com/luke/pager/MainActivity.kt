@@ -35,10 +35,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
-import com.luke.pager.auth.AuthManager
 import com.luke.pager.data.repo.FirebaseBookRepository
 import com.luke.pager.data.repo.FirebaseQuoteRepository
 import com.luke.pager.data.repo.FirebaseReviewRepository
@@ -46,8 +46,10 @@ import com.luke.pager.data.repo.FirebaseUserSettingsRepository
 import com.luke.pager.data.repo.IBookRepository
 import com.luke.pager.data.repo.IQuoteRepository
 import com.luke.pager.data.repo.IReviewRepository
+import com.luke.pager.data.viewmodel.AuthViewModel
 import com.luke.pager.navigation.BottomNavBar
 import com.luke.pager.navigation.PagerNavHost
+import com.luke.pager.screens.auth.LoggedOutGate
 import com.luke.pager.ui.theme.BackgroundDark
 import com.luke.pager.ui.theme.BackgroundLight
 import com.luke.pager.ui.theme.LocalUseDarkTheme
@@ -77,103 +79,100 @@ class MainActivity : ComponentActivity() {
         setContent {
             val auth = remember { FirebaseAuth.getInstance() }
 
-            var ready by remember { mutableStateOf(false) }
-            var uid by remember { mutableStateOf<String?>(null) }
+            val authViewModel: AuthViewModel = viewModel()
 
-            LaunchedEffect(Unit) {
-                uid = AuthManager.ensureAnonymousUser()
-                ready = true
+            var uid by remember { mutableStateOf(auth.currentUser?.uid) }
 
+            LaunchedEffect(auth) {
                 auth.addAuthStateListener { firebaseAuth ->
-                    val newUser = firebaseAuth.currentUser
-                    if (newUser != null && newUser.uid != uid) {
-                        uid = newUser.uid
-                    }
+                    uid = firebaseAuth.currentUser?.uid
                 }
             }
 
-            if (!ready || uid == null) {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .background(Color.White),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator()
-                    }
+            when (val currentUid = uid) {
+                null -> {
+                    LoggedOutGate(authViewModel = authViewModel)
                 }
-                return@setContent
-            }
+                else -> {
+                    val bookRepo: IBookRepository =
+                        remember(currentUid) { FirebaseBookRepository(currentUid) }
+                    val reviewRepo: IReviewRepository =
+                        remember(currentUid) { FirebaseReviewRepository(currentUid) }
+                    val quoteRepo: IQuoteRepository =
+                        remember(currentUid) { FirebaseQuoteRepository(currentUid) }
+                    val settingsRepository =
+                        remember(currentUid) { FirebaseUserSettingsRepository(currentUid) }
 
-            val bookRepo: IBookRepository = remember(uid) { FirebaseBookRepository(uid!!) }
-            val reviewRepo: IReviewRepository = remember(uid) { FirebaseReviewRepository(uid!!) }
-            val quoteRepo: IQuoteRepository = remember(uid) { FirebaseQuoteRepository(uid!!) }
-            val settingsRepository = remember(uid) { FirebaseUserSettingsRepository(uid!!) }
+                    val bookViewModel =
+                        remember(currentUid) {
+                            com.luke.pager.data.viewmodel.BookViewModel(bookRepo, reviewRepo)
+                        }
+                    val reviewViewModel =
+                        remember(currentUid) {
+                            com.luke.pager.data.viewmodel.ReviewViewModel(reviewRepo)
+                        }
+                    val quoteViewModel =
+                        remember(currentUid) {
+                            com.luke.pager.data.viewmodel.QuoteViewModel(quoteRepo)
+                        }
 
-            val bookViewModel = remember(uid) { com.luke.pager.data.viewmodel.BookViewModel(bookRepo, reviewRepo) }
-            val reviewViewModel = remember(uid) { com.luke.pager.data.viewmodel.ReviewViewModel(reviewRepo) }
-            val quoteViewModel = remember(uid) { com.luke.pager.data.viewmodel.QuoteViewModel(quoteRepo) }
+                    val coroutineScope = rememberCoroutineScope()
 
-            val coroutineScope = rememberCoroutineScope()
+                    var themeMode by remember { mutableStateOf<ThemeMode?>(null) }
+                    var syncOverCellular by remember { mutableStateOf(false) }
 
-            var themeMode by remember { mutableStateOf<ThemeMode?>(null) }
-            var syncOverCellular by remember { mutableStateOf(false) }
-
-            LaunchedEffect(settingsRepository) {
-                settingsRepository.themeModeFlow.collect { mode ->
-                    themeMode = mode
-                }
-            }
-
-            LaunchedEffect(settingsRepository) {
-                settingsRepository.syncOverCellularFlow.collect { enabled ->
-                    syncOverCellular = enabled
-                }
-            }
-
-            if (themeMode == null) {
-                val systemIsDark = isSystemInDarkTheme()
-                CompositionLocalProvider(LocalUseDarkTheme provides systemIsDark) {
-                    PagerTheme(useDarkTheme = systemIsDark) {
-                        Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .background(if (systemIsDark) BackgroundDark else BackgroundLight),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            CircularProgressIndicator()
+                    LaunchedEffect(settingsRepository) {
+                        settingsRepository.themeModeFlow.collect { mode ->
+                            themeMode = mode
                         }
                     }
+
+                    LaunchedEffect(settingsRepository) {
+                        settingsRepository.syncOverCellularFlow.collect { enabled ->
+                            syncOverCellular = enabled
+                        }
+                    }
+
+                    if (themeMode == null) {
+                        val systemIsDark = isSystemInDarkTheme()
+                        CompositionLocalProvider(LocalUseDarkTheme provides systemIsDark) {
+                            PagerTheme(useDarkTheme = systemIsDark) {
+                                Box(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxSize()
+                                            .background(
+                                                if (systemIsDark) BackgroundDark
+                                                else BackgroundLight,
+                                            ),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    CircularProgressIndicator()
+                                }
+                            }
+                        }
+                    } else {
+                        PagerAppUI(
+                            bookViewModel = bookViewModel,
+                            reviewViewModel = reviewViewModel,
+                            quoteViewModel = quoteViewModel,
+                            themeMode = themeMode!!,
+                            onThemeModeChange = { mode ->
+                                themeMode = mode
+                                coroutineScope.launch {
+                                    settingsRepository.setThemeMode(mode)
+                                }
+                            },
+                            syncOverCellular = syncOverCellular,
+                            onSyncOverCellularChange = { enabled ->
+                                syncOverCellular = enabled
+                                coroutineScope.launch {
+                                    settingsRepository.setSyncOverCellular(enabled)
+                                }
+                            },
+                        )
+                    }
                 }
-            } else {
-                PagerAppUI(
-                    bookViewModel = bookViewModel,
-                    reviewViewModel = reviewViewModel,
-                    quoteViewModel = quoteViewModel,
-                    themeMode = themeMode!!,
-                    onThemeModeChange = { mode ->
-                        themeMode = mode
-                        coroutineScope.launch {
-                            settingsRepository.setThemeMode(mode)
-                        }
-                    },
-                    syncOverCellular = syncOverCellular,
-                    onSyncOverCellularChange = { enabled ->
-                        syncOverCellular = enabled
-                        coroutineScope.launch {
-                            settingsRepository.setSyncOverCellular(enabled)
-                        }
-                    },
-                )
             }
         }
     }
@@ -222,7 +221,9 @@ fun PagerAppUI(
             var animatedTargetColor by remember { mutableStateOf<Color?>(null) }
             var bottomBarVisible by remember { mutableStateOf(true) }
 
-            var textureAlpha by remember { mutableFloatStateOf(if (useDarkTheme) 0.1f else 0.9f) }
+            var textureAlpha by remember {
+                mutableFloatStateOf(if (useDarkTheme) 0.1f else 0.9f)
+            }
             var prevUseDarkTheme by remember { mutableStateOf(useDarkTheme) }
             var prevRoute by remember { mutableStateOf(currentRoute) }
 
