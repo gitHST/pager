@@ -77,6 +77,11 @@ fun SearchAndResultsModal(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+
+    fun showMsg(msg: String) {
+        coroutineScope.launch { snackbarHostState.showSnackbar(msg) }
+    }
+
     var searchQuery by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
     var books by remember { mutableStateOf<List<OpenLibraryBook>>(emptyList()) }
@@ -86,25 +91,37 @@ fun SearchAndResultsModal(
     var containerHeight by remember { mutableIntStateOf(0) }
     val keyboardController = LocalSoftwareKeyboardController.current
     var hasActivatedOnce by remember { mutableStateOf(false) }
+
     val windowInfo = LocalWindowInfo.current
     val density = LocalDensity.current
     val screenHeight = with(density) { windowInfo.containerSize.height.toDp() }
+
     val imePadding = WindowInsets.ime.asPaddingValues()
     val imeVisible by remember {
         derivedStateOf { imePadding.calculateBottomPadding() > 0.dp }
     }
-    val animatedTopPadding by animateDpAsState(36.dp)
+
+    val animatedTopPadding by animateDpAsState(
+        targetValue = 36.dp,
+        label = "topPadding",
+    )
+
     var forceCompressed by remember { mutableStateOf(false) }
     if (forceCompressed && imeVisible) {
         forceCompressed = false
     }
+
     val targetHeight =
         when {
             selectedBook != null -> screenHeight / 1.5f
             forceCompressed || imeVisible -> screenHeight / 2.2f
             else -> screenHeight / 1.5f
         }
-    val animatedMaxHeight by animateDpAsState(targetHeight)
+
+    val animatedMaxHeight by animateDpAsState(
+        targetValue = targetHeight,
+        label = "maxHeight",
+    )
 
     LaunchedEffect(searchQuery) {
         searchJob?.cancel()
@@ -132,11 +149,7 @@ fun SearchAndResultsModal(
                     isLoading = false
                     active = true
 
-                    result.errorMessage?.let {
-                        coroutineScope.launch {
-                            snackbarHostState.showSnackbar(it)
-                        }
-                    }
+                    result.errorMessage?.let { showMsg(it) }
                 } else {
                     deferredResult.cancel()
                 }
@@ -144,6 +157,7 @@ fun SearchAndResultsModal(
     }
 
     Title("Review")
+
     Scaffold(
         containerColor = Color.Transparent,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -185,7 +199,8 @@ fun SearchAndResultsModal(
                     AnimatedContent(
                         targetState = selectedBook,
                         transitionSpec = {
-                            fadeIn(animationSpec = tween(200)).togetherWith(fadeOut(animationSpec = tween(200)))
+                            fadeIn(animationSpec = tween(200))
+                                .togetherWith(fadeOut(animationSpec = tween(200)))
                         },
                     ) { book ->
                         if (book != null) {
@@ -195,15 +210,14 @@ fun SearchAndResultsModal(
                                 bookViewModel = bookViewModel,
                                 navController = navController,
                                 containerHeight = containerHeight,
+                                onSnackbar = ::showMsg,
                             )
                         } else {
                             @Suppress("DEPRECATION")
                             SearchBar(
                                 query = searchQuery,
                                 onQueryChange = { searchQuery = it },
-                                onSearch = {
-                                    keyboardController?.hide()
-                                },
+                                onSearch = { keyboardController?.hide() },
                                 active = active,
                                 onActiveChange = { isActive ->
                                     active = isActive
@@ -236,7 +250,7 @@ fun SearchAndResultsModal(
                                     }
                                 } else {
                                     LazyColumn {
-                                        if (books.isEmpty() && !isLoading && searchQuery.isNotBlank()) {
+                                        if (books.isEmpty() && searchQuery.isNotBlank()) {
                                             item {
                                                 Box(
                                                     modifier =
@@ -254,7 +268,10 @@ fun SearchAndResultsModal(
                                             }
                                         } else {
                                             items(books) { bookItem ->
-                                                BookRowUIClickable(bookItem, onClick = { selectedBook = bookItem })
+                                                BookRowUIClickable(
+                                                    bookItem,
+                                                    onClick = { selectedBook = bookItem },
+                                                )
                                             }
                                         }
                                     }
@@ -293,12 +310,21 @@ fun BookRowUIClickable(
                     coverUrl = book.coverIndex?.let { "https://covers.openlibrary.org/b/id/$it-M.jpg" },
                 )
             }
+
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(book.title, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground)
+                Text(
+                    book.title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
                 book.authorName?.let {
-                    Text(it.joinToString(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onBackground)
+                    Text(
+                        it.joinToString(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
                 }
                 book.firstPublishYear?.let {
                     Text(

@@ -4,7 +4,7 @@ import com.luke.pager.data.entities.BookEntity
 import kotlinx.coroutines.flow.Flow
 
 interface IBookRepository {
-    fun getAllBooks(): Flow<List<BookEntity>>
+    fun getAllBooks(): Flow<Result<List<BookEntity>>>
 
-    suspend fun insertAndReturnId(book: BookEntity): String
+    suspend fun insertAndReturnId(book: BookEntity): Result<String>
 }

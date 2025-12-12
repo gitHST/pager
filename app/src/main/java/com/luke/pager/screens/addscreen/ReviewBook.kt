@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -46,15 +47,26 @@ fun ReviewBook(
     bookViewModel: BookViewModel,
     navController: NavHostController,
     containerHeight: Int,
+    onSnackbar: (String) -> Unit,
 ) {
-    val settingsRepository = remember {
+    // Re-create if uid changes (logout/login)
+    val settingsRepository = remember(AuthManager.uid) {
         FirebaseUserSettingsRepository(AuthManager.uid)
     }
     val coroutineScope = rememberCoroutineScope()
 
-    val defaultPrivacy by settingsRepository
+    val defaultPrivacyResult by settingsRepository
         .defaultPrivacyFlow
-        .collectAsState(initial = Privacy.PUBLIC)
+        .collectAsState(initial = Result.success(Privacy.PUBLIC))
+
+    val defaultPrivacy = defaultPrivacyResult.getOrNull() ?: Privacy.PUBLIC
+
+    // Show load error (if any)
+    LaunchedEffect(defaultPrivacyResult) {
+        defaultPrivacyResult.exceptionOrNull()?.let { e ->
+            onSnackbar(e.message ?: "Failed to load default privacy")
+        }
+    }
 
     var rating by remember { mutableFloatStateOf(0f) }
     var spoilers by remember { mutableStateOf(false) }
@@ -63,13 +75,19 @@ fun ReviewBook(
     var reviewText by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var showDatePicker by remember { mutableStateOf(false) }
+
     val datePickerState =
         rememberDatePickerState(
-            initialSelectedDateMillis = selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+            initialSelectedDateMillis =
+                selectedDate
+                    .atStartOfDay(ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli(),
         )
 
     Box(modifier = Modifier.fillMaxSize()) {
         val scrollState = rememberScrollState()
+
         SubmitReviewHeader(
             onBack = onBack,
             book = book,
@@ -99,14 +117,18 @@ fun ReviewBook(
             Spacer(Modifier.height(48.dp))
             BookRowUIClickable(book = book, onClick = {})
             Spacer(Modifier.height(16.dp))
+
             StarRatingBar(rating, hasRated, { rating = it }, { hasRated = true })
+
             Spacer(Modifier.height(12.dp))
+
             DatePickerPopup(
                 showDialog = showDatePicker,
                 datePickerState = datePickerState,
                 onDismiss = { showDatePicker = false },
                 onDateSelected = { selectedDate = it },
             )
+
             PrivacyDateSpoilersRow(
                 selectedDate,
                 privacy,
@@ -115,12 +137,22 @@ fun ReviewBook(
                 onLockToggle = { newPrivacy ->
                     privacy = newPrivacy
                     coroutineScope.launch {
-                        settingsRepository.setDefaultPrivacy(newPrivacy)
+                        val res = settingsRepository.setDefaultPrivacy(newPrivacy)
+                        if (res.isFailure) {
+                            onSnackbar(
+                                res.exceptionOrNull()?.message
+                                    ?: "Failed to save default privacy",
+                            )
+                        } else {
+                            onSnackbar("Default privacy saved")
+                        }
                     }
                 },
                 onSpoilerToggle = { spoilers = it },
             )
+
             Spacer(Modifier.height(12.dp))
+
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 ScrollingTextField(
                     reviewText,
@@ -128,9 +160,10 @@ fun ReviewBook(
                     scrollState,
                     containerHeight,
                     362,
-                    "Review..."
+                    "Review...",
                 )
             }
+
             Spacer(Modifier.height(8.dp))
         }
     }

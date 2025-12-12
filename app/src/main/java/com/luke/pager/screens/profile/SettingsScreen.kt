@@ -101,6 +101,7 @@ fun SettingsScreen(
     var reauthError by remember { mutableStateOf<String?>(null) }
 
 
+
     fun startExport(toEmail: String) {
         coroutineScope.launch {
             isExporting = true
@@ -434,7 +435,7 @@ fun SettingsScreen(
             text = {
                 Column {
                     Text(
-                        text = "For security, please re-authenticate to delete your account.",
+                        text = "Please enter your password",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground,
                     )
@@ -473,12 +474,34 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        val current = user ?: return@TextButton
+                        val current = user ?: run {
+                            reauthError = "Not logged in"
+                            return@TextButton
+                        }
+
                         reauthError = null
+                        isDeleting = true
+                        deleteError = null
+
+                        val runDelete = {
+                            authViewModel.deleteAccountAndData(
+                                context = context,
+                                onSuccess = {
+                                    isDeleting = false
+                                    showReauthDialog = false
+                                    navController.popBackStack()
+                                },
+                                onError = { msg ->
+                                    isDeleting = false
+                                    reauthError = msg
+                                },
+                            )
+                        }
 
                         if (isPasswordUser) {
                             val email = current.email.orEmpty()
                             if (email.isBlank() || reauthPassword.isBlank()) {
+                                isDeleting = false
                                 reauthError = "Enter your password"
                                 return@TextButton
                             }
@@ -486,45 +509,51 @@ fun SettingsScreen(
                             authViewModel.reauthenticateWithPassword(
                                 email = email,
                                 password = reauthPassword,
-                                onSuccess = {
-                                    showReauthDialog = false
-                                    showDeleteDialog = true // reopen delete confirm
+                                onSuccess = { runDelete() },
+                                onError = { msg ->
+                                    isDeleting = false
+                                    reauthError = msg
                                 },
-                                onError = { msg -> reauthError = msg },
                             )
                         } else {
                             if (activity == null) {
+                                isDeleting = false
                                 reauthError = "No Activity available for Google re-auth"
                                 return@TextButton
                             }
 
                             authViewModel.reauthenticateWithGoogle(
                                 activity = activity,
-                                onSuccess = {
-                                    showReauthDialog = false
-                                    showDeleteDialog = true
+                                onSuccess = { runDelete() },
+                                onError = { msg ->
+                                    isDeleting = false
+                                    reauthError = msg
                                 },
-                                onError = { msg -> reauthError = msg },
                             )
                         }
                     },
+                    enabled = !isDeleting,
                 ) {
-                    Text(if (isPasswordUser) "Confirm" else "Continue")
+                    Text(if (isDeleting) "Deleting..." else if (isPasswordUser) "Confirm" else "Continue")
                 }
             },
             dismissButton = {
                 TextButton(
                     onClick = {
-                        showReauthDialog = false
-                        reauthPassword = ""
-                        reauthError = null
+                        if (!isDeleting) {
+                            showReauthDialog = false
+                            reauthPassword = ""
+                            reauthError = null
+                        }
                     },
+                    enabled = !isDeleting,
                 ) {
                     Text("Cancel")
                 }
             },
         )
     }
+
 
 
     if (showDeleteDialog) {
@@ -553,30 +582,15 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        if (!isDeleting) {
-                            isDeleting = true
-                            deleteError = null
-                            authViewModel.deleteAccountAndData(
-                                context = context,
-                                onSuccess = {
-                                    isDeleting = false
-                                    showDeleteDialog = false
-                                    navController.popBackStack()
-                                },
-                                onError = { msg ->
-                                    isDeleting = false
-                                    deleteError = msg
-                                },
-                                onReauthRequired = {
-                                    isDeleting = false
-                                    showReauthDialog = true
-                                },
-                            )
-                        }
+                        // Always require re-auth before deletion
+                        showDeleteDialog = false
+                        reauthPassword = ""
+                        reauthError = null
+                        showReauthDialog = true
                     },
                     enabled = !isDeleting,
                 ) {
-                    Text(if (isDeleting) "Deleting..." else "Delete")
+                    Text("Delete")
                 }
             },
             dismissButton = {

@@ -1,6 +1,7 @@
 package com.luke.pager.data.repo
 
 import Privacy
+import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
@@ -32,131 +33,194 @@ class FirebaseReviewRepository(
 
     private val globalBooksCollection = firestore.collection("books")
 
-    override suspend fun insertReview(review: ReviewEntity) {
-        val docRef = reviewsCollection.document()
-        val id = docRef.id
+    override suspend fun insertReview(review: ReviewEntity): Result<Unit> {
+        return try {
+            val docRef = reviewsCollection.document()
+            val id = docRef.id
 
-        val reviewToSave = review.copy(id = id)
-        docRef.set(reviewToSave.toFirestoreMap()).await()
+            val reviewToSave = review.copy(id = id)
+            docRef.set(reviewToSave.toFirestoreMap()).await()
 
-        reviewToSave.bookKey?.let { bookKey ->
-            val safeBookId = bookKey.toFirestoreSafeId()
-            val globalReviewRef =
-                globalBooksCollection
-                    .document(safeBookId)
-                    .collection("reviews")
-                    .document(id)
+            // Best-effort global mirror
+            reviewToSave.bookKey?.let { bookKey ->
+                val safeBookId = bookKey.toFirestoreSafeId()
+                val globalReviewRef =
+                    globalBooksCollection
+                        .document(safeBookId)
+                        .collection("reviews")
+                        .document(id)
 
-            globalReviewRef.set(reviewToSave.toGlobalReviewMap(uid)).await()
+                try {
+                    globalReviewRef.set(reviewToSave.toGlobalReviewMap(uid)).await()
+                } catch (e: Exception) {
+                    Log.w("FirebaseReviewRepo", "Global review mirror write failed (ignored)", e)
+                }
+            }
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.w("FirebaseReviewRepo", "insertReview failed", e)
+            Result.failure(e)
         }
     }
 
-    override suspend fun getAllReviews(): List<ReviewEntity> {
-        val snapshot = reviewsCollection.get().await()
-        return snapshot.documents.mapNotNull { it.toReviewEntityOrNull() }
+    override suspend fun getAllReviews(): Result<List<ReviewEntity>> {
+        return try {
+            val snapshot = reviewsCollection.get().await()
+            Result.success(snapshot.documents.mapNotNull { it.toReviewEntityOrNull() })
+        } catch (e: Exception) {
+            Log.w("FirebaseReviewRepo", "getAllReviews failed", e)
+            Result.failure(e)
+        }
     }
 
-    override suspend fun deleteReviewAndBookById(reviewId: String) {
-        val reviewDoc = reviewsCollection.document(reviewId).get().await()
-        val bookId = reviewDoc.getString("book_id") ?: return
-        val bookKey = reviewDoc.getString("book_key")
+    override suspend fun deleteReviewAndBookById(reviewId: String): Result<Unit> {
+        return try {
+            val reviewDoc = reviewsCollection.document(reviewId).get().await()
+            val bookId = reviewDoc.getString("book_id") ?: return Result.success(Unit)
+            val bookKey = reviewDoc.getString("book_key")
 
-        reviewsCollection.document(reviewId).delete().await()
+            reviewsCollection.document(reviewId).delete().await()
 
-        if (bookKey != null) {
-            val safeBookId = bookKey.toFirestoreSafeId()
-            globalBooksCollection
-                .document(safeBookId)
-                .collection("reviews")
-                .document(reviewId)
-                .delete()
-                .await()
-        }
+            // Best-effort global mirror delete
+            if (bookKey != null) {
+                val safeBookId = bookKey.toFirestoreSafeId()
+                try {
+                    globalBooksCollection
+                        .document(safeBookId)
+                        .collection("reviews")
+                        .document(reviewId)
+                        .delete()
+                        .await()
+                } catch (e: Exception) {
+                    Log.w("FirebaseReviewRepo", "Global review mirror delete failed (ignored)", e)
+                }
+            }
 
-        val remainingReviewsSnapshot =
-            reviewsCollection
-                .whereEqualTo("book_id", bookId)
-                .get()
-                .await()
-
-        if (remainingReviewsSnapshot.isEmpty) {
-            booksCollection.document(bookId).delete().await()
-
-            val quoteSnapshot =
-                quotesCollection
+            val remainingReviewsSnapshot =
+                reviewsCollection
                     .whereEqualTo("book_id", bookId)
                     .get()
                     .await()
 
-            for (q in quoteSnapshot.documents) {
-                q.reference.delete().await()
+            if (remainingReviewsSnapshot.isEmpty) {
+                booksCollection.document(bookId).delete().await()
+
+                val quoteSnapshot =
+                    quotesCollection
+                        .whereEqualTo("book_id", bookId)
+                        .get()
+                        .await()
+
+                for (q in quoteSnapshot.documents) {
+                    q.reference.delete().await()
+                }
             }
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.w("FirebaseReviewRepo", "deleteReviewAndBookById failed", e)
+            Result.failure(e)
         }
     }
 
     override suspend fun updateReviewText(
         reviewId: String,
         newText: String,
-    ) {
-        reviewsCollection
-            .document(reviewId)
-            .update("review_text", newText)
-            .await()
-
-        val reviewDoc = reviewsCollection.document(reviewId).get().await()
-        val bookKey = reviewDoc.getString("book_key")
-        if (bookKey != null) {
-            val safeBookId = bookKey.toFirestoreSafeId()
-            globalBooksCollection
-                .document(safeBookId)
-                .collection("reviews")
+    ): Result<Unit> {
+        return try {
+            reviewsCollection
                 .document(reviewId)
                 .update("review_text", newText)
                 .await()
+
+            // Best-effort global mirror update
+            val reviewDoc = reviewsCollection.document(reviewId).get().await()
+            val bookKey = reviewDoc.getString("book_key")
+            if (bookKey != null) {
+                val safeBookId = bookKey.toFirestoreSafeId()
+                try {
+                    globalBooksCollection
+                        .document(safeBookId)
+                        .collection("reviews")
+                        .document(reviewId)
+                        .update("review_text", newText)
+                        .await()
+                } catch (e: Exception) {
+                    Log.w("FirebaseReviewRepo", "Global review mirror update failed (ignored)", e)
+                }
+            }
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.w("FirebaseReviewRepo", "updateReviewText failed", e)
+            Result.failure(e)
         }
     }
 
     override suspend fun updateReviewRating(
         reviewId: String,
         newRating: Float,
-    ) {
-        reviewsCollection
-            .document(reviewId)
-            .update("rating", newRating)
-            .await()
-
-        val reviewDoc = reviewsCollection.document(reviewId).get().await()
-        val bookKey = reviewDoc.getString("book_key")
-        if (bookKey != null) {
-            val safeBookId = bookKey.toFirestoreSafeId()
-            globalBooksCollection
-                .document(safeBookId)
-                .collection("reviews")
+    ): Result<Unit> {
+        return try {
+            reviewsCollection
                 .document(reviewId)
                 .update("rating", newRating)
                 .await()
+
+            val reviewDoc = reviewsCollection.document(reviewId).get().await()
+            val bookKey = reviewDoc.getString("book_key")
+            if (bookKey != null) {
+                val safeBookId = bookKey.toFirestoreSafeId()
+                try {
+                    globalBooksCollection
+                        .document(safeBookId)
+                        .collection("reviews")
+                        .document(reviewId)
+                        .update("rating", newRating)
+                        .await()
+                } catch (e: Exception) {
+                    Log.w("FirebaseReviewRepo", "Global review mirror update failed (ignored)", e)
+                }
+            }
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.w("FirebaseReviewRepo", "updateReviewRating failed", e)
+            Result.failure(e)
         }
     }
 
     override suspend fun updateReviewPrivacy(
         reviewId: String,
         privacy: Privacy,
-    ) {
-        reviewsCollection
-            .document(reviewId)
-            .update("privacy", privacy.name)
-            .await()
-
-        val reviewDoc = reviewsCollection.document(reviewId).get().await()
-        val bookKey = reviewDoc.getString("book_key")
-        if (bookKey != null) {
-            val safeBookId = bookKey.toFirestoreSafeId()
-            globalBooksCollection
-                .document(safeBookId)
-                .collection("reviews")
+    ): Result<Unit> {
+        return try {
+            reviewsCollection
                 .document(reviewId)
                 .update("privacy", privacy.name)
                 .await()
+
+            val reviewDoc = reviewsCollection.document(reviewId).get().await()
+            val bookKey = reviewDoc.getString("book_key")
+            if (bookKey != null) {
+                val safeBookId = bookKey.toFirestoreSafeId()
+                try {
+                    globalBooksCollection
+                        .document(safeBookId)
+                        .collection("reviews")
+                        .document(reviewId)
+                        .update("privacy", privacy.name)
+                        .await()
+                } catch (e: Exception) {
+                    Log.w("FirebaseReviewRepo", "Global review mirror update failed (ignored)", e)
+                }
+            }
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.w("FirebaseReviewRepo", "updateReviewPrivacy failed", e)
+            Result.failure(e)
         }
     }
 

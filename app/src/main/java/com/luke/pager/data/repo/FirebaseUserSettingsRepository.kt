@@ -24,104 +24,116 @@ class FirebaseUserSettingsRepository(
             .collection("settings")
             .document("app")
 
-    override val themeModeFlow: Flow<ThemeMode> =
+    override val themeModeFlow: Flow<Result<ThemeMode>> =
         callbackFlow {
             val listener = settingsDocument.addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     Log.w("UserSettingsRepo", "Theme listener error", error)
-                    trySend(ThemeMode.SYSTEM)
+                    trySend(Result.failure(error))
                     return@addSnapshotListener
                 }
 
-                if (snapshot != null && snapshot.exists()) {
-                    val modeString = snapshot.getString("theme_mode")
-                    val mode = modeString?.toThemeModeOrNull() ?: ThemeMode.SYSTEM
-                    trySend(mode)
-                } else {
-                    trySend(ThemeMode.SYSTEM)
-                }
+                val mode =
+                    if (snapshot != null && snapshot.exists()) {
+                        val modeString = snapshot.getString("theme_mode")
+                        modeString?.toThemeModeOrNull() ?: ThemeMode.SYSTEM
+                    } else {
+                        ThemeMode.SYSTEM
+                    }
+
+                trySend(Result.success(mode))
             }
 
             awaitClose { listener.remove() }
         }
 
-    override val defaultPrivacyFlow: Flow<Privacy> =
+    override val defaultPrivacyFlow: Flow<Result<Privacy>> =
         callbackFlow {
             val listener = settingsDocument.addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     Log.w("UserSettingsRepo", "Privacy listener error", error)
-                    trySend(Privacy.PUBLIC)
+                    trySend(Result.failure(error))
                     return@addSnapshotListener
                 }
 
-                if (snapshot != null && snapshot.exists()) {
-                    val privacyString = snapshot.getString("default_privacy")
-                    val privacy = privacyString?.toPrivacyOrNull() ?: Privacy.PUBLIC
-                    trySend(privacy)
-                } else {
-                    trySend(Privacy.PUBLIC)
-                }
+                val privacy =
+                    if (snapshot != null && snapshot.exists()) {
+                        val privacyString = snapshot.getString("default_privacy")
+                        privacyString?.toPrivacyOrNull() ?: Privacy.PUBLIC
+                    } else {
+                        Privacy.PUBLIC
+                    }
+
+                trySend(Result.success(privacy))
             }
 
             awaitClose { listener.remove() }
         }
 
-    override val syncOverCellularFlow: Flow<Boolean> =
+    override val syncOverCellularFlow: Flow<Result<Boolean>> =
         callbackFlow {
             val listener = settingsDocument.addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     Log.w("UserSettingsRepo", "Cellular sync listener error", error)
-                    trySend(false)
+                    trySend(Result.failure(error))
                     return@addSnapshotListener
                 }
 
-                if (snapshot != null && snapshot.exists()) {
-                    val value = snapshot.getBoolean("sync_over_cellular") ?: false
-                    trySend(value)
-                } else {
-                    trySend(false)
-                }
+                val value =
+                    if (snapshot != null && snapshot.exists()) {
+                        snapshot.getBoolean("sync_over_cellular") ?: false
+                    } else {
+                        false
+                    }
+
+                trySend(Result.success(value))
             }
 
             awaitClose { listener.remove() }
         }
 
-    override suspend fun setThemeMode(mode: ThemeMode) {
-        try {
+    override suspend fun setThemeMode(mode: ThemeMode): Result<Unit> {
+        return try {
             settingsDocument
                 .set(
                     mapOf("theme_mode" to mode.name),
                     SetOptions.merge()
                 )
                 .await()
+            Result.success(Unit)
         } catch (e: Exception) {
             Log.w("UserSettingsRepo", "Failed to set theme mode", e)
+            Result.failure(e)
         }
     }
 
-    override suspend fun setDefaultPrivacy(privacy: Privacy) {
-        try {
+    override suspend fun setDefaultPrivacy(privacy: Privacy): Result<Unit> {
+        return try {
             settingsDocument
                 .set(
                     mapOf("default_privacy" to privacy.name),
                     SetOptions.merge()
                 )
                 .await()
+            Result.success(Unit)
         } catch (e: Exception) {
             Log.w("UserSettingsRepo", "Failed to set default privacy", e)
+            Result.failure(e)
         }
     }
 
-    override suspend fun setSyncOverCellular(enabled: Boolean) {
-        try {
+    override suspend fun setSyncOverCellular(enabled: Boolean): Result<Unit> {
+        return try {
             settingsDocument
                 .set(
                     mapOf("sync_over_cellular" to enabled),
                     SetOptions.merge()
                 )
                 .await()
+            Result.success(Unit)
         } catch (e: Exception) {
             Log.w("UserSettingsRepo", "Failed to set sync over cellular", e)
+            Result.failure(e)
         }
     }
 }
