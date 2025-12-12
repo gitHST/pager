@@ -29,6 +29,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.luke.pager.auth.mapAuthErrorToUserMessage
 import com.luke.pager.data.viewmodel.AuthViewModel
 
 @Composable
@@ -52,7 +53,7 @@ fun RegisterScreen(
     LaunchedEffect(authError) {
         val msg = authError
         if (!msg.isNullOrBlank()) {
-            onShowSnackbar(msg)
+            onShowSnackbar(mapAuthErrorToUserMessage(msg))
             authViewModel.clearError()
         }
     }
@@ -180,7 +181,7 @@ fun RegisterScreen(
                                 navController.popBackStack()
                             },
                             onError = { msg ->
-                                onShowSnackbar(msg)
+                                onShowSnackbar(mapAuthErrorToUserMessage(msg))
                                 authViewModel.clearError()
                             },
                         )

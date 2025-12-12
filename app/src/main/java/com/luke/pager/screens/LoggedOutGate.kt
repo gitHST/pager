@@ -59,6 +59,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.luke.pager.R
+import com.luke.pager.auth.mapAuthErrorToUserMessage
 import com.luke.pager.data.viewmodel.AuthViewModel
 import com.luke.pager.network.onlineStatusFlow
 import com.luke.pager.ui.theme.BackgroundDark
@@ -251,7 +252,7 @@ private fun LoginScreen(
                                 onSuccess = {},
                                 onError = { msg ->
                                     // Keep Google errors out of inline Register UI
-                                    onShowSnackbar(msg.ifBlank { "Google sign-in failed" })
+                                    onShowSnackbar(mapAuthErrorToUserMessage(msg))
                                     authViewModel.clearError()
                                 },
                             )
