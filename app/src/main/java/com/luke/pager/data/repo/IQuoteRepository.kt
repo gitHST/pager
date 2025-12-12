@@ -3,13 +3,13 @@ package com.luke.pager.data.repo
 import com.luke.pager.data.entities.QuoteEntity
 
 interface IQuoteRepository {
-    suspend fun getQuotesByBookId(bookId: String): List<QuoteEntity>
+    suspend fun getQuotesByBookId(bookId: String): Result<List<QuoteEntity>>
 
-    suspend fun insertQuote(quote: QuoteEntity)
+    suspend fun insertQuote(quote: QuoteEntity): Result<Unit>
 
-    suspend fun getAllQuotes(): List<QuoteEntity>
+    suspend fun getAllQuotes(): Result<List<QuoteEntity>>
 
-    suspend fun updateQuote(quote: QuoteEntity)
+    suspend fun updateQuote(quote: QuoteEntity): Result<Unit>
 
-    suspend fun deleteQuote(quote: QuoteEntity)
+    suspend fun deleteQuote(quote: QuoteEntity): Result<Unit>
 }

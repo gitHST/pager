@@ -28,6 +28,8 @@ class BookViewModel(
     private val _isInitialLoading = MutableStateFlow(true)
     val isInitialLoading: StateFlow<Boolean> get() = _isInitialLoading
 
+    private val _lastError = MutableStateFlow<String?>(null)
+
     val booksSortedByReviewDate: StateFlow<List<BookEntity>> =
         combine(_books, _allReviews) { books, reviewsMap ->
             val reviewsByBookId =
@@ -44,12 +46,18 @@ class BookViewModel(
             initialValue = emptyList(),
         )
 
-    suspend fun insertAndReturnId(book: BookEntity): String = bookRepository.insertAndReturnId(book)
-
     fun loadBooks() {
         viewModelScope.launch {
-            bookRepository.getAllBooks().collect { books ->
-                _books.value = books
+            bookRepository.getAllBooks().collect { result ->
+                result
+                    .onSuccess { books ->
+                        _books.value = books
+                    }
+                    .onFailure { e ->
+                        _books.value = emptyList()
+                        _lastError.value = e.message ?: "Failed to load books"
+                    }
+
                 _isInitialLoading.value = false
             }
         }
@@ -57,8 +65,14 @@ class BookViewModel(
 
     fun loadAllReviews() {
         viewModelScope.launch {
-            val reviews = reviewRepository.getAllReviews()
-            _allReviews.value = reviews.associateBy { it.id }
+            reviewRepository.getAllReviews()
+                .onSuccess { reviews ->
+                    _allReviews.value = reviews.associateBy { it.id }
+                }
+                .onFailure { e ->
+                    _allReviews.value = emptyMap()
+                    _lastError.value = e.message ?: "Failed to load reviews"
+                }
         }
     }
 
@@ -81,7 +95,11 @@ class BookViewModel(
                     coverId = openBook.coverIndex,
                 )
 
-            val bookId: String = insertAndReturnId(book)
+            val bookIdResult = bookRepository.insertAndReturnId(book)
+            val bookId = bookIdResult.getOrElse { e ->
+                _lastError.value = e.message ?: "Failed to save book"
+                return@launch
+            }
 
             val sanitizedReviewText = reviewText.takeIf { it.isNotBlank() }
 
@@ -96,7 +114,12 @@ class BookViewModel(
                     hasSpoilers = hasSpoilers,
                 )
 
-            reviewRepository.insertReview(review)
+            val reviewResult = reviewRepository.insertReview(review)
+            if (reviewResult.isFailure) {
+                _lastError.value = reviewResult.exceptionOrNull()?.message ?: "Failed to save review"
+                return@launch
+            }
+
             loadBooks()
             loadAllReviews()
             onSuccess()

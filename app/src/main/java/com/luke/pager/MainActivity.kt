@@ -78,7 +78,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val auth = remember { FirebaseAuth.getInstance() }
-
             val authViewModel: AuthViewModel = viewModel()
 
             var uid by remember { mutableStateOf(auth.currentUser?.uid) }
@@ -118,18 +117,29 @@ class MainActivity : ComponentActivity() {
 
                     val coroutineScope = rememberCoroutineScope()
 
+                    // Default to SYSTEM until we hear otherwise
                     var themeMode by remember { mutableStateOf<ThemeMode?>(null) }
                     var syncOverCellular by remember { mutableStateOf(false) }
 
+                    // Optional: show a snackbar if settings fail to load
+                    val settingsLoadError = remember { mutableStateOf<String?>(null) }
+
                     LaunchedEffect(settingsRepository) {
-                        settingsRepository.themeModeFlow.collect { mode ->
-                            themeMode = mode
+                        settingsRepository.themeModeFlow.collect { res ->
+                            themeMode = res.getOrNull() ?: ThemeMode.SYSTEM
+                            res.exceptionOrNull()?.let { e ->
+                                settingsLoadError.value = e.message ?: "Failed to load theme setting"
+                            }
                         }
                     }
 
                     LaunchedEffect(settingsRepository) {
-                        settingsRepository.syncOverCellularFlow.collect { enabled ->
-                            syncOverCellular = enabled
+                        settingsRepository.syncOverCellularFlow.collect { res ->
+                            syncOverCellular = res.getOrNull() ?: false
+                            res.exceptionOrNull()?.let { e ->
+                                settingsLoadError.value =
+                                    e.message ?: "Failed to load sync setting"
+                            }
                         }
                     }
 
@@ -170,6 +180,8 @@ class MainActivity : ComponentActivity() {
                                     settingsRepository.setSyncOverCellular(enabled)
                                 }
                             },
+                            settingsLoadError = settingsLoadError.value,
+                            onSettingsLoadErrorShown = { settingsLoadError.value = null },
                         )
                     }
                 }
@@ -192,6 +204,8 @@ fun PagerAppUI(
     onThemeModeChange: (ThemeMode) -> Unit,
     syncOverCellular: Boolean,
     onSyncOverCellularChange: (Boolean) -> Unit,
+    settingsLoadError: String?,
+    onSettingsLoadErrorShown: () -> Unit,
 ) {
     val systemIsDark = isSystemInDarkTheme()
     val useDarkTheme =
@@ -234,6 +248,14 @@ fun PagerAppUI(
             }
 
             val isInitialLoading by bookViewModel.isInitialLoading.collectAsState()
+
+            // Show settings load error once
+            LaunchedEffect(settingsLoadError) {
+                if (!settingsLoadError.isNullOrBlank()) {
+                    snackbarHostState.showSnackbar(settingsLoadError)
+                    onSettingsLoadErrorShown()
+                }
+            }
 
             fun backgroundColorFor(
                 route: String?,

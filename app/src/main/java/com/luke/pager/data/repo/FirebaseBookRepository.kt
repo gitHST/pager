@@ -1,5 +1,6 @@
 package com.luke.pager.data.repo
 
+import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
@@ -13,37 +14,47 @@ class FirebaseBookRepository(
     uid: String,
     firestore: FirebaseFirestore = Firebase.firestore,
 ) : IBookRepository {
+
     private val booksCollection =
         firestore
             .collection("users")
             .document(uid)
             .collection("books")
 
-    override fun getAllBooks(): Flow<List<BookEntity>> =
+    override fun getAllBooks(): Flow<Result<List<BookEntity>>> =
         callbackFlow {
             val listener =
                 booksCollection.addSnapshotListener { snapshot, error ->
-                    if (error != null) return@addSnapshotListener
+                    if (error != null) {
+                        Log.w("FirebaseBookRepo", "Books listener error", error)
+                        trySend(Result.failure(error))
+                        return@addSnapshotListener
+                    }
 
                     val books =
                         snapshot?.documents?.mapNotNull { doc ->
                             doc.toBookEntityOrNull()
                         } ?: emptyList()
 
-                    trySend(books).isSuccess
+                    trySend(Result.success(books)).isSuccess
                 }
+
             awaitClose { listener.remove() }
         }
 
-    override suspend fun insertAndReturnId(book: BookEntity): String {
-        val docRef = booksCollection.document()
-        val id = docRef.id
+    override suspend fun insertAndReturnId(book: BookEntity): Result<String> {
+        return try {
+            val docRef = booksCollection.document()
+            val id = docRef.id
 
-        val bookToSave = book.copy(id = id)
+            val bookToSave = book.copy(id = id)
+            docRef.set(bookToSave.toFirestoreMap()).await()
 
-        docRef.set(bookToSave.toFirestoreMap()).await()
-
-        return id
+            Result.success(id)
+        } catch (e: Exception) {
+            Log.w("FirebaseBookRepo", "insertAndReturnId failed", e)
+            Result.failure(e)
+        }
     }
 
     private fun com.google.firebase.firestore.DocumentSnapshot.toBookEntityOrNull(): BookEntity? {

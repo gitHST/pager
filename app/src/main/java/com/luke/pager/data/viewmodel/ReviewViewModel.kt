@@ -16,20 +16,30 @@ class ReviewViewModel(
     private val _reviews = MutableStateFlow<List<ReviewEntity>>(emptyList())
     val reviews: StateFlow<List<ReviewEntity>> get() = _reviews
 
+    private val _lastError = MutableStateFlow<String?>(null)
+
     init {
         loadAllReviews()
     }
 
     fun loadAllReviews() {
         viewModelScope.launch {
-            _reviews.value = reviewRepository.getAllReviews()
+            reviewRepository.getAllReviews()
+                .onSuccess { list -> _reviews.value = list }
+                .onFailure { e ->
+                    _reviews.value = emptyList()
+                    _lastError.value = e.message ?: "Failed to load reviews"
+                }
         }
     }
 
     fun deleteReviewAndBookById(reviewId: String) {
         viewModelScope.launch {
-            reviewRepository.deleteReviewAndBookById(reviewId)
-
+            val res = reviewRepository.deleteReviewAndBookById(reviewId)
+            if (res.isFailure) {
+                _lastError.value = res.exceptionOrNull()?.message ?: "Failed to delete review"
+                return@launch
+            }
             loadAllReviews()
         }
     }
@@ -39,7 +49,11 @@ class ReviewViewModel(
         newText: String,
     ) {
         viewModelScope.launch {
-            reviewRepository.updateReviewText(reviewId, newText)
+            val res = reviewRepository.updateReviewText(reviewId, newText)
+            if (res.isFailure) {
+                _lastError.value = res.exceptionOrNull()?.message ?: "Failed to update review"
+                return@launch
+            }
             loadAllReviews()
         }
     }
@@ -49,7 +63,11 @@ class ReviewViewModel(
         newRating: Float,
     ) {
         viewModelScope.launch {
-            reviewRepository.updateReviewRating(reviewId, newRating)
+            val res = reviewRepository.updateReviewRating(reviewId, newRating)
+            if (res.isFailure) {
+                _lastError.value = res.exceptionOrNull()?.message ?: "Failed to update rating"
+                return@launch
+            }
             loadAllReviews()
         }
     }
@@ -59,7 +77,11 @@ class ReviewViewModel(
         privacy: Privacy,
     ) {
         viewModelScope.launch {
-            reviewRepository.updateReviewPrivacy(reviewId, privacy)
+            val res = reviewRepository.updateReviewPrivacy(reviewId, privacy)
+            if (res.isFailure) {
+                _lastError.value = res.exceptionOrNull()?.message ?: "Failed to update privacy"
+                return@launch
+            }
             loadAllReviews()
         }
     }

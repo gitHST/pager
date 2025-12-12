@@ -5,11 +5,11 @@ import com.luke.pager.ui.theme.ThemeMode
 import kotlinx.coroutines.flow.Flow
 
 interface IUserSettingsRepository {
-    val themeModeFlow: Flow<ThemeMode>
-    val defaultPrivacyFlow: Flow<Privacy>
-    val syncOverCellularFlow: Flow<Boolean>
+    val themeModeFlow: Flow<Result<ThemeMode>>
+    val defaultPrivacyFlow: Flow<Result<Privacy>>
+    val syncOverCellularFlow: Flow<Result<Boolean>>
 
-    suspend fun setThemeMode(mode: ThemeMode)
-    suspend fun setDefaultPrivacy(privacy: Privacy)
-    suspend fun setSyncOverCellular(enabled: Boolean)
+    suspend fun setThemeMode(mode: ThemeMode): Result<Unit>
+    suspend fun setDefaultPrivacy(privacy: Privacy): Result<Unit>
+    suspend fun setSyncOverCellular(enabled: Boolean): Result<Unit>
 }
