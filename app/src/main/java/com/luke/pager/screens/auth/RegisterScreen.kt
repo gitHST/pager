@@ -194,4 +194,3 @@ fun RegisterScreen(
         }
     }
 }
-

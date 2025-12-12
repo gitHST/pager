@@ -570,8 +570,9 @@ fun SettingsScreen(
             text = {
                 Column {
                     Text(
-                        text = "This will permanently delete your account, all your books, " +
-                            "quotes, reviews, and profile data. This cannot be undone.",
+                        text =
+                            "This will permanently delete your account, all your books, " +
+                                "quotes, reviews, and profile data. This cannot be undone.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground,
                     )

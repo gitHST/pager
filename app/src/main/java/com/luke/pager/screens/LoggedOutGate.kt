@@ -37,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -84,7 +85,10 @@ fun LoggedOutGate(authViewModel: AuthViewModel) {
         .collectAsState(initial = true)
 
     fun showSnackbar(msg: String) {
-        scope.launch { snackbarHostState.showSnackbar(msg) }
+        scope.launch {
+            if (snackbarHostState.currentSnackbarData != null) return@launch
+            snackbarHostState.showSnackbar(msg)
+        }
     }
 
     CompositionLocalProvider(LocalUseDarkTheme provides systemIsDark) {
@@ -165,6 +169,8 @@ private fun LoginScreen(
     val systemIsDark = isSystemInDarkTheme()
     val titleColor = if (systemIsDark) PagerTitleColorDark else PagerTitleColorLight
 
+    var googleSignInInProgress by rememberSaveable { mutableStateOf(false) }
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.TopCenter,
@@ -241,17 +247,24 @@ private fun LoginScreen(
 
                     val activity = LocalContext.current as Activity
                     IconButton(
+                        enabled = !googleSignInInProgress,
                         onClick = {
+                            if (googleSignInInProgress) return@IconButton
+
                             if (!isOnline) {
                                 onShowSnackbar("No internet connection")
                                 return@IconButton
                             }
 
+                            googleSignInInProgress = true
+
                             authViewModel.signInWithGoogle(
                                 activity = activity,
-                                onSuccess = {},
+                                onSuccess = {
+                                    googleSignInInProgress = false
+                                },
                                 onError = { msg ->
-                                    // Keep Google errors out of inline Register UI
+                                    googleSignInInProgress = false
                                     onShowSnackbar(mapAuthErrorToUserMessage(msg))
                                     authViewModel.clearError()
                                 },
