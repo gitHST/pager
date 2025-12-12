@@ -60,11 +60,10 @@ Pager is an all in one android app for browsing and reviewing books and sharing 
 | The ability to trim the selected text to your quote and edit it afterwards      | <img src="img/0.4.0/trimquote.png" alt="img_6.png" width="200"/>                                                                                                   |
 
 ### `Version 0.5.0 "Binding"`
-- General
-  - Tablet support
 - Firebase
   - Move db to firebase
-  - Users can use anon auth and later create an account
+  - The ability to login, log out, and delete all data
+  - The ability to be logged in and synced across multiple devices
 - Settings
   - Will add a settings page
   - The ability to set preferences
