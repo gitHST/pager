@@ -46,25 +46,20 @@ fun PagerNavHost(
     onThemeModeChange: (ThemeMode) -> Unit,
     syncOverCellular: Boolean,
     onSyncOverCellularChange: (Boolean) -> Unit,
+    onShowSnackbar: (String) -> Unit,
 ) {
     val topLevelRoutes = listOf("profile", "plus", "quotes", "diary")
-
     val currentRouteEntry by navController.currentBackStackEntryAsState()
 
     val activityOwner = LocalActivity.current as ViewModelStoreOwner
 
     val uiStateViewModel: QuoteUiStateViewModel =
-        viewModel(
-            viewModelStoreOwner = activityOwner,
-        )
+        viewModel(viewModelStoreOwner = activityOwner)
 
     val authViewModel: AuthViewModel =
-        viewModel(
-            viewModelStoreOwner = activityOwner,
-        )
+        viewModel(viewModelStoreOwner = activityOwner)
 
     val previousRoute = remember { mutableStateOf<String?>(null) }
-
     val coroutineScope = rememberCoroutineScope()
 
     val testMode = true
@@ -249,7 +244,6 @@ fun PagerNavHost(
 
         composable("review_screen/{reviewId}") { backStackEntry ->
             val reviewId = backStackEntry.arguments?.getString("reviewId") ?: ""
-
             val reviews by bookViewModel.allReviews.collectAsState()
 
             ReviewScreen(
@@ -281,6 +275,7 @@ fun PagerNavHost(
             RegisterScreen(
                 navController = navController,
                 authViewModel = authViewModel,
+                onShowSnackbar = onShowSnackbar,
             )
         }
     }
