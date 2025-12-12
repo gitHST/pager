@@ -12,7 +12,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
@@ -34,7 +33,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -212,8 +210,17 @@ fun PagerAppUI(
             val navController = rememberNavController()
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
+
             val snackbarHostState = remember { SnackbarHostState() }
             val snackbarScope = rememberCoroutineScope()
+
+            // ✅ Drop snackbar if one is already visible
+            val onShowSnackbarOnce: (String) -> Unit = { msg ->
+                snackbarScope.launch {
+                    if (snackbarHostState.currentSnackbarData != null) return@launch
+                    snackbarHostState.showSnackbar(msg)
+                }
+            }
 
             val hideBottomBarRoutes =
                 setOf(
@@ -329,9 +336,7 @@ fun PagerAppUI(
                             onThemeModeChange = onThemeModeChange,
                             syncOverCellular = syncOverCellular,
                             onSyncOverCellularChange = onSyncOverCellularChange,
-                            onShowSnackbar = { msg ->
-                                snackbarScope.launch { snackbarHostState.showSnackbar(msg) }
-                            },
+                            onShowSnackbar = onShowSnackbarOnce,
                         )
                     }
                 }
@@ -344,15 +349,7 @@ fun PagerAppUI(
                                 .background(Color(0x66000000)),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            CircularProgressIndicator()
-                        }
+                        CircularProgressIndicator()
                     }
                 }
             }

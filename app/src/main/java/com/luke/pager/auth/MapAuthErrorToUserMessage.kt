@@ -11,6 +11,9 @@ fun mapAuthErrorToUserMessage(raw: String?): String {
         "password" in msg && "incorrect" in msg ->
             "Incorrect email or password"
 
+        "sign-in fail" in msg ->
+            "Please try again"
+
         "no user record" in msg || "user not found" in msg ->
             "No account found with that email"
 
