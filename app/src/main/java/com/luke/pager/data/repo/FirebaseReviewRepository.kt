@@ -41,7 +41,6 @@ class FirebaseReviewRepository(
             val reviewToSave = review.copy(id = id)
             docRef.set(reviewToSave.toFirestoreMap()).await()
 
-            // Best-effort global mirror
             reviewToSave.bookKey?.let { bookKey ->
                 val safeBookId = bookKey.toFirestoreSafeId()
                 val globalReviewRef =
@@ -82,7 +81,6 @@ class FirebaseReviewRepository(
 
             reviewsCollection.document(reviewId).delete().await()
 
-            // Best-effort global mirror delete
             if (bookKey != null) {
                 val safeBookId = bookKey.toFirestoreSafeId()
                 try {
@@ -134,7 +132,6 @@ class FirebaseReviewRepository(
                 .update("review_text", newText)
                 .await()
 
-            // Best-effort global mirror update
             val reviewDoc = reviewsCollection.document(reviewId).get().await()
             val bookKey = reviewDoc.getString("book_key")
             if (bookKey != null) {

@@ -15,7 +15,7 @@ import kotlinx.coroutines.tasks.await
 
 class FirebaseUserSettingsRepository(
     uid: String,
-    firestore: FirebaseFirestore = Firebase.firestore
+    firestore: FirebaseFirestore = Firebase.firestore,
 ) : IUserSettingsRepository {
 
     private val settingsDocument: DocumentReference =
@@ -36,9 +36,9 @@ class FirebaseUserSettingsRepository(
                 val mode =
                     if (snapshot != null && snapshot.exists()) {
                         val modeString = snapshot.getString("theme_mode")
-                        modeString?.toThemeModeOrNull() ?: ThemeMode.SYSTEM
+                        modeString?.toThemeModeOrNull() ?: ThemeMode.LIGHT
                     } else {
-                        ThemeMode.SYSTEM
+                        ThemeMode.LIGHT
                     }
 
                 trySend(Result.success(mode))
@@ -81,9 +81,9 @@ class FirebaseUserSettingsRepository(
 
                 val value =
                     if (snapshot != null && snapshot.exists()) {
-                        snapshot.getBoolean("sync_over_cellular") ?: false
+                        snapshot.getBoolean("sync_over_cellular") ?: true
                     } else {
-                        false
+                        true
                     }
 
                 trySend(Result.success(value))
@@ -97,7 +97,7 @@ class FirebaseUserSettingsRepository(
             settingsDocument
                 .set(
                     mapOf("theme_mode" to mode.name),
-                    SetOptions.merge()
+                    SetOptions.merge(),
                 )
                 .await()
             Result.success(Unit)
@@ -112,7 +112,7 @@ class FirebaseUserSettingsRepository(
             settingsDocument
                 .set(
                     mapOf("default_privacy" to privacy.name),
-                    SetOptions.merge()
+                    SetOptions.merge(),
                 )
                 .await()
             Result.success(Unit)
@@ -127,7 +127,7 @@ class FirebaseUserSettingsRepository(
             settingsDocument
                 .set(
                     mapOf("sync_over_cellular" to enabled),
-                    SetOptions.merge()
+                    SetOptions.merge(),
                 )
                 .await()
             Result.success(Unit)
