@@ -84,9 +84,10 @@ fun ProfileScreen(
     val context = LocalContext.current
     val firebaseUser = Firebase.auth.currentUser
 
-    val initialProfilePhotoUri: Uri? = remember(firebaseUser?.uid) {
-        authViewModel.getOfflineFirstProfilePhotoUri(context)
-    }
+    val initialProfilePhotoUri: Uri? =
+        remember(firebaseUser?.uid) {
+            authViewModel.getOfflineFirstProfilePhotoUri(context)
+        }
 
     var nameInput by remember(firebaseUser?.uid) {
         mutableStateOf(authViewModel.getOfflineFirstDisplayName(context))
@@ -124,7 +125,6 @@ fun ProfileScreen(
     val isOnline by onlineStatusFlow(context, intervalMs = 10_000L)
         .collectAsState(initial = false)
 
-
     // 1) When auth state changes, always reset/load from local cache immediately
     LaunchedEffect(isLoggedIn, firebaseUser?.uid) {
         val uid = firebaseUser?.uid
@@ -149,7 +149,8 @@ fun ProfileScreen(
         if (!isLoggedIn) return@LaunchedEffect
         if (isEditing || showPfpModal || tempPhotoUri != null) return@LaunchedEffect
 
-        authViewModel.refreshProfileFromFirestore(context)
+        authViewModel
+            .refreshProfileFromFirestore(context)
             .onSuccess { updated ->
                 // display name
                 updated.displayName?.trim()?.takeIf { it.isNotBlank() }?.let { remoteName ->
@@ -253,7 +254,7 @@ fun ProfileScreen(
                         .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center,
             ) {
-                val model = profilePhotoUri?.let { uri -> "${uri}?v=$profilePhotoVersion" }
+                val model = profilePhotoUri?.let { uri -> "$uri?v=$profilePhotoVersion" }
                 val painter = rememberAsyncImagePainter(model = model)
 
                 val showPlaceholder =

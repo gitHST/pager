@@ -52,8 +52,7 @@ class BookViewModel(
                 result
                     .onSuccess { books ->
                         _books.value = books
-                    }
-                    .onFailure { e ->
+                    }.onFailure { e ->
                         _books.value = emptyList()
                         _lastError.value = e.message ?: "Failed to load books"
                     }
@@ -65,11 +64,11 @@ class BookViewModel(
 
     fun loadAllReviews() {
         viewModelScope.launch {
-            reviewRepository.getAllReviews()
+            reviewRepository
+                .getAllReviews()
                 .onSuccess { reviews ->
                     _allReviews.value = reviews.associateBy { it.id }
-                }
-                .onFailure { e ->
+                }.onFailure { e ->
                     _allReviews.value = emptyMap()
                     _lastError.value = e.message ?: "Failed to load reviews"
                 }
@@ -96,10 +95,11 @@ class BookViewModel(
                 )
 
             val bookIdResult = bookRepository.insertAndReturnId(book)
-            val bookId = bookIdResult.getOrElse { e ->
-                _lastError.value = e.message ?: "Failed to save book"
-                return@launch
-            }
+            val bookId =
+                bookIdResult.getOrElse { e ->
+                    _lastError.value = e.message ?: "Failed to save book"
+                    return@launch
+                }
 
             val sanitizedReviewText = reviewText.takeIf { it.isNotBlank() }
 

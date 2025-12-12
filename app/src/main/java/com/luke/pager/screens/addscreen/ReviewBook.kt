@@ -49,9 +49,10 @@ fun ReviewBook(
     containerHeight: Int,
     onSnackbar: (String) -> Unit,
 ) {
-    val settingsRepository = remember(AuthManager.uid) {
-        FirebaseUserSettingsRepository(AuthManager.uid)
-    }
+    val settingsRepository =
+        remember(AuthManager.uid) {
+            FirebaseUserSettingsRepository(AuthManager.uid)
+        }
     val coroutineScope = rememberCoroutineScope()
 
     val defaultPrivacyResult by settingsRepository

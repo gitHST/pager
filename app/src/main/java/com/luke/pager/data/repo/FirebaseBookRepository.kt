@@ -14,7 +14,6 @@ class FirebaseBookRepository(
     uid: String,
     firestore: FirebaseFirestore = Firebase.firestore,
 ) : IBookRepository {
-
     private val booksCollection =
         firestore
             .collection("users")
@@ -42,8 +41,8 @@ class FirebaseBookRepository(
             awaitClose { listener.remove() }
         }
 
-    override suspend fun insertAndReturnId(book: BookEntity): Result<String> {
-        return try {
+    override suspend fun insertAndReturnId(book: BookEntity): Result<String> =
+        try {
             val docRef = booksCollection.document()
             val id = docRef.id
 
@@ -55,7 +54,6 @@ class FirebaseBookRepository(
             Log.w("FirebaseBookRepo", "insertAndReturnId failed", e)
             Result.failure(e)
         }
-    }
 
     private fun com.google.firebase.firestore.DocumentSnapshot.toBookEntityOrNull(): BookEntity? {
         val id = this.id

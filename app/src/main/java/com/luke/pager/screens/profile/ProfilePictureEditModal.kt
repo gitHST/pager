@@ -48,7 +48,6 @@ import kotlinx.coroutines.delay
 import kotlin.math.max
 import kotlin.math.min
 
-
 @Composable
 fun ProfilePictureEditModal(
     visible: Boolean,
@@ -64,7 +63,6 @@ fun ProfilePictureEditModal(
     var containerSize by remember(visible) { mutableStateOf(IntSize.Zero) }
     var initializedFromFraction by remember(visible) { mutableStateOf(false) }
     var interactionTick by remember(visible) { mutableIntStateOf(0) }
-
 
     var isInteracting by remember(visible) { mutableStateOf(false) }
     val overlayAlpha by animateFloatAsState(
@@ -85,7 +83,10 @@ fun ProfilePictureEditModal(
         return max(cw / iw, ch / ih)
     }
 
-    fun clampOffset(raw: Offset, scale: Float): Offset {
+    fun clampOffset(
+        raw: Offset,
+        scale: Float,
+    ): Offset {
         val cw = containerSize.width.toFloat()
         val ch = containerSize.height.toFloat()
         val iw = imageSize.width.toFloat()
@@ -112,13 +113,14 @@ fun ProfilePictureEditModal(
         val height = containerSize.height.toFloat()
 
         if (visible && !initializedFromFraction && width > 0f && height > 0f) {
-            offsetPx = clampOffset(
-                Offset(
-                    x = offsetFraction.x * width,
-                    y = offsetFraction.y * height,
-                ),
-                zoom,
-            )
+            offsetPx =
+                clampOffset(
+                    Offset(
+                        x = offsetFraction.x * width,
+                        y = offsetFraction.y * height,
+                    ),
+                    zoom,
+                )
             initializedFromFraction = true
         }
     }
@@ -169,7 +171,7 @@ fun ProfilePictureEditModal(
                                         offsetPx = clampOffset(newOffset, newZoom)
                                     }
                                 },
-                                contentAlignment = Alignment.Center,
+                        contentAlignment = Alignment.Center,
                     ) {
                         Box(
                             modifier =
@@ -291,14 +293,15 @@ fun ProfilePictureEditModal(
                         val width = containerSize.width.toFloat().coerceAtLeast(1f)
                         val height = containerSize.height.toFloat().coerceAtLeast(1f)
 
-                        val newFraction = if (width > 0f && height > 0f) {
-                            Offset(
-                                x = offsetPx.x / width,
-                                y = offsetPx.y / height,
-                            )
-                        } else {
-                            offsetFraction
-                        }
+                        val newFraction =
+                            if (width > 0f && height > 0f) {
+                                Offset(
+                                    x = offsetPx.x / width,
+                                    y = offsetPx.y / height,
+                                )
+                            } else {
+                                offsetFraction
+                            }
 
                         offsetFraction = newFraction
                         onSave(imageUri, zoom, newFraction, containerSize, offsetPx)

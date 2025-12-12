@@ -43,7 +43,6 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 
 class AuthViewModel : ViewModel() {
-
     private val firebaseAuth = Firebase.auth
 
     private val _isLoggedIn =
@@ -127,28 +126,31 @@ class AuthViewModel : ViewModel() {
                 val credentialManager = CredentialManager.create(activity)
 
                 val googleIdOption =
-                    GetGoogleIdOption.Builder()
+                    GetGoogleIdOption
+                        .Builder()
                         .setServerClientId(serverClientId)
                         .setFilterByAuthorizedAccounts(false)
                         .setAutoSelectEnabled(false)
                         .build()
 
                 val request =
-                    GetCredentialRequest.Builder()
+                    GetCredentialRequest
+                        .Builder()
                         .addCredentialOption(googleIdOption)
                         .build()
 
-                val result = try {
-                    credentialManager.getCredential(
-                        context = activity,
-                        request = request,
-                    )
-                } catch (e: GetCredentialException) {
-                    val msg = "Google sign-in failed: ${e.type}"
-                    _authError.value = msg
-                    onError(msg)
-                    return@launch
-                }
+                val result =
+                    try {
+                        credentialManager.getCredential(
+                            context = activity,
+                            request = request,
+                        )
+                    } catch (e: GetCredentialException) {
+                        val msg = "Google sign-in failed: ${e.type}"
+                        _authError.value = msg
+                        onError(msg)
+                        return@launch
+                    }
 
                 val googleIdToken = extractGoogleIdToken(result.credential)
                 if (googleIdToken.isNullOrBlank()) {
@@ -164,9 +166,10 @@ class AuthViewModel : ViewModel() {
                 val isNewUser = authResult.additionalUserInfo?.isNewUser == true
 
                 if (isNewUser) {
-                    firebaseAuth.currentUser?.updateProfile(
-                        userProfileChangeRequest { photoUri = null }
-                    )?.await()
+                    firebaseAuth.currentUser
+                        ?.updateProfile(
+                            userProfileChangeRequest { photoUri = null },
+                        )?.await()
                 }
 
                 _isLoggedIn.value = firebaseAuth.currentUser?.isAnonymous == false
@@ -179,9 +182,8 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-
-    private fun extractGoogleIdToken(credential: androidx.credentials.Credential): String? {
-        return try {
+    private fun extractGoogleIdToken(credential: androidx.credentials.Credential): String? =
+        try {
             if (credential is CustomCredential &&
                 credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
             ) {
@@ -192,7 +194,6 @@ class AuthViewModel : ViewModel() {
         } catch (_: GoogleIdTokenParsingException) {
             null
         }
-    }
 
     fun updateDisplayName(
         context: Context,
@@ -299,10 +300,8 @@ class AuthViewModel : ViewModel() {
             .set(
                 mapOf("display_name" to trimmed),
                 SetOptions.merge(),
-            )
-            .await()
+            ).await()
     }
-
 
     fun logout(context: Context) {
         val uid = firebaseAuth.currentUser?.uid
@@ -317,7 +316,6 @@ class AuthViewModel : ViewModel() {
         _isLoggedIn.value = false
         _authError.value = null
     }
-
 
     fun deleteAccountAndData(
         context: Context,
@@ -352,7 +350,11 @@ class AuthViewModel : ViewModel() {
                 deleteSubcollection("quotes")
                 deleteSubcollection("settings")
 
-                firestore.collection("users").document(uid).delete().await()
+                firestore
+                    .collection("users")
+                    .document(uid)
+                    .delete()
+                    .await()
 
                 val userStorageRef = storage.reference.child("users/$uid")
                 try {
@@ -395,11 +397,10 @@ class AuthViewModel : ViewModel() {
         val profilePhotoUri: String?,
     )
 
-    suspend fun refreshProfileFromFirestore(
-        context: Context,
-    ): Result<RemoteProfileUpdate> {
-        val user = firebaseAuth.currentUser
-            ?: return Result.failure(IllegalStateException("No user logged in"))
+    suspend fun refreshProfileFromFirestore(context: Context): Result<RemoteProfileUpdate> {
+        val user =
+            firebaseAuth.currentUser
+                ?: return Result.failure(IllegalStateException("No user logged in"))
 
         val uid = user.uid
 
@@ -424,9 +425,13 @@ class AuthViewModel : ViewModel() {
             // cache photo to the same local file your offline-first getter uses
             if (!remotePhotoUrl.isNullOrBlank()) {
                 runCatching {
-                    val bytes = withContext(Dispatchers.IO) {
-                        java.net.URL(remotePhotoUrl).openStream().use { it.readBytes() }
-                    }
+                    val bytes =
+                        withContext(Dispatchers.IO) {
+                            java.net
+                                .URL(remotePhotoUrl)
+                                .openStream()
+                                .use { it.readBytes() }
+                        }
                     withContext(Dispatchers.IO) {
                         val file = profilePhotoFile(context, uid)
                         file.outputStream().use { it.write(bytes) }
@@ -464,20 +469,22 @@ class AuthViewModel : ViewModel() {
                 _authError.value = null
                 val uid = user.uid
 
-                val bytes = cropAndCompressProfileImage(
-                    context = context,
-                    imageUri = imageUri,
-                    zoom = zoom,
-                    containerSize = containerSize,
-                    offsetPx = offsetPx,
-                )
+                val bytes =
+                    cropAndCompressProfileImage(
+                        context = context,
+                        imageUri = imageUri,
+                        zoom = zoom,
+                        containerSize = containerSize,
+                        offsetPx = offsetPx,
+                    )
 
-                val localUriString = withContext(Dispatchers.IO) {
-                    val file = profilePhotoFile(context, uid)
-                    file.outputStream().use { it.write(bytes) }
-                    setProfilePhotoPending(context, uid, true)
-                    Uri.fromFile(file).toString()
-                }
+                val localUriString =
+                    withContext(Dispatchers.IO) {
+                        val file = profilePhotoFile(context, uid)
+                        file.outputStream().use { it.write(bytes) }
+                        setProfilePhotoPending(context, uid, true)
+                        Uri.fromFile(file).toString()
+                    }
 
                 _isLoggedIn.value = true
                 onSuccess(localUriString)
@@ -534,9 +541,10 @@ class AuthViewModel : ViewModel() {
             }
 
             try {
-                val bytes = withContext(Dispatchers.IO) {
-                    file.readBytes()
-                }
+                val bytes =
+                    withContext(Dispatchers.IO) {
+                        file.readBytes()
+                    }
 
                 uploadProfilePhotoToFirebase(
                     context = context,
@@ -560,13 +568,14 @@ class AuthViewModel : ViewModel() {
     ) {
         val firestore = Firebase.firestore
 
-        val settingsDoc = firestore
-            .collection("users")
-            .document(uid)
-            .collection("settings")
-            .document("app")
-            .get()
-            .await()
+        val settingsDoc =
+            firestore
+                .collection("users")
+                .document(uid)
+                .collection("settings")
+                .document("app")
+                .get()
+                .await()
 
         val allowCellular =
             settingsDoc.getBoolean("sync_over_cellular") ?: false
@@ -585,9 +594,10 @@ class AuthViewModel : ViewModel() {
         val downloadUri = storageRef.downloadUrl.await()
 
         val user = firebaseAuth.currentUser ?: return
-        val profileUpdates = userProfileChangeRequest {
-            photoUri = downloadUri
-        }
+        val profileUpdates =
+            userProfileChangeRequest {
+                photoUri = downloadUri
+            }
         user.updateProfile(profileUpdates).await()
 
         firestore
@@ -598,8 +608,7 @@ class AuthViewModel : ViewModel() {
             .set(
                 mapOf("profile_photo_url" to downloadUri.toString()),
                 SetOptions.merge(),
-            )
-            .await()
+            ).await()
 
         setProfilePhotoPending(context, uid, false)
     }
@@ -630,23 +639,24 @@ class AuthViewModel : ViewModel() {
 
                 val baseScale = maxOf(containerWidth / bw, containerHeight / bh)
 
-                val matrix = Matrix().apply {
-                    postScale(baseScale, baseScale)
-                    val dx = (containerWidth - bw * baseScale) / 2f
-                    val dy = (containerHeight - bh * baseScale) / 2f
-                    postTranslate(dx, dy)
+                val matrix =
+                    Matrix().apply {
+                        postScale(baseScale, baseScale)
+                        val dx = (containerWidth - bw * baseScale) / 2f
+                        val dy = (containerHeight - bh * baseScale) / 2f
+                        postTranslate(dx, dy)
 
-                    val cx = containerWidth / 2f
-                    val cy = containerHeight / 2f
-                    postTranslate(-cx, -cy)
-                    postScale(zoom, zoom)
-                    postTranslate(cx, cy)
+                        val cx = containerWidth / 2f
+                        val cy = containerHeight / 2f
+                        postTranslate(-cx, -cy)
+                        postScale(zoom, zoom)
+                        postTranslate(cx, cy)
 
-                    postTranslate(offsetPx.x, offsetPx.y)
+                        postTranslate(offsetPx.x, offsetPx.y)
 
-                    val destScale = outSize.toFloat() / containerWidth
-                    postScale(destScale, destScale)
-                }
+                        val destScale = outSize.toFloat() / containerWidth
+                        postScale(destScale, destScale)
+                    }
 
                 val output = createBitmap(outSize, outSize)
                 val canvas = Canvas(output)
@@ -662,25 +672,31 @@ class AuthViewModel : ViewModel() {
             }
         }
 
+    private fun profilePhotoFile(
+        context: Context,
+        uid: String,
+    ): File = File(context.filesDir, "profile_photo_$uid.jpg")
 
-    private fun profilePhotoFile(context: Context, uid: String): File =
-        File(context.filesDir, "profile_photo_${uid}.jpg")
+    private fun profilePhotoPrefs(context: Context) = context.getSharedPreferences("profile_photo_prefs", Context.MODE_PRIVATE)
 
-    private fun profilePhotoPrefs(context: Context) =
-        context.getSharedPreferences("profile_photo_prefs", Context.MODE_PRIVATE)
-
-    private fun setProfilePhotoPending(context: Context, uid: String, pending: Boolean) {
+    private fun setProfilePhotoPending(
+        context: Context,
+        uid: String,
+        pending: Boolean,
+    ) {
         profilePhotoPrefs(context).edit {
             putBoolean("profile_photo_pending_$uid", pending)
         }
     }
 
-    private fun isProfilePhotoPending(context: Context, uid: String): Boolean =
+    private fun isProfilePhotoPending(
+        context: Context,
+        uid: String,
+    ): Boolean =
         profilePhotoPrefs(context)
             .getBoolean("profile_photo_pending_$uid", false)
 
-    private fun namePrefs(context: Context) =
-        context.getSharedPreferences("profile_name_prefs", Context.MODE_PRIVATE)
+    private fun namePrefs(context: Context) = context.getSharedPreferences("profile_name_prefs", Context.MODE_PRIVATE)
 
     private fun cacheDisplayName(
         context: Context,
@@ -701,14 +717,12 @@ class AuthViewModel : ViewModel() {
     private fun getCachedDisplayName(
         context: Context,
         uid: String,
-    ): String? =
-        namePrefs(context).getString("display_name_$uid", null)
+    ): String? = namePrefs(context).getString("display_name_$uid", null)
 
     private fun isDisplayNamePending(
         context: Context,
         uid: String,
-    ): Boolean =
-        namePrefs(context).getBoolean("display_name_pending_$uid", false)
+    ): Boolean = namePrefs(context).getBoolean("display_name_pending_$uid", false)
 
     private fun clearLocalIdentityCache(
         context: Context,
@@ -765,28 +779,31 @@ class AuthViewModel : ViewModel() {
                 val credentialManager = CredentialManager.create(activity)
 
                 val googleIdOption =
-                    GetGoogleIdOption.Builder()
+                    GetGoogleIdOption
+                        .Builder()
                         .setServerClientId(serverClientId)
                         .setFilterByAuthorizedAccounts(false)
                         .setAutoSelectEnabled(false)
                         .build()
 
                 val request =
-                    GetCredentialRequest.Builder()
+                    GetCredentialRequest
+                        .Builder()
                         .addCredentialOption(googleIdOption)
                         .build()
 
-                val result = try {
-                    credentialManager.getCredential(
-                        context = activity,
-                        request = request,
-                    )
-                } catch (e: GetCredentialException) {
-                    val msg = "Google re-auth failed: ${e.type}"
-                    _authError.value = msg
-                    onError(msg)
-                    return@launch
-                }
+                val result =
+                    try {
+                        credentialManager.getCredential(
+                            context = activity,
+                            request = request,
+                        )
+                    } catch (e: GetCredentialException) {
+                        val msg = "Google re-auth failed: ${e.type}"
+                        _authError.value = msg
+                        onError(msg)
+                        return@launch
+                    }
 
                 val googleIdToken = extractGoogleIdToken(result.credential)
                 if (googleIdToken.isNullOrBlank()) {
@@ -805,5 +822,4 @@ class AuthViewModel : ViewModel() {
             }
         }
     }
-
 }

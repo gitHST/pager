@@ -12,7 +12,6 @@ import kotlinx.coroutines.launch
 class ReviewViewModel(
     private val reviewRepository: IReviewRepository,
 ) : ViewModel() {
-
     private val _reviews = MutableStateFlow<List<ReviewEntity>>(emptyList())
     val reviews: StateFlow<List<ReviewEntity>> get() = _reviews
 
@@ -24,7 +23,8 @@ class ReviewViewModel(
 
     fun loadAllReviews() {
         viewModelScope.launch {
-            reviewRepository.getAllReviews()
+            reviewRepository
+                .getAllReviews()
                 .onSuccess { list -> _reviews.value = list }
                 .onFailure { e ->
                     _reviews.value = emptyList()
