@@ -130,13 +130,6 @@ fun ProfileScreen(
         if (nameInput.isBlank()) fadedColor
         else MaterialTheme.colorScheme.onBackground
 
-    /**
-     * Offline-first: always render cached/local immediately (your current behavior),
-     * then also pull the latest profile photo URL from Firestore and replace if present.
-     *
-     * Keys include edit/modal flags so when you close the crop modal or stop editing,
-     * we re-check Firestore and pull the newest value.
-     */
     LaunchedEffect(isLoggedIn, firebaseUser?.uid, isEditing, showPfpModal) {
         val uid = firebaseUser?.uid
 
@@ -148,23 +141,19 @@ fun ProfileScreen(
             return@LaunchedEffect
         }
 
-        // Local/cache first (existing behavior)
         nameInput = authViewModel.getOfflineFirstDisplayName(context)
         profilePhotoUri = authViewModel.getOfflineFirstProfilePhotoUri(context)
         profilePhotoZoom = 1f
         profilePhotoOffsetFraction = Offset.Zero
 
-        // Don't override while user is actively editing / crop modal is open
         if (isEditing || showPfpModal || tempPhotoUri != null) return@LaunchedEffect
 
-        // Pull latest from Firestore and replace (and cache it locally)
         val updated = fetchAndCacheProfilePhotoFromFirestore(
             context = context,
             uid = uid,
         )
 
         if (updated != null) {
-            // Only bump version if we're actually changing the displayed URI
             if (profilePhotoUri?.toString() != updated.toString()) {
                 profilePhotoUri = updated
                 profilePhotoVersion++
@@ -446,11 +435,6 @@ fun ProfileScreen(
 private fun profilePhotoFile(context: android.content.Context, uid: String): File =
     File(context.filesDir, "profile_photo_${uid}.jpg")
 
-/**
- * Reads users/{uid}/settings/app.profile_photo_url from Firestore.
- * If present, downloads it and caches to the same local file you already use,
- * then returns a file:// Uri so the UI stays offline-first next time too.
- */
 private suspend fun fetchAndCacheProfilePhotoFromFirestore(
     context: android.content.Context,
     uid: String,
