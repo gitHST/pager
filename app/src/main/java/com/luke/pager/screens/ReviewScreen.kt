@@ -1,6 +1,5 @@
 package com.luke.pager.screens
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -81,8 +80,7 @@ fun ReviewScreen(
     Box(
         modifier =
             Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
+                .fillMaxSize(),
     ) {
         Column(
             modifier =
