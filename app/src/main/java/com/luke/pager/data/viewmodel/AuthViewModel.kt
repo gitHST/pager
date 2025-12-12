@@ -23,6 +23,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.google.firebase.Firebase
 import com.google.firebase.auth.EmailAuthProvider
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
 import com.google.firebase.auth.userProfileChangeRequest
@@ -308,6 +309,7 @@ class AuthViewModel : ViewModel() {
         context: Context,
         onSuccess: () -> Unit = {},
         onError: (String) -> Unit = {},
+        onReauthRequired: () -> Unit = {},
     ) {
         val user = firebaseAuth.currentUser
         if (user == null) {
@@ -341,14 +343,10 @@ class AuthViewModel : ViewModel() {
                 val userStorageRef = storage.reference.child("users/$uid")
                 try {
                     val listResult = userStorageRef.listAll().await()
-                    for (item in listResult.items) {
-                        item.delete().await()
-                    }
+                    for (item in listResult.items) item.delete().await()
                     for (prefix in listResult.prefixes) {
                         val subList = prefix.listAll().await()
-                        for (subItem in subList.items) {
-                            subItem.delete().await()
-                        }
+                        for (subItem in subList.items) subItem.delete().await()
                     }
                 } catch (_: Exception) {
                 }
@@ -357,10 +355,12 @@ class AuthViewModel : ViewModel() {
 
                 try {
                     user.delete().await()
+                } catch (e: FirebaseAuthRecentLoginRequiredException) {
+                    onReauthRequired()
+                    return@launch
                 } catch (e: Exception) {
                     val msg =
-                        e.message
-                            ?: "Failed to delete account. You may need to re-login before deletion."
+                        e.message ?: "Failed to delete account. Re-authentication may be required."
                     _authError.value = msg
                     onError(msg)
                     return@launch
@@ -375,6 +375,7 @@ class AuthViewModel : ViewModel() {
             }
         }
     }
+
 
     fun updateProfilePhoto(
         context: Context,
@@ -660,4 +661,82 @@ class AuthViewModel : ViewModel() {
             remove("profile_photo_pending_$uid")
         }
     }
+
+    fun reauthenticateWithPassword(
+        email: String,
+        password: String,
+        onSuccess: () -> Unit = {},
+        onError: (String) -> Unit = {},
+    ) {
+        val user = firebaseAuth.currentUser
+        if (user == null) {
+            onError("Not logged in")
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                val credential = EmailAuthProvider.getCredential(email.trim(), password)
+                user.reauthenticate(credential).await()
+                onSuccess()
+            } catch (e: Exception) {
+                onError(e.message ?: "Re-authentication failed")
+            }
+        }
+    }
+
+    fun reauthenticateWithGoogle(
+        activity: Activity,
+        onSuccess: () -> Unit = {},
+        onError: (String) -> Unit = {},
+    ) {
+        viewModelScope.launch {
+            try {
+                _authError.value = null
+
+                val serverClientId = activity.getString(R.string.default_web_client_id)
+                val credentialManager = CredentialManager.create(activity)
+
+                val googleIdOption =
+                    GetGoogleIdOption.Builder()
+                        .setServerClientId(serverClientId)
+                        .setFilterByAuthorizedAccounts(false)
+                        .setAutoSelectEnabled(false)
+                        .build()
+
+                val request =
+                    GetCredentialRequest.Builder()
+                        .addCredentialOption(googleIdOption)
+                        .build()
+
+                val result = try {
+                    credentialManager.getCredential(
+                        context = activity,
+                        request = request,
+                    )
+                } catch (e: GetCredentialException) {
+                    val msg = "Google re-auth failed: ${e.type}"
+                    _authError.value = msg
+                    onError(msg)
+                    return@launch
+                }
+
+                val googleIdToken = extractGoogleIdToken(result.credential)
+                if (googleIdToken.isNullOrBlank()) {
+                    val msg = "Google re-auth failed (no ID token)"
+                    _authError.value = msg
+                    onError(msg)
+                    return@launch
+                }
+
+                val firebaseCredential = GoogleAuthProvider.getCredential(googleIdToken, null)
+                firebaseAuth.currentUser?.reauthenticate(firebaseCredential)?.await()
+
+                onSuccess()
+            } catch (e: Exception) {
+                onError(e.message ?: "Google re-authentication failed")
+            }
+        }
+    }
+
 }

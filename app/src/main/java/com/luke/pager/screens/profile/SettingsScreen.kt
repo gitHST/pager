@@ -1,5 +1,6 @@
 package com.luke.pager.screens.profile
 
+import android.app.Activity
 import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -39,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -94,6 +96,10 @@ fun SettingsScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var isDeleting by remember { mutableStateOf(false) }
     var deleteError by remember { mutableStateOf<String?>(null) }
+    var showReauthDialog by remember { mutableStateOf(false) }
+    var reauthPassword by remember { mutableStateOf("") }
+    var reauthError by remember { mutableStateOf<String?>(null) }
+
 
     fun startExport(toEmail: String) {
         coroutineScope.launch {
@@ -411,6 +417,116 @@ fun SettingsScreen(
         )
     }
 
+    if (showReauthDialog) {
+        val user = firebaseUser
+        val isPasswordUser = user?.providerData?.any { it.providerId == "password" } == true
+        val activity = (LocalContext.current as? Activity)
+
+        AlertDialog(
+            onDismissRequest = {
+                if (!isDeleting) {
+                    showReauthDialog = false
+                    reauthPassword = ""
+                    reauthError = null
+                }
+            },
+            title = { Text("Confirm identity") },
+            text = {
+                Column {
+                    Text(
+                        text = "For security, please re-authenticate to delete your account.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    if (isPasswordUser) {
+                        OutlinedTextField(
+                            value = reauthPassword,
+                            onValueChange = {
+                                reauthPassword = it
+                                reauthError = null
+                            },
+                            label = { Text("Password") },
+                            singleLine = true,
+                            visualTransformation = PasswordVisualTransformation(),
+                        )
+                    } else {
+                        Text(
+                            text = "Continue with Google to confirm.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                    }
+
+                    if (reauthError != null) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = reauthError!!,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val current = user ?: return@TextButton
+                        reauthError = null
+
+                        if (isPasswordUser) {
+                            val email = current.email.orEmpty()
+                            if (email.isBlank() || reauthPassword.isBlank()) {
+                                reauthError = "Enter your password"
+                                return@TextButton
+                            }
+
+                            authViewModel.reauthenticateWithPassword(
+                                email = email,
+                                password = reauthPassword,
+                                onSuccess = {
+                                    showReauthDialog = false
+                                    showDeleteDialog = true // reopen delete confirm
+                                },
+                                onError = { msg -> reauthError = msg },
+                            )
+                        } else {
+                            if (activity == null) {
+                                reauthError = "No Activity available for Google re-auth"
+                                return@TextButton
+                            }
+
+                            authViewModel.reauthenticateWithGoogle(
+                                activity = activity,
+                                onSuccess = {
+                                    showReauthDialog = false
+                                    showDeleteDialog = true
+                                },
+                                onError = { msg -> reauthError = msg },
+                            )
+                        }
+                    },
+                ) {
+                    Text(if (isPasswordUser) "Confirm" else "Continue")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showReauthDialog = false
+                        reauthPassword = ""
+                        reauthError = null
+                    },
+                ) {
+                    Text("Cancel")
+                }
+            },
+        )
+    }
+
+
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = {
@@ -450,6 +566,10 @@ fun SettingsScreen(
                                 onError = { msg ->
                                     isDeleting = false
                                     deleteError = msg
+                                },
+                                onReauthRequired = {
+                                    isDeleting = false
+                                    showReauthDialog = true
                                 },
                             )
                         }
