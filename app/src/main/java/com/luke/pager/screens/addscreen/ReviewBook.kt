@@ -49,7 +49,6 @@ fun ReviewBook(
     containerHeight: Int,
     onSnackbar: (String) -> Unit,
 ) {
-    // Re-create if uid changes (logout/login)
     val settingsRepository = remember(AuthManager.uid) {
         FirebaseUserSettingsRepository(AuthManager.uid)
     }
@@ -61,7 +60,6 @@ fun ReviewBook(
 
     val defaultPrivacy = defaultPrivacyResult.getOrNull() ?: Privacy.PUBLIC
 
-    // Show load error (if any)
     LaunchedEffect(defaultPrivacyResult) {
         defaultPrivacyResult.exceptionOrNull()?.let { e ->
             onSnackbar(e.message ?: "Failed to load default privacy")

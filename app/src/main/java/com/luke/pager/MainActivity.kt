@@ -117,11 +117,9 @@ class MainActivity : ComponentActivity() {
 
                     val coroutineScope = rememberCoroutineScope()
 
-                    // Default to SYSTEM until we hear otherwise
                     var themeMode by remember { mutableStateOf<ThemeMode?>(null) }
                     var syncOverCellular by remember { mutableStateOf(false) }
 
-                    // Optional: show a snackbar if settings fail to load
                     val settingsLoadError = remember { mutableStateOf<String?>(null) }
 
                     LaunchedEffect(settingsRepository) {
@@ -249,7 +247,6 @@ fun PagerAppUI(
 
             val isInitialLoading by bookViewModel.isInitialLoading.collectAsState()
 
-            // Show settings load error once
             LaunchedEffect(settingsLoadError) {
                 if (!settingsLoadError.isNullOrBlank()) {
                     snackbarHostState.showSnackbar(settingsLoadError)

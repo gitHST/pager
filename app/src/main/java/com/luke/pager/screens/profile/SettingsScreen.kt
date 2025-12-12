@@ -582,7 +582,6 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        // Always require re-auth before deletion
                         showDeleteDialog = false
                         reauthPassword = ""
                         reauthError = null
