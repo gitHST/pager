@@ -278,17 +278,31 @@ class AuthViewModel : ViewModel() {
     }
 
     private suspend fun uploadDisplayNameToFirebase(name: String) {
-        val user = firebaseAuth.currentUser
-            ?: throw IllegalStateException("No current user")
+        val user = firebaseAuth.currentUser ?: throw IllegalStateException("No current user")
+        val uid = user.uid
+
+        val trimmed = name.trim()
 
         val profileUpdates =
             userProfileChangeRequest {
-                displayName = name.ifBlank { null }
+                displayName = trimmed.ifBlank { null }
             }
-
         user.updateProfile(profileUpdates).await()
         _isLoggedIn.value = user.isAnonymous == false
+
+        // mirror into Firestore so other devices can fetch it
+        Firebase.firestore
+            .collection("users")
+            .document(uid)
+            .collection("settings")
+            .document("app")
+            .set(
+                mapOf("display_name" to trimmed),
+                SetOptions.merge(),
+            )
+            .await()
     }
+
 
     fun logout(context: Context) {
         val uid = firebaseAuth.currentUser?.uid
@@ -376,6 +390,59 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    data class RemoteProfileUpdate(
+        val displayName: String?,
+        val profilePhotoUri: String?,
+    )
+
+    suspend fun refreshProfileFromFirestore(
+        context: Context,
+    ): Result<RemoteProfileUpdate> {
+        val user = firebaseAuth.currentUser
+            ?: return Result.failure(IllegalStateException("No user logged in"))
+
+        val uid = user.uid
+
+        return runCatching {
+            val doc =
+                Firebase.firestore
+                    .collection("users")
+                    .document(uid)
+                    .collection("settings")
+                    .document("app")
+                    .get()
+                    .await()
+
+            val remoteName = doc.getString("display_name")?.trim()
+            val remotePhotoUrl = doc.getString("profile_photo_url")?.trim()
+
+            // cache name (NOT pending)
+            if (!remoteName.isNullOrBlank()) {
+                cacheDisplayName(context, uid, remoteName, pending = false)
+            }
+
+            // cache photo to the same local file your offline-first getter uses
+            if (!remotePhotoUrl.isNullOrBlank()) {
+                runCatching {
+                    val bytes = withContext(Dispatchers.IO) {
+                        java.net.URL(remotePhotoUrl).openStream().use { it.readBytes() }
+                    }
+                    withContext(Dispatchers.IO) {
+                        val file = profilePhotoFile(context, uid)
+                        file.outputStream().use { it.write(bytes) }
+                    }
+                    setProfilePhotoPending(context, uid, false)
+                }
+            }
+
+            val localPhotoUri = getOfflineFirstProfilePhotoUri(context)?.toString()
+
+            RemoteProfileUpdate(
+                displayName = remoteName,
+                profilePhotoUri = localPhotoUri,
+            )
+        }
+    }
 
     fun updateProfilePhoto(
         context: Context,
