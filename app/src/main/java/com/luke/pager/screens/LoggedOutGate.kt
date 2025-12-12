@@ -26,12 +26,17 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,13 +60,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.luke.pager.R
 import com.luke.pager.data.viewmodel.AuthViewModel
+import com.luke.pager.network.onlineStatusFlow
 import com.luke.pager.ui.theme.BackgroundDark
 import com.luke.pager.ui.theme.BackgroundLight
 import com.luke.pager.ui.theme.LocalUseDarkTheme
 import com.luke.pager.ui.theme.PagerTheme
+import kotlinx.coroutines.launch
 
 private val CaslonPro = FontFamily(Font(R.font.caslonpro, FontWeight.Normal))
-private val PagerTitleColor = Color(0xFF63503A)
+private val PagerTitleColorLight = Color(0xFF63503A)
 private val PagerTitleColorDark = Color(0xFFF6EDDB)
 
 @Composable
@@ -69,43 +76,75 @@ fun LoggedOutGate(
     authViewModel: AuthViewModel,
 ) {
     val systemIsDark = isSystemInDarkTheme()
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    // Re-usable online state (updates every 10s)
+    val isOnline by onlineStatusFlow(context, intervalMs = 10_000L)
+        .collectAsState(initial = true)
+
+    fun showSnackbar(msg: String) {
+        scope.launch { snackbarHostState.showSnackbar(msg) }
+    }
 
     CompositionLocalProvider(LocalUseDarkTheme provides systemIsDark) {
         PagerTheme(useDarkTheme = systemIsDark) {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .background(if (systemIsDark) BackgroundDark else BackgroundLight),
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.clean_gray_paper),
-                    contentDescription = null,
-                    contentScale = ContentScale.FillBounds,
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .alpha(if (systemIsDark) 0.1f else 0.9f),
-                )
-
-                val navController = rememberNavController()
-
-                NavHost(
-                    navController = navController,
-                    startDestination = "login",
+            Scaffold(
+                containerColor = Color.Transparent,
+                snackbarHost = { SnackbarHost(snackbarHostState) },
+            ) { paddingValues ->
+                // ✅ Background draws edge-to-edge (no scaffold padding applied here)
+                Box(
+                    modifier = Modifier.fillMaxSize(),
                 ) {
-                    composable("login") {
-                        LoginScreen(
-                            authViewModel = authViewModel,
-                            onSignUpClick = { navController.navigate("register") },
-                        )
-                    }
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .background(if (systemIsDark) BackgroundDark else BackgroundLight),
+                    )
 
-                    composable("register") {
-                        RegisterScreen(
+                    Image(
+                        painter = painterResource(id = R.drawable.clean_gray_paper),
+                        contentDescription = null,
+                        contentScale = ContentScale.FillBounds,
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .alpha(if (systemIsDark) 0.1f else 0.9f),
+                    )
+
+                    // ✅ Only the actual content respects scaffold insets/snackbar/etc
+                    val navController = rememberNavController()
+
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues),
+                    ) {
+                        NavHost(
                             navController = navController,
-                            authViewModel = authViewModel,
-                        )
+                            startDestination = "login",
+                        ) {
+                            composable("login") {
+                                LoginScreen(
+                                    authViewModel = authViewModel,
+                                    isOnline = isOnline,
+                                    onShowSnackbar = ::showSnackbar,
+                                    onSignUpClick = { navController.navigate("register") },
+                                )
+                            }
+
+                            composable("register") {
+                                RegisterScreen(
+                                    navController = navController,
+                                    authViewModel = authViewModel,
+                                    onShowSnackbar = ::showSnackbar,
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -113,15 +152,20 @@ fun LoggedOutGate(
     }
 }
 
+
 @Composable
 private fun LoginScreen(
     authViewModel: AuthViewModel,
+    isOnline: Boolean,
+    onShowSnackbar: (String) -> Unit,
     onSignUpClick: () -> Unit,
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     val textColor = MaterialTheme.colorScheme.onBackground
+    val systemIsDark = isSystemInDarkTheme()
+    val titleColor = if (systemIsDark) PagerTitleColorDark else PagerTitleColorLight
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -147,7 +191,7 @@ private fun LoginScreen(
                     text = "Pager",
                     fontFamily = CaslonPro,
                     fontSize = 60.sp,
-                    color = if (isSystemInDarkTheme()) PagerTitleColorDark else PagerTitleColor,
+                    color = titleColor,
                 )
 
                 Spacer(modifier = Modifier.height(30.dp))
@@ -200,17 +244,26 @@ private fun LoginScreen(
                     val activity = LocalContext.current as Activity
                     IconButton(
                         onClick = {
+                            if (!isOnline) {
+                                onShowSnackbar("No internet connection")
+                                return@IconButton
+                            }
+
                             authViewModel.signInWithGoogle(
                                 activity = activity,
                                 onSuccess = {},
-                                onError = {},
+                                onError = { msg ->
+                                    // Keep Google errors out of inline Register UI
+                                    onShowSnackbar(msg.ifBlank { "Google sign-in failed" })
+                                    authViewModel.clearError()
+                                },
                             )
                         },
                         modifier = Modifier.size(48.dp),
                     ) {
                         Icon(
                             painter = painterResource(
-                                id = if (isSystemInDarkTheme()) {
+                                id = if (systemIsDark) {
                                     R.drawable.ic_google_dark
                                 } else {
                                     R.drawable.ic_google_light
@@ -249,7 +302,6 @@ private fun LoginScreen(
     }
 }
 
-
 @Composable
 fun TransparentField(
     value: String,
@@ -263,9 +315,7 @@ fun TransparentField(
     val hintColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
 
     Box(
-        modifier =
-            modifier
-                .height(56.dp),
+        modifier = modifier.height(56.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
         BasicTextField(
@@ -301,4 +351,3 @@ private fun Context.findActivity(): Activity? {
     }
     return null
 }
-
