@@ -100,8 +100,6 @@ fun SettingsScreen(
     var reauthPassword by remember { mutableStateOf("") }
     var reauthError by remember { mutableStateOf<String?>(null) }
 
-
-
     fun startExport(toEmail: String) {
         coroutineScope.launch {
             isExporting = true
@@ -474,10 +472,11 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        val current = user ?: run {
-                            reauthError = "Not logged in"
-                            return@TextButton
-                        }
+                        val current =
+                            user ?: run {
+                                reauthError = "Not logged in"
+                                return@TextButton
+                            }
 
                         reauthError = null
                         isDeleting = true
@@ -534,7 +533,15 @@ fun SettingsScreen(
                     },
                     enabled = !isDeleting,
                 ) {
-                    Text(if (isDeleting) "Deleting..." else if (isPasswordUser) "Confirm" else "Continue")
+                    Text(
+                        if (isDeleting) {
+                            "Deleting..."
+                        } else if (isPasswordUser) {
+                            "Confirm"
+                        } else {
+                            "Continue"
+                        },
+                    )
                 }
             },
             dismissButton = {
@@ -554,8 +561,6 @@ fun SettingsScreen(
         )
     }
 
-
-
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = {
@@ -565,7 +570,8 @@ fun SettingsScreen(
             text = {
                 Column {
                     Text(
-                        text = "This will permanently delete your account, all your books, quotes, reviews, and profile data. This cannot be undone.",
+                        text = "This will permanently delete your account, all your books, " +
+                            "quotes, reviews, and profile data. This cannot be undone.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground,
                     )
@@ -614,11 +620,12 @@ private suspend fun buildExportJson(
         val quotes = quoteViewModel.quotes.value
         val reviews = reviewViewModel.reviews.value
 
-        val payload = mapOf(
-            "books" to books,
-            "quotes" to quotes,
-            "reviews" to reviews,
-        )
+        val payload =
+            mapOf(
+                "books" to books,
+                "quotes" to quotes,
+                "reviews" to reviews,
+            )
 
         Gson().toJson(payload)
     }
@@ -628,12 +635,13 @@ private fun sendExportEmail(
     toEmail: String,
     json: String,
 ) {
-    val sendIntent = Intent(Intent.ACTION_SEND).apply {
-        type = "message/rfc822"
-        putExtra(Intent.EXTRA_EMAIL, arrayOf(toEmail))
-        putExtra(Intent.EXTRA_SUBJECT, "Your Pager data export")
-        putExtra(Intent.EXTRA_TEXT, json)
-    }
+    val sendIntent =
+        Intent(Intent.ACTION_SEND).apply {
+            type = "message/rfc822"
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(toEmail))
+            putExtra(Intent.EXTRA_SUBJECT, "Your Pager data export")
+            putExtra(Intent.EXTRA_TEXT, json)
+        }
 
     val chooser = Intent.createChooser(sendIntent, "Send data export")
 

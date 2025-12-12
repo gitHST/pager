@@ -10,6 +10,8 @@ interface IUserSettingsRepository {
     val syncOverCellularFlow: Flow<Result<Boolean>>
 
     suspend fun setThemeMode(mode: ThemeMode): Result<Unit>
+
     suspend fun setDefaultPrivacy(privacy: Privacy): Result<Unit>
+
     suspend fun setSyncOverCellular(enabled: Boolean): Result<Unit>
 }

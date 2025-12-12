@@ -21,7 +21,8 @@ class QuoteViewModel(
 
     fun loadQuotesForBook(bookId: String) {
         viewModelScope.launch {
-            quoteRepository.getQuotesByBookId(bookId)
+            quoteRepository
+                .getQuotesByBookId(bookId)
                 .onSuccess { _quotes.value = it }
                 .onFailure { e ->
                     _quotes.value = emptyList()
@@ -44,7 +45,8 @@ class QuoteViewModel(
 
     fun loadAllQuotes() {
         viewModelScope.launch {
-            quoteRepository.getAllQuotes()
+            quoteRepository
+                .getAllQuotes()
                 .onSuccess { _allQuotes.value = it }
                 .onFailure { e ->
                     _allQuotes.value = emptyList()

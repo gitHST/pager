@@ -11,12 +11,13 @@ import kotlinx.coroutines.flow.flow
 fun onlineStatusFlow(
     context: Context,
     intervalMs: Long = 10_000L,
-): Flow<Boolean> = flow {
-    while (true) {
-        emit(isOnlineNow(context))
-        delay(intervalMs)
-    }
-}.distinctUntilChanged()
+): Flow<Boolean> =
+    flow {
+        while (true) {
+            emit(isOnlineNow(context))
+            delay(intervalMs)
+        }
+    }.distinctUntilChanged()
 
 fun isOnlineNow(context: Context): Boolean {
     val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager

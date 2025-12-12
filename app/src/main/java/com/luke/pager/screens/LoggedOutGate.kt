@@ -72,9 +72,7 @@ private val PagerTitleColorLight = Color(0xFF63503A)
 private val PagerTitleColorDark = Color(0xFFF6EDDB)
 
 @Composable
-fun LoggedOutGate(
-    authViewModel: AuthViewModel,
-) {
+fun LoggedOutGate(authViewModel: AuthViewModel) {
     val systemIsDark = isSystemInDarkTheme()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -151,7 +149,6 @@ fun LoggedOutGate(
         }
     }
 }
-
 
 @Composable
 private fun LoginScreen(
@@ -262,13 +259,15 @@ private fun LoginScreen(
                         modifier = Modifier.size(48.dp),
                     ) {
                         Icon(
-                            painter = painterResource(
-                                id = if (systemIsDark) {
-                                    R.drawable.ic_google_dark
-                                } else {
-                                    R.drawable.ic_google_light
-                                },
-                            ),
+                            painter =
+                                painterResource(
+                                    id =
+                                        if (systemIsDark) {
+                                            R.drawable.ic_google_dark
+                                        } else {
+                                            R.drawable.ic_google_light
+                                        },
+                                ),
                             contentDescription = "Sign in with Google",
                             modifier = Modifier.fillMaxSize(),
                             tint = Color.Unspecified,
@@ -278,18 +277,19 @@ private fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(22.dp))
 
-                val signUpText = buildAnnotatedString {
-                    append("Don't have an account? ")
-                    withStyle(
-                        SpanStyle(
-                            color = MaterialTheme.colorScheme.primary,
-                            textDecoration = TextDecoration.Underline,
-                            fontWeight = FontWeight.SemiBold,
-                        ),
-                    ) {
-                        append("Sign up")
+                val signUpText =
+                    buildAnnotatedString {
+                        append("Don't have an account? ")
+                        withStyle(
+                            SpanStyle(
+                                color = MaterialTheme.colorScheme.primary,
+                                textDecoration = TextDecoration.Underline,
+                                fontWeight = FontWeight.SemiBold,
+                            ),
+                        ) {
+                            append("Sign up")
+                        }
                     }
-                }
 
                 Text(
                     text = signUpText,

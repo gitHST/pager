@@ -11,15 +11,14 @@ class FirebaseQuoteRepository(
     uid: String,
     firestore: FirebaseFirestore = Firebase.firestore,
 ) : IQuoteRepository {
-
     private val quotesCollection =
         firestore
             .collection("users")
             .document(uid)
             .collection("quotes")
 
-    override suspend fun getQuotesByBookId(bookId: String): Result<List<QuoteEntity>> {
-        return try {
+    override suspend fun getQuotesByBookId(bookId: String): Result<List<QuoteEntity>> =
+        try {
             val snapshot =
                 quotesCollection.whereEqualTo("book_id", bookId).get().await()
 
@@ -28,10 +27,9 @@ class FirebaseQuoteRepository(
             Log.w("FirebaseQuoteRepo", "getQuotesByBookId failed", e)
             Result.failure(e)
         }
-    }
 
-    override suspend fun insertQuote(quote: QuoteEntity): Result<Unit> {
-        return try {
+    override suspend fun insertQuote(quote: QuoteEntity): Result<Unit> =
+        try {
             val docRef = quotesCollection.document()
             val id = docRef.id
 
@@ -43,10 +41,9 @@ class FirebaseQuoteRepository(
             Log.w("FirebaseQuoteRepo", "insertQuote failed", e)
             Result.failure(e)
         }
-    }
 
-    override suspend fun getAllQuotes(): Result<List<QuoteEntity>> {
-        return try {
+    override suspend fun getAllQuotes(): Result<List<QuoteEntity>> =
+        try {
             val snapshot =
                 quotesCollection.orderBy("date_added").get().await()
 
@@ -55,7 +52,6 @@ class FirebaseQuoteRepository(
             Log.w("FirebaseQuoteRepo", "getAllQuotes failed", e)
             Result.failure(e)
         }
-    }
 
     override suspend fun updateQuote(quote: QuoteEntity): Result<Unit> {
         return try {

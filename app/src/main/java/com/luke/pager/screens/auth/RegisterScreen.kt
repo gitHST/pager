@@ -1,7 +1,6 @@
 package com.luke.pager.screens.auth
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -59,161 +57,140 @@ fun RegisterScreen(
         }
     }
 
-    Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp),
-    ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            IconButton(
-                onClick = { navController.popBackStack() },
-                modifier =
-                    Modifier
-                        .align(Alignment.TopStart)
-                        .padding(start = 8.dp, top = 96.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.onBackground,
-                )
-            }
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Back arrow (top-left)
+        IconButton(
+            onClick = { navController.popBackStack() },
+            modifier =
+                Modifier
+                    .align(Alignment.TopStart)
+                    .padding(8.dp),
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+                tint = MaterialTheme.colorScheme.onBackground,
+            )
         }
 
         Column(
             modifier =
                 Modifier
-                    .fillMaxWidth()
                     .fillMaxSize()
-                    .wrapContentHeight(Alignment.CenterVertically),
-            verticalArrangement = Arrangement.Center,
+                    .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            // Push title near top
+            Spacer(modifier = Modifier.height(80.dp))
+
             Text(
                 text = "Create account",
                 fontSize = 22.sp,
                 color = MaterialTheme.colorScheme.onBackground,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .widthIn(max = 520.dp),
+                modifier = Modifier.widthIn(max = 520.dp),
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(96.dp))
 
-            TransparentField(
-                value = displayName,
-                onValueChange = {
-                    displayName = it
-                    inlineError = null
-                },
-                placeholder = "Display name",
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .widthIn(max = 520.dp),
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            TransparentField(
-                value = email,
-                onValueChange = {
-                    email = it
-                    inlineError = null
-                },
-                placeholder = "Email",
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .widthIn(max = 520.dp),
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            TransparentField(
-                value = password,
-                onValueChange = {
-                    password = it
-                    inlineError = null
-                },
-                placeholder = "Password",
-                visualTransformation = PasswordVisualTransformation(),
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .widthIn(max = 520.dp),
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            TransparentField(
-                value = confirmPassword,
-                onValueChange = {
-                    confirmPassword = it
-                    inlineError = null
-                },
-                placeholder = "Confirm password",
-                visualTransformation = PasswordVisualTransformation(),
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .widthIn(max = 520.dp),
-            )
-
-            if (!inlineError.isNullOrBlank()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = inlineError!!,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .widthIn(max = 520.dp),
-                )
-            }
-
-            Spacer(modifier = Modifier.height(22.dp))
-
-            Button(
-                onClick = {
-                    val trimmedName = displayName.trim()
-                    val trimmedEmail = email.trim()
-
-                    inlineError =
-                        when {
-                            trimmedName.isBlank() -> "Display name can't be empty"
-                            password.length < 6 -> "Password must be at least 6 characters"
-                            password != confirmPassword -> "Passwords do not match"
-                            else -> null
-                        }
-
-                    if (inlineError != null) return@Button
-
-                    authViewModel.register(
-                        email = trimmedEmail,
-                        password = password,
-                        onSuccess = {
-                            authViewModel.clearError()
-                            // Optional: you can set display name after register here if you want,
-                            // but keep errors as snackbar.
-                            navController.popBackStack()
-                        },
-                        onError = { msg ->
-                            onShowSnackbar(msg)
-                            authViewModel.clearError()
-                        },
-                    )
-                },
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .widthIn(max = 520.dp),
+            // Fields block (centered horizontally)
+            Column(
+                modifier = Modifier.widthIn(max = 520.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text("Create account")
+                TransparentField(
+                    value = displayName,
+                    onValueChange = {
+                        displayName = it
+                        inlineError = null
+                    },
+                    placeholder = "Display name",
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                TransparentField(
+                    value = email,
+                    onValueChange = {
+                        email = it
+                        inlineError = null
+                    },
+                    placeholder = "Email",
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                TransparentField(
+                    value = password,
+                    onValueChange = {
+                        password = it
+                        inlineError = null
+                    },
+                    placeholder = "Password",
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                TransparentField(
+                    value = confirmPassword,
+                    onValueChange = {
+                        confirmPassword = it
+                        inlineError = null
+                    },
+                    placeholder = "Confirm password",
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                if (!inlineError.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = inlineError!!,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(28.dp))
+
+                Button(
+                    onClick = {
+                        val trimmedName = displayName.trim()
+                        val trimmedEmail = email.trim()
+
+                        inlineError =
+                            when {
+                                trimmedName.isBlank() -> "Display name can't be empty"
+                                password.length < 6 -> "Password must be at least 6 characters"
+                                password != confirmPassword -> "Passwords do not match"
+                                else -> null
+                            }
+
+                        if (inlineError != null) return@Button
+
+                        authViewModel.register(
+                            email = trimmedEmail,
+                            password = password,
+                            onSuccess = {
+                                authViewModel.clearError()
+                                navController.popBackStack()
+                            },
+                            onError = { msg ->
+                                onShowSnackbar(msg)
+                                authViewModel.clearError()
+                            },
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text("Create account")
+                }
             }
         }
     }
 }
+

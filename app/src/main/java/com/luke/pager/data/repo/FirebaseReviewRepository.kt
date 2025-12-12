@@ -12,7 +12,6 @@ class FirebaseReviewRepository(
     private val uid: String,
     firestore: FirebaseFirestore = Firebase.firestore,
 ) : IReviewRepository {
-
     private val reviewsCollection =
         firestore
             .collection("users")
@@ -33,8 +32,8 @@ class FirebaseReviewRepository(
 
     private val globalBooksCollection = firestore.collection("books")
 
-    override suspend fun insertReview(review: ReviewEntity): Result<Unit> {
-        return try {
+    override suspend fun insertReview(review: ReviewEntity): Result<Unit> =
+        try {
             val docRef = reviewsCollection.document()
             val id = docRef.id
 
@@ -61,17 +60,15 @@ class FirebaseReviewRepository(
             Log.w("FirebaseReviewRepo", "insertReview failed", e)
             Result.failure(e)
         }
-    }
 
-    override suspend fun getAllReviews(): Result<List<ReviewEntity>> {
-        return try {
+    override suspend fun getAllReviews(): Result<List<ReviewEntity>> =
+        try {
             val snapshot = reviewsCollection.get().await()
             Result.success(snapshot.documents.mapNotNull { it.toReviewEntityOrNull() })
         } catch (e: Exception) {
             Log.w("FirebaseReviewRepo", "getAllReviews failed", e)
             Result.failure(e)
         }
-    }
 
     override suspend fun deleteReviewAndBookById(reviewId: String): Result<Unit> {
         return try {
@@ -125,8 +122,8 @@ class FirebaseReviewRepository(
     override suspend fun updateReviewText(
         reviewId: String,
         newText: String,
-    ): Result<Unit> {
-        return try {
+    ): Result<Unit> =
+        try {
             reviewsCollection
                 .document(reviewId)
                 .update("review_text", newText)
@@ -153,13 +150,12 @@ class FirebaseReviewRepository(
             Log.w("FirebaseReviewRepo", "updateReviewText failed", e)
             Result.failure(e)
         }
-    }
 
     override suspend fun updateReviewRating(
         reviewId: String,
         newRating: Float,
-    ): Result<Unit> {
-        return try {
+    ): Result<Unit> =
+        try {
             reviewsCollection
                 .document(reviewId)
                 .update("rating", newRating)
@@ -186,13 +182,12 @@ class FirebaseReviewRepository(
             Log.w("FirebaseReviewRepo", "updateReviewRating failed", e)
             Result.failure(e)
         }
-    }
 
     override suspend fun updateReviewPrivacy(
         reviewId: String,
         privacy: Privacy,
-    ): Result<Unit> {
-        return try {
+    ): Result<Unit> =
+        try {
             reviewsCollection
                 .document(reviewId)
                 .update("privacy", privacy.name)
@@ -219,7 +214,6 @@ class FirebaseReviewRepository(
             Log.w("FirebaseReviewRepo", "updateReviewPrivacy failed", e)
             Result.failure(e)
         }
-    }
 
     private fun ReviewEntity.toFirestoreMap(): Map<String, Any?> =
         mapOf(
@@ -283,5 +277,4 @@ class FirebaseReviewRepository(
     }
 }
 
-private fun String.toFirestoreSafeId(): String =
-    this.trimStart('/').replace('/', '_')
+private fun String.toFirestoreSafeId(): String = this.trimStart('/').replace('/', '_')

@@ -105,15 +105,18 @@ class MainActivity : ComponentActivity() {
 
                     val bookViewModel =
                         remember(currentUid) {
-                            com.luke.pager.data.viewmodel.BookViewModel(bookRepo, reviewRepo)
+                            com.luke.pager.data.viewmodel
+                                .BookViewModel(bookRepo, reviewRepo)
                         }
                     val reviewViewModel =
                         remember(currentUid) {
-                            com.luke.pager.data.viewmodel.ReviewViewModel(reviewRepo)
+                            com.luke.pager.data.viewmodel
+                                .ReviewViewModel(reviewRepo)
                         }
                     val quoteViewModel =
                         remember(currentUid) {
-                            com.luke.pager.data.viewmodel.QuoteViewModel(quoteRepo)
+                            com.luke.pager.data.viewmodel
+                                .QuoteViewModel(quoteRepo)
                         }
 
                     val coroutineScope = rememberCoroutineScope()
@@ -142,8 +145,11 @@ class MainActivity : ComponentActivity() {
                                         Modifier
                                             .fillMaxSize()
                                             .background(
-                                                if (systemIsDark) BackgroundDark
-                                                else BackgroundLight,
+                                                if (systemIsDark) {
+                                                    BackgroundDark
+                                                } else {
+                                                    BackgroundLight
+                                                },
                                             ),
                                     contentAlignment = Alignment.Center,
                                 ) {
