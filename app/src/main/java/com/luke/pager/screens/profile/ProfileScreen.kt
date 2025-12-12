@@ -33,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -57,19 +58,13 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
-import com.google.firebase.firestore.firestore
 import com.luke.pager.data.viewmodel.AuthViewModel
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.data.viewmodel.ReviewViewModel
 import com.luke.pager.screens.auth.LoginModal
 import com.luke.pager.screens.components.Title
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
-import java.io.File
-import java.net.URL
 
 @Composable
 fun ProfileScreen(
@@ -106,12 +101,10 @@ fun ProfileScreen(
         mutableStateOf(Offset.Zero)
     }
 
-    var profilePhotoVersion by remember(firebaseUser?.uid) {
-        mutableIntStateOf(0)
-    }
+    var profilePhotoVersion by remember(firebaseUser?.uid) { mutableIntStateOf(0) }
+    var displayNameVersion by remember(firebaseUser?.uid) { mutableIntStateOf(0) }
 
     var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
-
     val coroutineScope = rememberCoroutineScope()
 
     val photoPickerLauncher =
@@ -126,13 +119,11 @@ fun ProfileScreen(
 
     val fadedColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
     val nameToShow = nameInput.ifBlank { "Name" }
-    val nameColor =
-        if (nameInput.isBlank()) fadedColor
-        else MaterialTheme.colorScheme.onBackground
+    val nameColor = if (nameInput.isBlank()) fadedColor else MaterialTheme.colorScheme.onBackground
 
-    LaunchedEffect(isLoggedIn, firebaseUser?.uid, isEditing, showPfpModal) {
+    // 1) When auth state changes, always reset/load from local cache immediately
+    LaunchedEffect(isLoggedIn, firebaseUser?.uid) {
         val uid = firebaseUser?.uid
-
         if (!isLoggedIn || uid == null) {
             nameInput = ""
             profilePhotoUri = null
@@ -145,20 +136,34 @@ fun ProfileScreen(
         profilePhotoUri = authViewModel.getOfflineFirstProfilePhotoUri(context)
         profilePhotoZoom = 1f
         profilePhotoOffsetFraction = Offset.Zero
+    }
 
+    // 2) On recomposition (and whenever you come back to Profile), refresh remote -> update cache -> update UI if changed.
+    //    Avoid stomping while editing / modal open.
+    LaunchedEffect(isLoggedIn, firebaseUser?.uid, isEditing, showPfpModal) {
+        val uid = firebaseUser?.uid ?: return@LaunchedEffect
+        if (!isLoggedIn) return@LaunchedEffect
         if (isEditing || showPfpModal || tempPhotoUri != null) return@LaunchedEffect
 
-        val updated = fetchAndCacheProfilePhotoFromFirestore(
-            context = context,
-            uid = uid,
-        )
+        authViewModel.refreshProfileFromFirestore(context)
+            .onSuccess { updated ->
+                // display name
+                updated.displayName?.trim()?.takeIf { it.isNotBlank() }?.let { remoteName ->
+                    if (remoteName != nameInput) {
+                        nameInput = remoteName
+                        displayNameVersion++
+                    }
+                }
 
-        if (updated != null) {
-            if (profilePhotoUri?.toString() != updated.toString()) {
-                profilePhotoUri = updated
-                profilePhotoVersion++
+                // pfp
+                updated.profilePhotoUri?.let { remoteUri ->
+                    val remote = remoteUri.toUri()
+                    if (profilePhotoUri?.toString() != remote.toString()) {
+                        profilePhotoUri = remote
+                        profilePhotoVersion++
+                    }
+                }
             }
-        }
     }
 
     LaunchedEffect(Unit) {
@@ -175,9 +180,7 @@ fun ProfileScreen(
                             context = context,
                             newName = nameInput,
                             onSuccess = { isEditing = false },
-                            onError = { _ ->
-                                isEditing = false
-                            },
+                            onError = { _ -> isEditing = false },
                         )
                         showPfpModal = false
                         tempPhotoUri = null
@@ -288,12 +291,8 @@ fun ProfileScreen(
                             Modifier
                                 .matchParentSize()
                                 .clip(CircleShape)
-                                .background(
-                                    Color.Black.copy(alpha = 0.35f),
-                                )
-                                .clickable {
-                                    photoPickerLauncher.launch("image/*")
-                                },
+                                .background(Color.Black.copy(alpha = 0.35f))
+                                .clickable { photoPickerLauncher.launch("image/*") },
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
@@ -344,11 +343,13 @@ fun ProfileScreen(
                         modifier = Modifier.widthIn(min = 80.dp, max = 220.dp),
                     )
                 } else {
-                    Text(
-                        text = nameToShow,
-                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                        color = nameColor,
-                    )
+                    key(displayNameVersion) {
+                        Text(
+                            text = nameToShow,
+                            fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                            color = nameColor,
+                        )
+                    }
                 }
 
                 Text(
@@ -399,9 +400,7 @@ fun ProfileScreen(
         imageUri = tempPhotoUri,
         initialZoom = profilePhotoZoom,
         initialOffsetFraction = profilePhotoOffsetFraction,
-        onDismiss = {
-            showPfpModal = false
-        },
+        onDismiss = { showPfpModal = false },
         onSave = { uri, zoom, offsetFraction, containerSize, offsetPx ->
             if (uri == null) {
                 showPfpModal = false
@@ -430,37 +429,4 @@ fun ProfileScreen(
             }
         },
     )
-}
-
-private fun profilePhotoFile(context: android.content.Context, uid: String): File =
-    File(context.filesDir, "profile_photo_${uid}.jpg")
-
-private suspend fun fetchAndCacheProfilePhotoFromFirestore(
-    context: android.content.Context,
-    uid: String,
-): Uri? {
-    return try {
-        val doc = Firebase.firestore
-            .collection("users")
-            .document(uid)
-            .collection("settings")
-            .document("app")
-            .get()
-            .await()
-
-        val url = doc.getString("profile_photo_url").orEmpty().trim()
-        if (url.isBlank()) return null
-
-        val bytes = withContext(Dispatchers.IO) {
-            URL(url).openStream().use { it.readBytes() }
-        }
-
-        withContext(Dispatchers.IO) {
-            val file = profilePhotoFile(context, uid)
-            file.outputStream().use { it.write(bytes) }
-            Uri.fromFile(file)
-        }
-    } catch (_: Exception) {
-        null
-    }
 }
