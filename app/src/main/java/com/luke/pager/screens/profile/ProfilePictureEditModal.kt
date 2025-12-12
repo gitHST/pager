@@ -5,7 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -43,8 +44,10 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.luke.pager.screens.components.CenteredModalScaffold
+import kotlinx.coroutines.delay
 import kotlin.math.max
 import kotlin.math.min
+
 
 @Composable
 fun ProfilePictureEditModal(
@@ -60,6 +63,8 @@ fun ProfilePictureEditModal(
     var offsetFraction by remember(visible) { mutableStateOf(initialOffsetFraction) }
     var containerSize by remember(visible) { mutableStateOf(IntSize.Zero) }
     var initializedFromFraction by remember(visible) { mutableStateOf(false) }
+    var interactionTick by remember(visible) { mutableIntStateOf(0) }
+
 
     var isInteracting by remember(visible) { mutableStateOf(false) }
     val overlayAlpha by animateFloatAsState(
@@ -122,6 +127,12 @@ fun ProfilePictureEditModal(
         offsetPx = clampOffset(offsetPx, zoom)
     }
 
+    LaunchedEffect(interactionTick) {
+        isInteracting = true
+        delay(200)
+        isInteracting = false
+    }
+
     CenteredModalScaffold(
         onDismiss = onDismiss,
         overlayAlpha = 0.5f,
@@ -148,23 +159,17 @@ fun ProfilePictureEditModal(
                                 .aspectRatio(1f)
                                 .onSizeChanged { containerSize = it }
                                 .pointerInput(Unit) {
-                                    detectDragGestures(
-                                        onDragStart = {
-                                            isInteracting = true
-                                        },
-                                        onDragEnd = {
-                                            isInteracting = false
-                                        },
-                                        onDragCancel = {
-                                            isInteracting = false
-                                        },
-                                    ) { change, dragAmount ->
-                                        change.consume()
-                                        val newOffset = offsetPx + dragAmount
-                                        offsetPx = clampOffset(newOffset, zoom)
+                                    detectTransformGestures { _, pan, gestureZoom, _ ->
+                                        interactionTick++
+
+                                        val newZoom = (zoom * gestureZoom).coerceIn(1f, 3f)
+                                        val newOffset = offsetPx + pan
+
+                                        zoom = newZoom
+                                        offsetPx = clampOffset(newOffset, newZoom)
                                     }
                                 },
-                        contentAlignment = Alignment.Center,
+                                contentAlignment = Alignment.Center,
                     ) {
                         Box(
                             modifier =
@@ -251,11 +256,11 @@ fun ProfilePictureEditModal(
                 Slider(
                     value = zoom,
                     onValueChange = {
-                        isInteracting = true
+                        interactionTick++
                         zoom = it.coerceIn(1f, 3f)
                     },
                     onValueChangeFinished = {
-                        isInteracting = false
+                        interactionTick++
                     },
                     valueRange = 1f..3f,
                 )
