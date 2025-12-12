@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
@@ -42,6 +43,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.luke.pager.screens.components.CenteredModalScaffold
+import kotlin.math.max
 import kotlin.math.min
 
 @Composable
@@ -66,28 +68,37 @@ fun ProfilePictureEditModal(
         label = "cropOverlayAlpha",
     )
 
+    var imageSize by remember(visible) { mutableStateOf(IntSize.Zero) }
+
+    fun baseScale(): Float {
+        val cw = containerSize.width.toFloat()
+        val ch = containerSize.height.toFloat()
+        val iw = imageSize.width.toFloat()
+        val ih = imageSize.height.toFloat()
+
+        if (cw <= 0f || ch <= 0f || iw <= 0f || ih <= 0f) return 1f
+        return max(cw / iw, ch / ih)
+    }
+
     fun clampOffset(raw: Offset, scale: Float): Offset {
-        val width = containerSize.width.toFloat()
-        val height = containerSize.height.toFloat()
+        val cw = containerSize.width.toFloat()
+        val ch = containerSize.height.toFloat()
+        val iw = imageSize.width.toFloat()
+        val ih = imageSize.height.toFloat()
 
-        if (width == 0f || height == 0f) return raw
+        if (cw <= 0f || ch <= 0f || iw <= 0f || ih <= 0f) return raw
 
-        if (scale <= 1f) return Offset.Zero
+        val radius = min(cw, ch) / 2f
 
-        val radius = min(width, height) * 0.5f
+        val renderedW = iw * baseScale() * scale
+        val renderedH = ih * baseScale() * scale
 
-        val halfWidthScaled = width * scale / 2f
-        val halfHeightScaled = height * scale / 2f
-
-        val minX = radius - halfWidthScaled
-        val maxX = halfWidthScaled - radius
-
-        val minY = radius - halfHeightScaled
-        val maxY = halfHeightScaled - radius
+        val maxX = ((renderedW / 2f) - radius).coerceAtLeast(0f)
+        val maxY = ((renderedH / 2f) - radius).coerceAtLeast(0f)
 
         return Offset(
-            x = raw.x.coerceIn(minX, maxX),
-            y = raw.y.coerceIn(minY, maxY),
+            x = raw.x.coerceIn(-maxX, maxX),
+            y = raw.y.coerceIn(-maxY, maxY),
         )
     }
 
@@ -174,12 +185,19 @@ fun ProfilePictureEditModal(
                                         .matchParentSize()
                                         .clip(CircleShape)
                                         .graphicsLayer {
-                                            scaleX = zoom
-                                            scaleY = zoom
+                                            val s = baseScale() * zoom
+                                            scaleX = s
+                                            scaleY = s
                                             translationX = offsetPx.x
                                             translationY = offsetPx.y
                                         },
-                                contentScale = ContentScale.Crop,
+                                contentScale = ContentScale.Fit,
+                                onSuccess = { result ->
+                                    val size = result.painter.intrinsicSize
+                                    if (size.isSpecified) {
+                                        imageSize = IntSize(size.width.toInt(), size.height.toInt())
+                                    }
+                                },
                             )
 
                             Canvas(
