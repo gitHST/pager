@@ -1,5 +1,8 @@
 package com.luke.pager.screens.auth
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,12 +13,14 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -33,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -56,6 +62,7 @@ import com.luke.pager.ui.theme.PagerTheme
 
 private val CaslonPro = FontFamily(Font(R.font.caslonpro, FontWeight.Normal))
 private val PagerTitleColor = Color(0xFF63503A)
+private val PagerTitleColorDark = Color(0xFFF6EDDB)
 
 @Composable
 fun LoggedOutGate(
@@ -116,122 +123,135 @@ private fun LoginScreen(
 
     val textColor = MaterialTheme.colorScheme.onBackground
 
-    BoxWithConstraints(
+    Box(
         modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopCenter,
     ) {
-        val titleTopSpacer = maxHeight * 0.25f
-
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        BoxWithConstraints(
+            modifier = Modifier.fillMaxWidth(0.9f).fillMaxHeight(),
+            contentAlignment = Alignment.TopCenter,
         ) {
-            Spacer(modifier = Modifier.height(titleTopSpacer))
+            val titleTopSpacer = maxHeight * 0.25f
 
-            Text(
-                text = "Pager",
-                fontFamily = CaslonPro,
-                fontSize = 60.sp,
-                color = PagerTitleColor,
-            )
-
-            Spacer(modifier = Modifier.height(30.dp))
-
-            TransparentField(
-                value = email,
-                onValueChange = { email = it },
-                placeholder = "Email",
+            Column(
                 modifier =
                     Modifier
-                        .fillMaxWidth()
-                        .widthIn(max = 520.dp),
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            TransparentField(
-                value = password,
-                onValueChange = { password = it },
-                placeholder = "Password",
-                visualTransformation = PasswordVisualTransformation(),
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .widthIn(max = 520.dp),
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Row(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .widthIn(max = 520.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                        .fillMaxSize()
+                        .padding(horizontal = 20.dp)
+                        .wrapContentSize(Alignment.TopCenter),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Button(
-                    onClick = {
-                        authViewModel.login(
-                            email = email,
-                            password = password,
-                        )
-                    },
-                    modifier = Modifier.weight(1f),
-                ) {
-                    Text("Sign in")
-                }
+                Spacer(modifier = Modifier.height(titleTopSpacer))
 
-                IconButton(
-                    onClick = {
-                    },
-                    modifier = Modifier.size(48.dp),
+                Text(
+                    text = "Pager",
+                    fontFamily = CaslonPro,
+                    fontSize = 60.sp,
+                    color = if (isSystemInDarkTheme()) PagerTitleColorDark else PagerTitleColor,
+                )
+
+                Spacer(modifier = Modifier.height(30.dp))
+
+                TransparentField(
+                    value = email,
+                    onValueChange = { email = it },
+                    placeholder = "Email",
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .widthIn(max = 520.dp),
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                TransparentField(
+                    value = password,
+                    onValueChange = { password = it },
+                    placeholder = "Password",
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .widthIn(max = 520.dp),
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .widthIn(max = 520.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(
-                        painter = painterResource(
-                            id =
-                                if (isSystemInDarkTheme()) {
+                    Button(
+                        onClick = {
+                            authViewModel.login(
+                                email = email,
+                                password = password,
+                            )
+                        },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text("Sign in")
+                    }
+
+                    val activity = LocalContext.current as Activity
+                    IconButton(
+                        onClick = {
+                            authViewModel.signInWithGoogle(
+                                activity = activity,
+                                onSuccess = {},
+                                onError = {},
+                            )
+                        },
+                        modifier = Modifier.size(48.dp),
+                    ) {
+                        Icon(
+                            painter = painterResource(
+                                id = if (isSystemInDarkTheme()) {
                                     R.drawable.ic_google_dark
                                 } else {
                                     R.drawable.ic_google_light
                                 },
+                            ),
+                            contentDescription = "Sign in with Google",
+                            modifier = Modifier.fillMaxSize(),
+                            tint = Color.Unspecified,
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(22.dp))
+
+                val signUpText = buildAnnotatedString {
+                    append("Don't have an account? ")
+                    withStyle(
+                        SpanStyle(
+                            color = MaterialTheme.colorScheme.primary,
+                            textDecoration = TextDecoration.Underline,
+                            fontWeight = FontWeight.SemiBold,
                         ),
-                        contentDescription = "Sign in with Google",
-                        modifier = Modifier.fillMaxSize(),
-                        tint = Color.Unspecified,
-                    )
+                    ) {
+                        append("Sign up")
+                    }
                 }
+
+                Text(
+                    text = signUpText,
+                    color = textColor,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.clickable { onSignUpClick() },
+                )
             }
-
-            Spacer(modifier = Modifier.height(22.dp))
-
-            val signUpText = buildAnnotatedString {
-                append("Don't have an account? ")
-                withStyle(
-                    SpanStyle(
-                        color = MaterialTheme.colorScheme.primary,
-                        textDecoration = TextDecoration.Underline,
-                        fontWeight = FontWeight.SemiBold,
-                    ),
-                ) {
-                    append("Sign up")
-                }
-            }
-
-            Text(
-                text = signUpText,
-                color = textColor,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.clickable { onSignUpClick() },
-            )
         }
     }
 }
 
+
 @Composable
-private fun TransparentField(
+fun TransparentField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
@@ -272,3 +292,13 @@ private fun TransparentField(
         )
     }
 }
+
+private fun Context.findActivity(): Activity? {
+    var current = this
+    while (current is ContextWrapper) {
+        if (current is Activity) return current
+        current = current.baseContext
+    }
+    return null
+}
+

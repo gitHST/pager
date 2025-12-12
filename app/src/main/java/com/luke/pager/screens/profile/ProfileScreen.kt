@@ -53,16 +53,23 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
+import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.firestore
 import com.luke.pager.data.viewmodel.AuthViewModel
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.data.viewmodel.ReviewViewModel
 import com.luke.pager.screens.auth.LoginModal
 import com.luke.pager.screens.components.Title
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.net.URL
 
 @Composable
 fun ProfileScreen(
@@ -123,20 +130,47 @@ fun ProfileScreen(
         if (nameInput.isBlank()) fadedColor
         else MaterialTheme.colorScheme.onBackground
 
-    LaunchedEffect(isLoggedIn) {
-        if (!isLoggedIn) {
+    /**
+     * Offline-first: always render cached/local immediately (your current behavior),
+     * then also pull the latest profile photo URL from Firestore and replace if present.
+     *
+     * Keys include edit/modal flags so when you close the crop modal or stop editing,
+     * we re-check Firestore and pull the newest value.
+     */
+    LaunchedEffect(isLoggedIn, firebaseUser?.uid, isEditing, showPfpModal) {
+        val uid = firebaseUser?.uid
+
+        if (!isLoggedIn || uid == null) {
             nameInput = ""
             profilePhotoUri = null
             profilePhotoZoom = 1f
             profilePhotoOffsetFraction = Offset.Zero
-        } else {
-            nameInput = authViewModel.getOfflineFirstDisplayName(context)
-            profilePhotoUri = authViewModel.getOfflineFirstProfilePhotoUri(context)
-            profilePhotoZoom = 1f
-            profilePhotoOffsetFraction = Offset.Zero
+            return@LaunchedEffect
+        }
+
+        // Local/cache first (existing behavior)
+        nameInput = authViewModel.getOfflineFirstDisplayName(context)
+        profilePhotoUri = authViewModel.getOfflineFirstProfilePhotoUri(context)
+        profilePhotoZoom = 1f
+        profilePhotoOffsetFraction = Offset.Zero
+
+        // Don't override while user is actively editing / crop modal is open
+        if (isEditing || showPfpModal || tempPhotoUri != null) return@LaunchedEffect
+
+        // Pull latest from Firestore and replace (and cache it locally)
+        val updated = fetchAndCacheProfilePhotoFromFirestore(
+            context = context,
+            uid = uid,
+        )
+
+        if (updated != null) {
+            // Only bump version if we're actually changing the displayed URI
+            if (profilePhotoUri?.toString() != updated.toString()) {
+                profilePhotoUri = updated
+                profilePhotoVersion++
+            }
         }
     }
-
 
     LaunchedEffect(Unit) {
         authViewModel.tryUploadPendingProfilePhoto(context)
@@ -223,16 +257,20 @@ fun ProfileScreen(
                         .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center,
             ) {
-                if (profilePhotoUri != null) {
+                val model = profilePhotoUri?.let { uri -> "${uri}?v=$profilePhotoVersion" }
+                val painter = rememberAsyncImagePainter(model = model)
+
+                val showPlaceholder =
+                    profilePhotoUri == null ||
+                        painter.state is AsyncImagePainter.State.Empty ||
+                        painter.state is AsyncImagePainter.State.Error
+
+                if (!showPlaceholder) {
                     val avatarWidth = avatarSize.width.toFloat().coerceAtLeast(1f)
                     val avatarHeight = avatarSize.height.toFloat().coerceAtLeast(1f)
 
                     Image(
-                        painter = rememberAsyncImagePainter(
-                            model = profilePhotoUri?.let { uri ->
-                                "${uri}?v=$profilePhotoVersion"
-                            },
-                        ),
+                        painter = painter,
                         contentDescription = "Profile picture",
                         modifier =
                             Modifier
@@ -403,4 +441,42 @@ fun ProfileScreen(
             }
         },
     )
+}
+
+private fun profilePhotoFile(context: android.content.Context, uid: String): File =
+    File(context.filesDir, "profile_photo_${uid}.jpg")
+
+/**
+ * Reads users/{uid}/settings/app.profile_photo_url from Firestore.
+ * If present, downloads it and caches to the same local file you already use,
+ * then returns a file:// Uri so the UI stays offline-first next time too.
+ */
+private suspend fun fetchAndCacheProfilePhotoFromFirestore(
+    context: android.content.Context,
+    uid: String,
+): Uri? {
+    return try {
+        val doc = Firebase.firestore
+            .collection("users")
+            .document(uid)
+            .collection("settings")
+            .document("app")
+            .get()
+            .await()
+
+        val url = doc.getString("profile_photo_url").orEmpty().trim()
+        if (url.isBlank()) return null
+
+        val bytes = withContext(Dispatchers.IO) {
+            URL(url).openStream().use { it.readBytes() }
+        }
+
+        withContext(Dispatchers.IO) {
+            val file = profilePhotoFile(context, uid)
+            file.outputStream().use { it.write(bytes) }
+            Uri.fromFile(file)
+        }
+    } catch (_: Exception) {
+        null
+    }
 }
