@@ -62,6 +62,7 @@ import com.luke.pager.data.viewmodel.AuthViewModel
 import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.data.viewmodel.ReviewViewModel
+import com.luke.pager.network.onlineStatusFlow
 import com.luke.pager.screens.auth.LoginModal
 import com.luke.pager.screens.components.Title
 import kotlinx.coroutines.launch
@@ -120,6 +121,9 @@ fun ProfileScreen(
     val fadedColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
     val nameToShow = nameInput.ifBlank { "Name" }
     val nameColor = if (nameInput.isBlank()) fadedColor else MaterialTheme.colorScheme.onBackground
+    val isOnline by onlineStatusFlow(context, intervalMs = 10_000L)
+        .collectAsState(initial = false)
+
 
     // 1) When auth state changes, always reset/load from local cache immediately
     LaunchedEffect(isLoggedIn, firebaseUser?.uid) {
@@ -353,7 +357,7 @@ fun ProfileScreen(
                 }
 
                 Text(
-                    text = if (isLoggedIn) "Logged in" else "Not logged in",
+                    text = if (isOnline) "" else "No internet connection",
                     style = MaterialTheme.typography.bodyMedium,
                     color = fadedColor,
                 )
