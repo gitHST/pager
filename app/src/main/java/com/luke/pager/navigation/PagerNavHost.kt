@@ -218,7 +218,7 @@ fun PagerNavHost(
                 bookViewModel = bookViewModel,
                 reviewViewModel = reviewViewModel,
                 quoteViewModel = quoteViewModel,
-                authViewModel = authViewModel, // <-- pass it through
+                authViewModel = authViewModel,
                 themeMode = themeMode,
                 onThemeModeChange = onThemeModeChange,
                 syncOverCellular = syncOverCellular,

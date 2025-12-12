@@ -13,9 +13,6 @@ class ReviewViewModel(
     private val reviewRepository: IReviewRepository,
 ) : ViewModel() {
 
-    // -----------------------------------------
-    // NEW: expose reviews for export & UI
-    // -----------------------------------------
     private val _reviews = MutableStateFlow<List<ReviewEntity>>(emptyList())
     val reviews: StateFlow<List<ReviewEntity>> get() = _reviews
 
@@ -23,23 +20,16 @@ class ReviewViewModel(
         loadAllReviews()
     }
 
-    // -----------------------------------------
-    // NEW: load all reviews from repository
-    // -----------------------------------------
     fun loadAllReviews() {
         viewModelScope.launch {
             _reviews.value = reviewRepository.getAllReviews()
         }
     }
 
-    // -----------------------------------------
-    // Existing functions
-    // -----------------------------------------
     fun deleteReviewAndBookById(reviewId: String) {
         viewModelScope.launch {
             reviewRepository.deleteReviewAndBookById(reviewId)
 
-            // Keep state in sync
             loadAllReviews()
         }
     }

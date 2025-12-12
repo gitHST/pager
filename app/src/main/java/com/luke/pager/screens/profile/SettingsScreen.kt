@@ -91,6 +91,10 @@ fun SettingsScreen(
 
     var showLogoutDialog by remember { mutableStateOf(false) }
 
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var isDeleting by remember { mutableStateOf(false) }
+    var deleteError by remember { mutableStateOf<String?>(null) }
+
     fun startExport(toEmail: String) {
         coroutineScope.launch {
             isExporting = true
@@ -297,26 +301,25 @@ fun SettingsScreen(
                         color = MaterialTheme.colorScheme.onBackground,
                     )
                 }
-
                 Spacer(modifier = Modifier.height(8.dp))
-            }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .clickable { /* TODO: implement delete account */ },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = "Delete account and data",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.error,
-                )
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                            .clickable {
+                                showDeleteDialog = true
+                            },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = "Delete account and data",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
             }
         }
     }
@@ -390,7 +393,7 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        authViewModel.logout(context)
+                        authViewModel.logout()
                         showLogoutDialog = false
                         navController.popBackStack()
                     },
@@ -407,11 +410,67 @@ fun SettingsScreen(
             },
         )
     }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                if (!isDeleting) showDeleteDialog = false
+            },
+            title = { Text("Delete account and data") },
+            text = {
+                Column {
+                    Text(
+                        text = "This will permanently delete your account, all your books, quotes, reviews, and profile data. This cannot be undone.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                    if (deleteError != null) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = deleteError!!,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (!isDeleting) {
+                            isDeleting = true
+                            deleteError = null
+                            authViewModel.deleteAccountAndData(
+                                context = context,
+                                onSuccess = {
+                                    isDeleting = false
+                                    showDeleteDialog = false
+                                    navController.popBackStack()
+                                },
+                                onError = { msg ->
+                                    isDeleting = false
+                                    deleteError = msg
+                                },
+                            )
+                        }
+                    },
+                    enabled = !isDeleting,
+                ) {
+                    Text(if (isDeleting) "Deleting..." else "Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { if (!isDeleting) showDeleteDialog = false },
+                    enabled = !isDeleting,
+                ) {
+                    Text("Cancel")
+                }
+            },
+        )
+    }
 }
 
-/**
- * Build a JSON payload for export.
- */
 private suspend fun buildExportJson(
     bookViewModel: BookViewModel,
     reviewViewModel: ReviewViewModel,
