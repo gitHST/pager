@@ -393,7 +393,7 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        authViewModel.logout()
+                        authViewModel.logout(context)
                         showLogoutDialog = false
                         navController.popBackStack()
                     },

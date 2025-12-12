@@ -1,5 +1,6 @@
 package com.luke.pager.data.viewmodel
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -11,17 +12,27 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import androidx.core.content.edit
 import androidx.core.graphics.createBitmap
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.google.firebase.Firebase
 import com.google.firebase.auth.EmailAuthProvider
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
 import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
+import com.luke.pager.R
 import com.luke.pager.network.canSyncNow
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -35,7 +46,7 @@ class AuthViewModel : ViewModel() {
     private val firebaseAuth = Firebase.auth
 
     private val _isLoggedIn =
-        MutableStateFlow(firebaseAuth.currentUser != null)
+        MutableStateFlow(firebaseAuth.currentUser?.isAnonymous == false)
     val isLoggedIn: StateFlow<Boolean> get() = _isLoggedIn
 
     private val _authError = MutableStateFlow<String?>(null)
@@ -59,7 +70,7 @@ class AuthViewModel : ViewModel() {
                     .signInWithEmailAndPassword(email.trim(), password)
                     .await()
 
-                _isLoggedIn.value = firebaseAuth.currentUser != null
+                _isLoggedIn.value = firebaseAuth.currentUser?.isAnonymous == false
                 onSuccess()
             } catch (e: Exception) {
                 val msg = e.message ?: "Login failed"
@@ -91,13 +102,94 @@ class AuthViewModel : ViewModel() {
                         .await()
                 }
 
-                _isLoggedIn.value = firebaseAuth.currentUser != null
+                _isLoggedIn.value = firebaseAuth.currentUser?.isAnonymous == false
                 onSuccess()
             } catch (e: Exception) {
                 val msg = e.message ?: "Registration failed"
                 _authError.value = msg
                 onError(msg)
             }
+        }
+    }
+
+    fun signInWithGoogle(
+        activity: Activity,
+        onSuccess: () -> Unit = {},
+        onError: (String) -> Unit = {},
+    ) {
+        viewModelScope.launch {
+            try {
+                _authError.value = null
+
+                val serverClientId = activity.getString(R.string.default_web_client_id)
+
+                val credentialManager = CredentialManager.create(activity)
+
+                val googleIdOption =
+                    GetGoogleIdOption.Builder()
+                        .setServerClientId(serverClientId)
+                        .setFilterByAuthorizedAccounts(false)
+                        .setAutoSelectEnabled(false)
+                        .build()
+
+                val request =
+                    GetCredentialRequest.Builder()
+                        .addCredentialOption(googleIdOption)
+                        .build()
+
+                val result = try {
+                    credentialManager.getCredential(
+                        context = activity,
+                        request = request,
+                    )
+                } catch (e: GetCredentialException) {
+                    val msg = "Google sign-in failed: ${e.type}"
+                    _authError.value = msg
+                    onError(msg)
+                    return@launch
+                }
+
+                val googleIdToken = extractGoogleIdToken(result.credential)
+                if (googleIdToken.isNullOrBlank()) {
+                    val msg = "Google sign-in failed (no ID token)"
+                    _authError.value = msg
+                    onError(msg)
+                    return@launch
+                }
+
+                val firebaseCredential = GoogleAuthProvider.getCredential(googleIdToken, null)
+
+                val authResult = firebaseAuth.signInWithCredential(firebaseCredential).await()
+                val isNewUser = authResult.additionalUserInfo?.isNewUser == true
+
+                if (isNewUser) {
+                    firebaseAuth.currentUser?.updateProfile(
+                        userProfileChangeRequest { photoUri = null }
+                    )?.await()
+                }
+
+                _isLoggedIn.value = firebaseAuth.currentUser?.isAnonymous == false
+                onSuccess()
+            } catch (e: Exception) {
+                val msg = e.message ?: "Google sign-in failed"
+                _authError.value = msg
+                onError(msg)
+            }
+        }
+    }
+
+
+    private fun extractGoogleIdToken(credential: androidx.credentials.Credential): String? {
+        return try {
+            if (credential is CustomCredential &&
+                credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+            ) {
+                GoogleIdTokenCredential.createFrom(credential.data).idToken
+            } else {
+                null
+            }
+        } catch (_: GoogleIdTokenParsingException) {
+            null
         }
     }
 
@@ -194,14 +286,23 @@ class AuthViewModel : ViewModel() {
             }
 
         user.updateProfile(profileUpdates).await()
-        _isLoggedIn.value = true
+        _isLoggedIn.value = user.isAnonymous == false
     }
 
-    fun logout() {
+    fun logout(context: Context) {
+        val uid = firebaseAuth.currentUser?.uid
+
+        viewModelScope.coroutineContext.cancelChildren()
+
+        if (uid != null) {
+            clearLocalIdentityCache(context, uid)
+        }
+
         firebaseAuth.signOut()
         _isLoggedIn.value = false
         _authError.value = null
     }
+
 
     fun deleteAccountAndData(
         context: Context,

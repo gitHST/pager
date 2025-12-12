@@ -24,6 +24,9 @@ mockk = "1.14.6"
 kotlin-test = "1.10.2"
 material3 = "1.4.0"
 mlkitText = "16.0.1"
+androidxCredentials = "1.5.0"
+googleid = "1.1.1"
+
 
 
 [libraries]
@@ -60,6 +63,9 @@ firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.6.0"
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 firebase-storage = { module = "com.google.firebase:firebase-storage" }
+androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "androidxCredentials" }
+androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "androidxCredentials" }
+googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 
 
 [plugins]
