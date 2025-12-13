@@ -181,6 +181,7 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
+    implementation(libs.androidx.core.splashscreen)
 
     testImplementation(libs.mockk)
     testImplementation(libs.junit)
