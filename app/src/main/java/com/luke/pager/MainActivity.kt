@@ -125,7 +125,6 @@ class MainActivity : ComponentActivity() {
                     var themeMode by remember { mutableStateOf<ThemeMode?>(null) }
                     var syncOverCellular by remember { mutableStateOf(false) }
 
-                    // NEW: diary layout preference
                     var diaryLayout by remember { mutableStateOf<DiaryLayout?>(null) }
 
                     LaunchedEffect(settingsRepository) {
@@ -140,7 +139,6 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    // NEW: fetch once on login (no listener)
                     LaunchedEffect(settingsRepository) {
                         diaryLayout =
                             settingsRepository.getDiaryLayout().getOrNull() ?: DiaryLayout.COMPACT
