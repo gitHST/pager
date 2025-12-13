@@ -291,7 +291,6 @@ class AuthViewModel : ViewModel() {
         user.updateProfile(profileUpdates).await()
         _isLoggedIn.value = user.isAnonymous == false
 
-        // mirror into Firestore so other devices can fetch it
         Firebase.firestore
             .collection("users")
             .document(uid)
@@ -417,12 +416,10 @@ class AuthViewModel : ViewModel() {
             val remoteName = doc.getString("display_name")?.trim()
             val remotePhotoUrl = doc.getString("profile_photo_url")?.trim()
 
-            // cache name (NOT pending)
             if (!remoteName.isNullOrBlank()) {
                 cacheDisplayName(context, uid, remoteName, pending = false)
             }
 
-            // cache photo to the same local file your offline-first getter uses
             if (!remotePhotoUrl.isNullOrBlank()) {
                 runCatching {
                     val bytes =

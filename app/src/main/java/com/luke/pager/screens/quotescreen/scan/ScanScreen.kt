@@ -8,10 +8,15 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
@@ -156,41 +161,52 @@ fun ScanScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        if (scannedPages.isNotEmpty() && imageWidth > 0 && imageHeight > 0) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    val coroutineScope = rememberCoroutineScope()
-                    IconButton(
-                        onClick = {
-                            coroutineScope.launch {
-                                navController.navigate("quotes") {
-                                    popUpTo("quotes") { inclusive = true }
-                                }
-                                uiStateViewModel.clearScannedPages()
-                            }
-                        },
-                        modifier = Modifier.size(36.dp),
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Close",
-                            modifier = Modifier.size(24.dp),
-                            tint =
-                                if (!isLaunchingCamera) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-                                },
-                        )
-                    }
+        val hasImageReady =
+            scannedPages.isNotEmpty() &&
+                imageWidth > 0 &&
+                imageHeight > 0 &&
+                !isLaunchingCamera &&
+                selectedPage?.rotatedBitmap != null
 
+        val isBusy = isLaunchingCamera || !hasImageReady
+
+
+        Column(modifier = Modifier.fillMaxSize()) {
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                val coroutineScope = rememberCoroutineScope()
+
+                IconButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            navController.navigate("quotes") {
+                                popUpTo("quotes") { inclusive = true }
+                            }
+                            uiStateViewModel.clearScannedPages()
+                        }
+                    },
+                    modifier = Modifier.size(36.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close",
+                        modifier = Modifier.size(24.dp),
+                        tint =
+                            if (!isLaunchingCamera) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                            },
+                    )
+                }
+
+                if (!isBusy) {
                     IconButton(
                         onClick = {
                             val hasAnyText = scannedPages.any { it.allClusters.isNotEmpty() }
@@ -208,192 +224,179 @@ fun ScanScreen(
                                 }
                             }
                         },
-                        enabled = !isLaunchingCamera,
                         modifier = Modifier.size(36.dp),
                     ) {
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = "Confirm",
-                            tint =
-                                if (!isLaunchingCamera) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-                                },
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                     }
                 }
+            }
 
-                Column(modifier = Modifier.fillMaxSize()) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .weight(0.75f)
-                                .padding(16.dp),
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(horizontal = 16.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (hasImageReady) {
+                    BoxWithConstraints(
+                        modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center,
                     ) {
-                        if (!isLaunchingCamera && selectedPage?.rotatedBitmap != null) {
-                            Column(
-                                modifier = Modifier.fillMaxSize(),
-                            ) {
-                                Box(
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .weight(1f),
-                                    contentAlignment = Alignment.Center,
-                                ) {
-                                    ScanImageWithOverlay(
-                                        bitmap = selectedPage!!.rotatedBitmap,
-                                        allClusters = selectedPage!!.allClusters,
-                                        imageWidth = selectedPage!!.imageWidth,
-                                        imageHeight = selectedPage!!.imageHeight,
-                                        outlineLevel = OutlineLevel.CLUSTER,
-                                        modifier = Modifier.fillMaxWidth(),
-                                    )
-                                }
+                        val imgRatio = selectedPage!!.imageWidth.toFloat() / selectedPage!!.imageHeight.toFloat()
+                        val boxRatio = maxWidth.value / maxHeight.value
 
-                                Row(
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 20.dp, vertical = 24.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Button(
-                                        onClick = {
-                                            isRetaking = true
-                                            photoLauncher()
-                                        },
-                                        colors =
-                                            ButtonDefaults.buttonColors(
-                                                containerColor = MaterialTheme.colorScheme.primary,
-                                                contentColor = MaterialTheme.colorScheme.onPrimary,
-                                            ),
-                                        elevation = ButtonDefaults.buttonElevation(6.dp),
-                                    ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(
-                                                imageVector = Icons.Default.Autorenew,
-                                                contentDescription = "Retake Photo",
-                                                modifier = Modifier.size(24.dp),
-                                            )
-                                            Text(
-                                                "Retake",
-                                                modifier = Modifier.padding(start = 8.dp),
-                                            )
-                                        }
-                                    }
-
-                                    Button(
-                                        onClick = {
-                                            targetPageCount++
-                                            photoLauncher()
-                                        },
-                                        colors =
-                                            ButtonDefaults.buttonColors(
-                                                containerColor = MaterialTheme.colorScheme.primary,
-                                                contentColor = MaterialTheme.colorScheme.onPrimary,
-                                            ),
-                                        elevation = ButtonDefaults.buttonElevation(6.dp),
-                                    ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(
-                                                imageVector = Icons.Default.Add,
-                                                contentDescription = "Add Page",
-                                                modifier = Modifier.size(24.dp),
-                                            )
-                                            Text(
-                                                "Add Page",
-                                                modifier = Modifier.padding(start = 8.dp),
-                                            )
-                                        }
-                                    }
-                                }
+                        val imageModifier =
+                            if (boxRatio > imgRatio) {
+                                Modifier.fillMaxHeight().aspectRatio(imgRatio)
+                            } else {
+                                Modifier.fillMaxWidth().aspectRatio(imgRatio)
                             }
-                        } else {
-                            CircularProgressIndicator(
-                                color = MaterialTheme.colorScheme.primary,
-                                strokeWidth = 4.dp,
-                                modifier = Modifier.size(48.dp),
+
+                        ScanImageWithOverlay(
+                            bitmap = selectedPage!!.rotatedBitmap,
+                            allClusters = selectedPage!!.allClusters,
+                            imageWidth = selectedPage!!.imageWidth,
+                            imageHeight = selectedPage!!.imageHeight,
+                            outlineLevel = OutlineLevel.CLUSTER,
+                            modifier = imageModifier,
+                        )
+                    }
+                } else {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = 4.dp,
+                        modifier = Modifier.size(48.dp),
+                    )
+                }
+            }
+
+            if (!isBusy) {
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Button(
+                        onClick = {
+                            isRetaking = true
+                            photoLauncher()
+                        },
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                            ),
+                        elevation = ButtonDefaults.buttonElevation(6.dp),
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Autorenew,
+                                contentDescription = "Retake Photo",
+                                modifier = Modifier.size(24.dp),
                             )
+                            Text("Retake", modifier = Modifier.padding(start = 8.dp))
                         }
                     }
 
-                    if (scannedPages.isNotEmpty()) {
-                        Text(
-                            text = "Check your quote is fully highlighted",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontStyle = FontStyle.Italic,
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                        )
-
-                        LazyRow(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .weight(0.25f)
-                                    .padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            items(scannedPages, key = { it.imageUri.toString() }) { page ->
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    modifier =
-                                        Modifier
-                                            .padding(end = 8.dp)
-                                            .clickable {
-                                                selectedPage = page
-                                                Log.d("ScanScreen", "Thumbnail clicked, selectedPage=$selectedPage")
-                                            },
-                                ) {
-                                    val hasText = page.allClusters.isNotEmpty()
-
-                                    Image(
-                                        bitmap = page.rotatedBitmap.asImageBitmap(),
-                                        contentDescription = "Scanned page",
-                                        modifier =
-                                            Modifier
-                                                .size(100.dp)
-                                                .then(
-                                                    if (selectedPage == page) {
-                                                        Modifier.border(3.dp, MaterialTheme.colorScheme.primary)
-                                                    } else {
-                                                        Modifier
-                                                    },
-                                                ).alpha(if (hasText) 1f else 0.6f),
-                                    )
-
-                                    if (!hasText) {
-                                        Text(
-                                            text = "No text detected",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            fontStyle = FontStyle.Italic,
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                                            modifier = Modifier.padding(top = 4.dp),
-                                        )
-                                    }
-                                }
-                            }
+                    Button(
+                        onClick = {
+                            targetPageCount++
+                            photoLauncher()
+                        },
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                            ),
+                        elevation = ButtonDefaults.buttonElevation(6.dp),
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add Page",
+                                modifier = Modifier.size(24.dp),
+                            )
+                            Text("Add Page", modifier = Modifier.padding(start = 8.dp))
                         }
                     }
                 }
             }
-        } else {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.primary,
-                    strokeWidth = 4.dp,
-                    modifier = Modifier.size(48.dp),
+
+            if (scannedPages.isNotEmpty()) {
+                Text(
+                    text = "Check your quote is fully highlighted",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontStyle = FontStyle.Italic,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
                 )
+
+                LazyRow(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(140.dp)
+                            .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    items(scannedPages, key = { it.imageUri.toString() }) { page ->
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier =
+                                Modifier
+                                    .padding(end = 8.dp)
+                                    .clickable {
+                                        selectedPage = page
+                                        Log.d("ScanScreen", "Thumbnail clicked, selectedPage=$selectedPage")
+                                    },
+                        ) {
+                            val hasText = page.allClusters.isNotEmpty()
+
+                            Image(
+                                bitmap = page.rotatedBitmap.asImageBitmap(),
+                                contentDescription = "Scanned page",
+                                modifier =
+                                    Modifier
+                                        .size(100.dp)
+                                        .then(
+                                            if (selectedPage == page) {
+                                                Modifier.border(3.dp, MaterialTheme.colorScheme.primary)
+                                            } else {
+                                                Modifier
+                                            },
+                                        )
+                                        .alpha(if (hasText) 1f else 0.6f),
+                            )
+
+                            if (!hasText) {
+                                Text(
+                                    text = "No text detected",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontStyle = FontStyle.Italic,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                    modifier = Modifier.padding(top = 4.dp),
+                                )
+                            }
+                        }
+                    }
+                }
+            } else {
+                Spacer(modifier = Modifier.height(12.dp))
             }
         }
     }
+
 }

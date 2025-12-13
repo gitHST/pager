@@ -62,7 +62,7 @@ fun PagerNavHost(
     val previousRoute = remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
-    val testMode = true
+    val testMode = false
 
     val photoLauncher =
         takePhotoHandler(

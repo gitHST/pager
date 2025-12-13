@@ -3,6 +3,7 @@ package com.luke.pager.screens.auth
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -80,7 +81,6 @@ fun LoggedOutGate(authViewModel: AuthViewModel) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    // Re-usable online state (updates every 10s)
     val isOnline by onlineStatusFlow(context, intervalMs = 10_000L)
         .collectAsState(initial = true)
 
@@ -97,7 +97,6 @@ fun LoggedOutGate(authViewModel: AuthViewModel) {
                 containerColor = Color.Transparent,
                 snackbarHost = { SnackbarHost(snackbarHostState) },
             ) { paddingValues ->
-                // ✅ Background draws edge-to-edge (no scaffold padding applied here)
                 Box(
                     modifier = Modifier.fillMaxSize(),
                 ) {
@@ -118,7 +117,6 @@ fun LoggedOutGate(authViewModel: AuthViewModel) {
                                 .alpha(if (systemIsDark) 0.1f else 0.9f),
                     )
 
-                    // ✅ Only the actual content respects scaffold insets/snackbar/etc
                     val navController = rememberNavController()
 
                     Box(
@@ -170,6 +168,8 @@ private fun LoginScreen(
     val titleColor = if (systemIsDark) PagerTitleColorDark else PagerTitleColorLight
 
     var googleSignInInProgress by rememberSaveable { mutableStateOf(false) }
+
+    val activity = LocalActivity.current
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -245,7 +245,6 @@ private fun LoginScreen(
                         Text("Sign in")
                     }
 
-                    val activity = LocalContext.current as Activity
                     IconButton(
                         enabled = !googleSignInInProgress,
                         onClick = {
@@ -256,16 +255,22 @@ private fun LoginScreen(
                                 return@IconButton
                             }
 
+                            // If LocalActivity is null (rare), just do nothing safely.
+                            val nonNullActivity = activity ?: run {
+                                onShowSnackbar("Sorry, please try again later")
+                                return@IconButton
+                            }
+
                             googleSignInInProgress = true
 
                             authViewModel.signInWithGoogle(
-                                activity = activity,
+                                activity = nonNullActivity,
                                 onSuccess = {
                                     googleSignInInProgress = false
                                 },
                                 onError = { msg ->
                                     googleSignInInProgress = false
-                                    onShowSnackbar(mapAuthErrorToUserMessage(msg))
+                                    mapAuthErrorToUserMessage(msg)?.let(onShowSnackbar)
                                     authViewModel.clearError()
                                 },
                             )
