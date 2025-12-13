@@ -18,6 +18,7 @@ class QuoteViewModel(
     val quotes: StateFlow<List<QuoteEntity>> = _quotes
 
     private val _lastError = MutableStateFlow<String?>(null)
+    val lastError: StateFlow<String?> get() = _lastError
 
     fun loadQuotesForBook(bookId: String) {
         viewModelScope.launch {

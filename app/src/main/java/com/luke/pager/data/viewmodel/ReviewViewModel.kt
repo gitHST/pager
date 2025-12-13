@@ -16,6 +16,7 @@ class ReviewViewModel(
     val reviews: StateFlow<List<ReviewEntity>> get() = _reviews
 
     private val _lastError = MutableStateFlow<String?>(null)
+    val lastError: StateFlow<String?> get() = _lastError
 
     init {
         loadAllReviews()

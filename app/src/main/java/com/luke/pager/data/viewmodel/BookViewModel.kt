@@ -29,6 +29,7 @@ class BookViewModel(
     val isInitialLoading: StateFlow<Boolean> get() = _isInitialLoading
 
     private val _lastError = MutableStateFlow<String?>(null)
+    val lastError: StateFlow<String?> get() = _lastError
 
     val booksSortedByReviewDate: StateFlow<List<BookEntity>> =
         combine(_books, _allReviews) { books, reviewsMap ->
