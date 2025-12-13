@@ -216,7 +216,6 @@ fun PagerAppUI(
             val snackbarHostState = remember { SnackbarHostState() }
             val snackbarScope = rememberCoroutineScope()
 
-            // ✅ Drop snackbar if one is already visible
             val onShowSnackbarOnce: (String) -> Unit = { msg ->
                 snackbarScope.launch {
                     if (snackbarHostState.currentSnackbarData != null) return@launch

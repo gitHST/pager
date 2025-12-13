@@ -125,7 +125,6 @@ fun ProfileScreen(
     val isOnline by onlineStatusFlow(context, intervalMs = 10_000L)
         .collectAsState(initial = false)
 
-    // 1) When auth state changes, always reset/load from local cache immediately
     LaunchedEffect(isLoggedIn, firebaseUser?.uid) {
         val uid = firebaseUser?.uid
         if (!isLoggedIn || uid == null) {
@@ -142,8 +141,6 @@ fun ProfileScreen(
         profilePhotoOffsetFraction = Offset.Zero
     }
 
-    // 2) On recomposition (and whenever you come back to Profile), refresh remote -> update cache -> update UI if changed.
-    //    Avoid stomping while editing / modal open.
     LaunchedEffect(isLoggedIn, firebaseUser?.uid, isEditing, showPfpModal) {
         val uid = firebaseUser?.uid ?: return@LaunchedEffect
         if (!isLoggedIn) return@LaunchedEffect
@@ -152,7 +149,6 @@ fun ProfileScreen(
         authViewModel
             .refreshProfileFromFirestore(context)
             .onSuccess { updated ->
-                // display name
                 updated.displayName?.trim()?.takeIf { it.isNotBlank() }?.let { remoteName ->
                     if (remoteName != nameInput) {
                         nameInput = remoteName
@@ -160,7 +156,6 @@ fun ProfileScreen(
                     }
                 }
 
-                // pfp
                 updated.profilePhotoUri?.let { remoteUri ->
                     val remote = remoteUri.toUri()
                     if (profilePhotoUri?.toString() != remote.toString()) {

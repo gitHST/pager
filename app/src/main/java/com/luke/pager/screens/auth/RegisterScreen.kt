@@ -47,7 +47,6 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
-    // ONLY for password/name validation
     var inlineError by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(authError) {
@@ -59,7 +58,6 @@ fun RegisterScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Back arrow (top-left)
         IconButton(
             onClick = { navController.popBackStack() },
             modifier =
@@ -81,7 +79,6 @@ fun RegisterScreen(
                     .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Push title near top
             Spacer(modifier = Modifier.height(80.dp))
 
             Text(
@@ -93,7 +90,6 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(96.dp))
 
-            // Fields block (centered horizontally)
             Column(
                 modifier = Modifier.widthIn(max = 520.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
