@@ -1,4 +1,4 @@
-package com.luke.pager.screens
+package com.luke.pager.screens.diary
 
 import BookCoverImage
 import Privacy
@@ -49,6 +49,7 @@ import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.screens.components.NoBooksYetMessage
 import com.luke.pager.screens.components.Title
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
 
 @Composable
@@ -250,18 +251,19 @@ fun getDateWithoutTime(dateString: String?): String {
         val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         val reviewDate = inputFormat.parse(dateString ?: "") ?: return "Unknown Date"
 
-        val calendarNow = java.util.Calendar.getInstance()
+        val calendarNow = Calendar.getInstance()
         val calendarReview =
-            java.util.Calendar.getInstance().apply {
+            Calendar.getInstance().apply {
                 time = reviewDate
             }
 
-        val yearDifference = calendarNow.get(java.util.Calendar.YEAR) - calendarReview.get(java.util.Calendar.YEAR)
+        val yearDifference = calendarNow.get(Calendar.YEAR) - calendarReview.get(Calendar.YEAR)
         val monthFormat = SimpleDateFormat("MMMM", Locale.getDefault())
         val month = monthFormat.format(reviewDate)
 
-        if (yearDifference >= 1 || calendarNow.get(java.util.Calendar.DAY_OF_YEAR) < calendarReview.get(java.util.Calendar.DAY_OF_YEAR)) {
-            "$month ${calendarReview.get(java.util.Calendar.YEAR)}"
+        if (yearDifference >= 1 || calendarNow.get(Calendar.DAY_OF_YEAR) < calendarReview.get(
+                Calendar.DAY_OF_YEAR)) {
+            "$month ${calendarReview.get(Calendar.YEAR)}"
         } else {
             month
         }
