@@ -135,7 +135,6 @@ class FirebaseUserSettingsRepository(
             Result.failure(e)
         }
 
-    // ✅ NEW: read once (no listener)
     override suspend fun getDiaryLayout(): Result<DiaryLayout> =
         try {
             val snapshot = settingsDocument.get().await()
@@ -152,7 +151,6 @@ class FirebaseUserSettingsRepository(
             Result.failure(e)
         }
 
-    // ✅ NEW: write on toggle
     override suspend fun setDiaryLayout(layout: DiaryLayout): Result<Unit> =
         try {
             settingsDocument

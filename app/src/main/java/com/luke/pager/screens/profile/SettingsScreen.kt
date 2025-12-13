@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,7 +73,7 @@ fun SettingsScreen(
     onSyncOverCellularChange: (Boolean) -> Unit,
     diaryLayout: DiaryLayout,
     onDiaryLayoutChange: (DiaryLayout) -> Unit,
-    ) {
+) {
     val themeOptions =
         listOf(
             ThemeMode.LIGHT to "Light",
@@ -102,8 +103,12 @@ fun SettingsScreen(
     var showReauthDialog by remember { mutableStateOf(false) }
     var reauthPassword by remember { mutableStateOf("") }
     var reauthError by remember { mutableStateOf<String?>(null) }
+
+    var showReRateDialog by remember { mutableStateOf(false) }
+
     val diaryExpanded = diaryLayout == DiaryLayout.EXPANDED
     val diaryLayoutLabel = if (diaryExpanded) "Expanded" else "Compact"
+    val subtitleSpacing = 40.dp
 
     fun startExport(toEmail: String) {
         coroutineScope.launch {
@@ -156,11 +161,12 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start,
         ) {
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(subtitleSpacing))
 
             Text(
                 text = "Appearance",
                 fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
             )
 
@@ -229,6 +235,15 @@ fun SettingsScreen(
                 }
             }
 
+            Spacer(modifier = Modifier.height(subtitleSpacing))
+
+            Text(
+                text = "Diary",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+
             Row(
                 modifier =
                     Modifier
@@ -243,7 +258,11 @@ fun SettingsScreen(
                             .weight(1f)
                             .clickable {
                                 val next =
-                                    if (diaryLayout == DiaryLayout.EXPANDED) DiaryLayout.COMPACT else DiaryLayout.EXPANDED
+                                    if (diaryLayout == DiaryLayout.EXPANDED) {
+                                        DiaryLayout.COMPACT
+                                    } else {
+                                        DiaryLayout.EXPANDED
+                                    }
                                 onDiaryLayoutChange(next)
                             }
                             .padding(end = 12.dp),
@@ -251,7 +270,7 @@ fun SettingsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
-                        text = "Diary layout",
+                        text = "Layout",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onBackground,
                     )
@@ -266,16 +285,36 @@ fun SettingsScreen(
                 Switch(
                     checked = diaryExpanded,
                     onCheckedChange = { checked ->
-                        onDiaryLayoutChange(if (checked) DiaryLayout.EXPANDED else DiaryLayout.COMPACT)
+                        onDiaryLayoutChange(
+                            if (checked) DiaryLayout.EXPANDED else DiaryLayout.COMPACT,
+                        )
                     },
                     modifier = Modifier.scale(0.8f),
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .clickable { showReRateDialog = true },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "Re-rate diary entries",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(subtitleSpacing))
+
             Text(
                 text = "Data",
                 fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
             )
 
@@ -311,13 +350,8 @@ fun SettingsScreen(
                         .padding(vertical = 8.dp)
                         .clickable {
                             val defaultEmail = firebaseUser?.email
-                            if (defaultEmail.isNullOrBlank()) {
-                                exportEmail = ""
-                                showExportDialog = true
-                            } else {
-                                exportEmail = defaultEmail
-                                showExportDialog = true
-                            }
+                            exportEmail = defaultEmail ?: ""
+                            showExportDialog = true
                         },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -329,10 +363,12 @@ fun SettingsScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(subtitleSpacing))
+
             Text(
                 text = "Account",
                 fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -376,6 +412,35 @@ fun SettingsScreen(
                 }
             }
         }
+    }
+
+    if (showReRateDialog) {
+        AlertDialog(
+            onDismissRequest = { showReRateDialog = false },
+            title = { Text("Re-rate diary entries") },
+            text = {
+                Text(
+                    text = "Re-rating your diary allows you to change the rating of every",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showReRateDialog = false
+                        navController.navigate("re_rate_diary")
+                    },
+                ) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showReRateDialog = false }) {
+                    Text("Cancel")
+                }
+            },
+        )
     }
 
     if (showExportDialog) {

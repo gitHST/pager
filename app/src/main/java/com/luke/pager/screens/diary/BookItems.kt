@@ -156,12 +156,11 @@ fun BookItemExpanded(
 
     val reviewText =
         review?.reviewText
-            ?.trimEnd()            // ← strips ending newlines + spaces
+            ?.trimEnd()
             ?.takeIf { it.isNotBlank() }
 
     val isPlaceholder = reviewText == null
 
-// “decent chunk” – tweak as you like
     val previewCharLimit = 380
     val reviewPreview =
         reviewText?.let {
@@ -182,7 +181,6 @@ fun BookItemExpanded(
         shape = RoundedCornerShape(28.dp),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Top section: cover + metadata (title/authors/privacy/stars)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -257,7 +255,6 @@ fun BookItemExpanded(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Review body: spans full width under cover+stars
             Text(
                 text = reviewPreview,
                 style =

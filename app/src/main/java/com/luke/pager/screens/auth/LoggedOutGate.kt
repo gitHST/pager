@@ -252,7 +252,6 @@ private fun LoginScreen(
                                 return@IconButton
                             }
 
-                            // If LocalActivity is null (rare), just do nothing safely.
                             val nonNullActivity = activity ?: run {
                                 onShowSnackbar("Sorry, please try again later")
                                 return@IconButton

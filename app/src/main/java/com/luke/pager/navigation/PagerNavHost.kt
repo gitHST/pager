@@ -25,6 +25,7 @@ import com.luke.pager.data.viewmodel.ReviewViewModel
 import com.luke.pager.screens.addscreen.SearchAndResultsModal
 import com.luke.pager.screens.auth.RegisterScreen
 import com.luke.pager.screens.diary.DiaryScreen
+import com.luke.pager.screens.diary.ReRateDiaryScreen
 import com.luke.pager.screens.diary.ReviewScreen
 import com.luke.pager.screens.profile.ProfileScreen
 import com.luke.pager.screens.profile.SettingsScreen
@@ -227,11 +228,11 @@ fun PagerNavHost(
         }
 
         composable("diary") {
-            DiaryScreen(
-                navController = navController,
-                bookViewModel = bookViewModel,
-                diaryLayout = diaryLayout,
-            )
+            DiaryScreen(navController, bookViewModel, diaryLayout)
+        }
+
+        composable("re_rate_diary") {
+            ReRateDiaryScreen(navController = navController)
         }
 
         composable("plus") {
