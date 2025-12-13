@@ -1,6 +1,6 @@
 package unit.screens
 
-import com.luke.pager.screens.getDateWithoutTime
+import com.luke.pager.screens.diary.getDateWithoutTime
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.text.SimpleDateFormat

@@ -1,4 +1,4 @@
-package com.luke.pager.screens
+package com.luke.pager.screens.diary
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -45,6 +45,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.TextFieldValue
@@ -235,7 +236,7 @@ private fun ReviewContent(
     isEditing: Boolean,
     onIsEditingChange: (Boolean) -> Unit,
     focusRequester: FocusRequester,
-    keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?,
+    keyboardController: SoftwareKeyboardController?,
     reviewViewModel: ReviewViewModel,
     onDeleteClick: () -> Unit,
 ) {
