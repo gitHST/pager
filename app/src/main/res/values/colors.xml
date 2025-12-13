@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="background_color">#F5F5F5</color> <!-- Light Gray Example -->
+    <color name="pager_splash_bg">#F6EDDB</color>
+    <color name="pager_splash_bg_night">#1B1B1B</color>
 </resources>
