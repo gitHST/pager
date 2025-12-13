@@ -8,4 +8,9 @@ enum class ThemeMode {
     SYSTEM,
 }
 
+enum class DiaryLayout {
+    COMPACT,
+    EXPANDED,
+}
+
 val LocalUseDarkTheme = staticCompositionLocalOf { false }

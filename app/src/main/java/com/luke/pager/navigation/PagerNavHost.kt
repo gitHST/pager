@@ -22,16 +22,17 @@ import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.data.viewmodel.QuoteUiStateViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.data.viewmodel.ReviewViewModel
-import com.luke.pager.screens.diary.DiaryScreen
-import com.luke.pager.screens.diary.ReviewScreen
 import com.luke.pager.screens.addscreen.SearchAndResultsModal
 import com.luke.pager.screens.auth.RegisterScreen
+import com.luke.pager.screens.diary.DiaryScreen
+import com.luke.pager.screens.diary.ReviewScreen
 import com.luke.pager.screens.profile.ProfileScreen
 import com.luke.pager.screens.profile.SettingsScreen
 import com.luke.pager.screens.quotescreen.QuotesScreen
 import com.luke.pager.screens.quotescreen.scan.MultiPagePreviewModal
 import com.luke.pager.screens.quotescreen.scan.ScanScreen
 import com.luke.pager.screens.quotescreen.scan.takePhotoHandler
+import com.luke.pager.ui.theme.DiaryLayout
 import com.luke.pager.ui.theme.ThemeMode
 import kotlinx.coroutines.delay
 
@@ -46,6 +47,8 @@ fun PagerNavHost(
     onThemeModeChange: (ThemeMode) -> Unit,
     syncOverCellular: Boolean,
     onSyncOverCellularChange: (Boolean) -> Unit,
+    diaryLayout: DiaryLayout,
+    onDiaryLayoutChange: (DiaryLayout) -> Unit,
     onShowSnackbar: (String) -> Unit,
 ) {
     val topLevelRoutes = listOf("profile", "plus", "quotes", "diary")
@@ -218,11 +221,17 @@ fun PagerNavHost(
                 onThemeModeChange = onThemeModeChange,
                 syncOverCellular = syncOverCellular,
                 onSyncOverCellularChange = onSyncOverCellularChange,
+                diaryLayout = diaryLayout,
+                onDiaryLayoutChange = onDiaryLayoutChange,
             )
         }
 
         composable("diary") {
-            DiaryScreen(navController, bookViewModel)
+            DiaryScreen(
+                navController = navController,
+                bookViewModel = bookViewModel,
+                diaryLayout = diaryLayout,
+            )
         }
 
         composable("plus") {

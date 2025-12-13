@@ -1,7 +1,7 @@
 package com.luke.pager.screens.profile
 
-import android.app.Activity
 import android.content.Intent
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -52,6 +52,7 @@ import com.luke.pager.data.viewmodel.BookViewModel
 import com.luke.pager.data.viewmodel.QuoteViewModel
 import com.luke.pager.data.viewmodel.ReviewViewModel
 import com.luke.pager.screens.components.Title
+import com.luke.pager.ui.theme.DiaryLayout
 import com.luke.pager.ui.theme.ThemeMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -69,7 +70,9 @@ fun SettingsScreen(
     onThemeModeChange: (ThemeMode) -> Unit,
     syncOverCellular: Boolean,
     onSyncOverCellularChange: (Boolean) -> Unit,
-) {
+    diaryLayout: DiaryLayout,
+    onDiaryLayoutChange: (DiaryLayout) -> Unit,
+    ) {
     val themeOptions =
         listOf(
             ThemeMode.LIGHT to "Light",
@@ -99,6 +102,8 @@ fun SettingsScreen(
     var showReauthDialog by remember { mutableStateOf(false) }
     var reauthPassword by remember { mutableStateOf("") }
     var reauthError by remember { mutableStateOf<String?>(null) }
+    val diaryExpanded = diaryLayout == DiaryLayout.EXPANDED
+    val diaryLayoutLabel = if (diaryExpanded) "Expanded" else "Compact"
 
     fun startExport(toEmail: String) {
         coroutineScope.launch {
@@ -183,7 +188,8 @@ fun SettingsScreen(
                                 .menuAnchor(
                                     type = ExposedDropdownMenuAnchorType.PrimaryNotEditable,
                                     enabled = true,
-                                ).fillMaxWidth(0.55f)
+                                )
+                                .fillMaxWidth(0.55f)
                                 .height(40.dp)
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(MaterialTheme.colorScheme.surface)
@@ -221,6 +227,49 @@ fun SettingsScreen(
                         }
                     }
                 }
+            }
+
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Row(
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .clickable {
+                                val next =
+                                    if (diaryLayout == DiaryLayout.EXPANDED) DiaryLayout.COMPACT else DiaryLayout.EXPANDED
+                                onDiaryLayoutChange(next)
+                            }
+                            .padding(end = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = "Diary layout",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+
+                    Text(
+                        text = diaryLayoutLabel,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    )
+                }
+
+                Switch(
+                    checked = diaryExpanded,
+                    onCheckedChange = { checked ->
+                        onDiaryLayoutChange(if (checked) DiaryLayout.EXPANDED else DiaryLayout.COMPACT)
+                    },
+                    modifier = Modifier.scale(0.8f),
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -417,9 +466,8 @@ fun SettingsScreen(
     }
 
     if (showReauthDialog) {
-        val user = firebaseUser
-        val isPasswordUser = user?.providerData?.any { it.providerId == "password" } == true
-        val activity = (LocalContext.current as? Activity)
+        val isPasswordUser = firebaseUser?.providerData?.any { it.providerId == "password" } == true
+        val activity = LocalActivity.current
 
         AlertDialog(
             onDismissRequest = {
@@ -473,7 +521,7 @@ fun SettingsScreen(
                 TextButton(
                     onClick = {
                         val current =
-                            user ?: run {
+                            firebaseUser ?: run {
                                 reauthError = "Not logged in"
                                 return@TextButton
                             }
@@ -515,14 +563,15 @@ fun SettingsScreen(
                                 },
                             )
                         } else {
-                            if (activity == null) {
-                                isDeleting = false
-                                reauthError = "No Activity available for Google re-auth"
-                                return@TextButton
-                            }
+                            val nonNullActivity =
+                                activity ?: run {
+                                    isDeleting = false
+                                    reauthError = "No Activity available for Google re-auth"
+                                    return@TextButton
+                                }
 
                             authViewModel.reauthenticateWithGoogle(
-                                activity = activity,
+                                activity = nonNullActivity,
                                 onSuccess = { runDelete() },
                                 onError = { msg ->
                                     isDeleting = false

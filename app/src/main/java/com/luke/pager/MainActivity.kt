@@ -51,6 +51,7 @@ import com.luke.pager.navigation.PagerNavHost
 import com.luke.pager.screens.auth.LoggedOutGate
 import com.luke.pager.ui.theme.BackgroundDark
 import com.luke.pager.ui.theme.BackgroundLight
+import com.luke.pager.ui.theme.DiaryLayout
 import com.luke.pager.ui.theme.LocalUseDarkTheme
 import com.luke.pager.ui.theme.PagerTheme
 import com.luke.pager.ui.theme.PlusBackgroundDark
@@ -124,6 +125,9 @@ class MainActivity : ComponentActivity() {
                     var themeMode by remember { mutableStateOf<ThemeMode?>(null) }
                     var syncOverCellular by remember { mutableStateOf(false) }
 
+                    // NEW: diary layout preference
+                    var diaryLayout by remember { mutableStateOf<DiaryLayout?>(null) }
+
                     LaunchedEffect(settingsRepository) {
                         settingsRepository.themeModeFlow.collect { result ->
                             themeMode = result.getOrNull() ?: ThemeMode.SYSTEM
@@ -136,7 +140,13 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    if (themeMode == null) {
+                    // NEW: fetch once on login (no listener)
+                    LaunchedEffect(settingsRepository) {
+                        diaryLayout =
+                            settingsRepository.getDiaryLayout().getOrNull() ?: DiaryLayout.COMPACT
+                    }
+
+                    if (themeMode == null || diaryLayout == null) {
                         val systemIsDark = isSystemInDarkTheme()
                         CompositionLocalProvider(LocalUseDarkTheme provides systemIsDark) {
                             PagerTheme(useDarkTheme = systemIsDark) {
@@ -176,6 +186,13 @@ class MainActivity : ComponentActivity() {
                                     settingsRepository.setSyncOverCellular(enabled)
                                 }
                             },
+                            diaryLayout = diaryLayout!!,
+                            onDiaryLayoutChange = { layout ->
+                                diaryLayout = layout
+                                coroutineScope.launch {
+                                    settingsRepository.setDiaryLayout(layout)
+                                }
+                            },
                         )
                     }
                 }
@@ -198,6 +215,8 @@ fun PagerAppUI(
     onThemeModeChange: (ThemeMode) -> Unit,
     syncOverCellular: Boolean,
     onSyncOverCellularChange: (Boolean) -> Unit,
+    diaryLayout: DiaryLayout,
+    onDiaryLayoutChange: (DiaryLayout) -> Unit,
 ) {
     val systemIsDark = isSystemInDarkTheme()
     val useDarkTheme =
@@ -337,6 +356,8 @@ fun PagerAppUI(
                             onThemeModeChange = onThemeModeChange,
                             syncOverCellular = syncOverCellular,
                             onSyncOverCellularChange = onSyncOverCellularChange,
+                            diaryLayout = diaryLayout,
+                            onDiaryLayoutChange = onDiaryLayoutChange,
                             onShowSnackbar = onShowSnackbarOnce,
                         )
                     }

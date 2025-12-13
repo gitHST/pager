@@ -7,6 +7,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
+import com.luke.pager.ui.theme.DiaryLayout
 import com.luke.pager.ui.theme.ThemeMode
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -133,6 +134,37 @@ class FirebaseUserSettingsRepository(
             Log.w("UserSettingsRepo", "Failed to set sync over cellular", e)
             Result.failure(e)
         }
+
+    // ✅ NEW: read once (no listener)
+    override suspend fun getDiaryLayout(): Result<DiaryLayout> =
+        try {
+            val snapshot = settingsDocument.get().await()
+            val layout =
+                if (snapshot.exists()) {
+                    val raw = snapshot.getString("diary_layout")
+                    raw?.toDiaryLayoutOrNull() ?: DiaryLayout.COMPACT
+                } else {
+                    DiaryLayout.COMPACT
+                }
+            Result.success(layout)
+        } catch (e: Exception) {
+            Log.w("UserSettingsRepo", "Failed to get diary layout", e)
+            Result.failure(e)
+        }
+
+    // ✅ NEW: write on toggle
+    override suspend fun setDiaryLayout(layout: DiaryLayout): Result<Unit> =
+        try {
+            settingsDocument
+                .set(
+                    mapOf("diary_layout" to layout.name),
+                    SetOptions.merge(),
+                ).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.w("UserSettingsRepo", "Failed to set diary layout", e)
+            Result.failure(e)
+        }
 }
 
 private fun String.toThemeModeOrNull(): ThemeMode? =
@@ -145,6 +177,13 @@ private fun String.toThemeModeOrNull(): ThemeMode? =
 private fun String.toPrivacyOrNull(): Privacy? =
     try {
         Privacy.valueOf(this)
+    } catch (_: IllegalArgumentException) {
+        null
+    }
+
+private fun String.toDiaryLayoutOrNull(): DiaryLayout? =
+    try {
+        DiaryLayout.valueOf(this)
     } catch (_: IllegalArgumentException) {
         null
     }
