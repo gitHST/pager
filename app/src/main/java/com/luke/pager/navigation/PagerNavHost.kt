@@ -52,7 +52,7 @@ fun PagerNavHost(
 
     val coroutineScope = rememberCoroutineScope()
 
-    val testMode = true
+    val testMode = false
 
     val photoLauncher = takePhotoHandler(
         snackbarScope = coroutineScope,
