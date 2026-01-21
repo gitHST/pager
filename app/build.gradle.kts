@@ -23,28 +23,24 @@ android {
     }
 
     signingConfigs {
-        val isCi = System.getenv("CI") == "true"
+        create("release") {
+            val storeFilePath = project.findProperty("RELEASE_STORE_FILE") as String?
+            val storePass = project.findProperty("RELEASE_STORE_PASSWORD") as String?
+            val keyAliasValue = project.findProperty("RELEASE_KEY_ALIAS") as String?
+            val keyPass = project.findProperty("RELEASE_KEY_PASSWORD") as String?
 
-        val releaseStoreFile = project.findProperty("RELEASE_STORE_FILE") as String?
-        val releaseStorePassword = project.findProperty("RELEASE_STORE_PASSWORD") as String?
-        val releaseKeyAlias = project.findProperty("RELEASE_KEY_ALIAS") as String?
-        val releaseKeyPassword = project.findProperty("RELEASE_KEY_PASSWORD") as String?
+            require(!storeFilePath.isNullOrBlank()) { "Missing RELEASE_STORE_FILE in ~/.gradle/gradle.properties" }
+            require(!storePass.isNullOrBlank()) { "Missing RELEASE_STORE_PASSWORD in ~/.gradle/gradle.properties" }
+            require(!keyAliasValue.isNullOrBlank()) { "Missing RELEASE_KEY_ALIAS in ~/.gradle/gradle.properties" }
+            require(!keyPass.isNullOrBlank()) { "Missing RELEASE_KEY_PASSWORD in ~/.gradle/gradle.properties" }
 
-        if (!isCi &&
-            !releaseStoreFile.isNullOrBlank() &&
-            !releaseStorePassword.isNullOrBlank() &&
-            !releaseKeyAlias.isNullOrBlank() &&
-            !releaseKeyPassword.isNullOrBlank()
-        ) {
-            val keystoreFile = file(releaseStoreFile)
-            if (keystoreFile.exists()) {
-                create("release") {
-                    storeFile = keystoreFile
-                    storePassword = releaseStorePassword
-                    keyAlias = releaseKeyAlias
-                    keyPassword = releaseKeyPassword
-                }
-            }
+            val ksFile = file(storeFilePath)
+            require(ksFile.exists()) { "Keystore not found at RELEASE_STORE_FILE path: $storeFilePath" }
+
+            storeFile = ksFile
+            storePassword = storePass
+            keyAlias = keyAliasValue
+            keyPassword = keyPass
         }
     }
 
@@ -53,11 +49,11 @@ android {
             enableUnitTestCoverage = true
             enableAndroidTestCoverage = false
         }
-        release {
+
+        getByName("release") {
             isMinifyEnabled = false
 
-            val releaseSigning = signingConfigs.findByName("release")
-            signingConfig = releaseSigning ?: signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
 
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
