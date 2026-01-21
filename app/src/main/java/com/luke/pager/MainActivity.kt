@@ -41,10 +41,9 @@ import com.luke.pager.navigation.PagerNavHost
 import com.luke.pager.ui.theme.NiceBlue
 import com.luke.pager.ui.theme.PagerTheme
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.io.File
+
 
 class MainActivity : ComponentActivity() {
     @OptIn(DelicateCoroutinesApi::class)
@@ -70,10 +69,6 @@ class MainActivity : ComponentActivity() {
                     // Add migrations later
                 )
                 .build()
-                .apply {
-                    GlobalScope.launch {
-                    }
-                }
         val bookDao = db.bookDao()
         val reviewDao = db.reviewDao()
         val quoteDao = db.quoteDao()
@@ -96,6 +91,7 @@ class MainActivity : ComponentActivity() {
 
     @Suppress("unused")
     fun exportDatabase() {
+        if (!BuildConfig.DEBUG) return
         val dbFile = applicationContext.getDatabasePath("pager-db")
         val walFile = File(dbFile.parent, "pager-db-wal")
         val shmFile = File(dbFile.parent, "pager-db-shm")
@@ -108,12 +104,11 @@ class MainActivity : ComponentActivity() {
         dbFile.copyTo(backupDb, overwrite = true)
         if (walFile.exists()) walFile.copyTo(backupWal, overwrite = true)
         if (shmFile.exists()) shmFile.copyTo(backupShm, overwrite = true)
-
-        println("✅ Full database export complete: ${backupDb.absolutePath}")
     }
 
     @Suppress("unused")
     fun restoreDatabase() {
+        if (!BuildConfig.DEBUG) return
         val dbFile = applicationContext.getDatabasePath("pager-db")
         val walFile = File(dbFile.parent, "pager-db-wal")
         val shmFile = File(dbFile.parent, "pager-db-shm")
@@ -127,9 +122,6 @@ class MainActivity : ComponentActivity() {
             backupDb.copyTo(dbFile, overwrite = true)
             if (backupWal.exists()) backupWal.copyTo(walFile, overwrite = true)
             if (backupShm.exists()) backupShm.copyTo(shmFile, overwrite = true)
-            println("✅ Full database restore complete: ${backupDb.absolutePath}")
-        } else {
-            println("❌ Backup database file not found.")
         }
     }
 }
