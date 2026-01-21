@@ -93,6 +93,10 @@ android {
     }
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 jacoco {
     toolVersion = "0.8.10"
 }

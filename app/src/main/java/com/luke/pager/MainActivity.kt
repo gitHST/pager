@@ -67,7 +67,9 @@ class MainActivity : ComponentActivity() {
 
         val db =
             Room.databaseBuilder(applicationContext, AppDatabase::class.java, "pager-db")
-                .fallbackToDestructiveMigration(true)
+                .addMigrations(
+                    // Add migrations later
+                )
                 .build()
                 .apply {
                     GlobalScope.launch {
